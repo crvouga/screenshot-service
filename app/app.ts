@@ -9,7 +9,7 @@ export const createApp = async () => {
 
   app.use(
     cors({
-      origin: true,
+      origin: "*",
     })
   );
 
