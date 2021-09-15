@@ -9,7 +9,9 @@ const setTimeoutPromise = (timeout: number) => {
 };
 
 export const createGetScreenshot = async () => {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    headless: true,
+  });
 
   return async ({
     timeout,
