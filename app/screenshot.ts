@@ -8,9 +8,11 @@ const setTimeoutPromise = (timeout: number) => {
   });
 };
 
+//run on heroku: https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#running-puppeteer-on-heroku
+
 export const createGetScreenshot = async () => {
   const browser = await puppeteer.launch({
-    headless: true,
+    args: ["--no-sandbox"],
   });
 
   return async ({
