@@ -1,10 +1,13 @@
 import express from "express";
+import cors from "cors";
 import { createGetScreenshot } from "./screenshot";
 import { castTargetUrl, validateTargetUrl } from "./target-url";
 import { castTimeout, validateTimeout } from "./timeout";
 
 export const createApp = async () => {
   const app = express();
+
+  app.use(cors());
 
   const getScreenshot = await createGetScreenshot();
 
