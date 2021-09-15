@@ -7,7 +7,11 @@ import { castTimeout, validateTimeout } from "./timeout";
 export const createApp = async () => {
   const app = express();
 
-  app.use(cors());
+  app.use(
+    cors({
+      origin: true,
+    })
+  );
 
   const getScreenshot = await createGetScreenshot();
 
