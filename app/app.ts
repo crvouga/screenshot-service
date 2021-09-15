@@ -1,5 +1,5 @@
-import express from "express";
 import cors from "cors";
+import express from "express";
 import { createGetScreenshot } from "./screenshot";
 import { castTargetUrl, validateTargetUrl } from "./target-url";
 import { castTimeout, validateTimeout } from "./timeout";
