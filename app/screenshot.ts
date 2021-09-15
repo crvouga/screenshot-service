@@ -11,6 +11,10 @@ const setTimeoutPromise = (timeout: number) => {
 //run on heroku: https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#running-puppeteer-on-heroku
 
 export const createGetScreenshot = async () => {
+  const browser = await puppeteer.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
+
   return async ({
     timeout,
     targetUrl,
@@ -23,9 +27,6 @@ export const createGetScreenshot = async () => {
       message: string;
     }[];
   }> => {
-    const browser = await puppeteer.launch({
-      args: ["--no-sandbox"],
-    });
     try {
       const page = await browser.newPage();
 
@@ -50,8 +51,6 @@ export const createGetScreenshot = async () => {
       return {
         errors: [{ message }],
       };
-    } finally {
-      await browser.close();
     }
   };
 };
