@@ -15,31 +15,41 @@ export const createApp = async () => {
 
   const getScreenshot = await createGetScreenshot();
 
-  app.get("/screenshot", async (req, res) => {
-    const { targetUrl, timeout } = req.query;
+  app.get("/api/screenshot", async (req, res) => {
+    const { url, timeout } = req.query;
 
     const validationErrors = [
       ...validateTimeout(timeout, { name: "'timeout' query param" }),
-      ...validateTargetUrl(targetUrl, { name: "'targetUrl' query param" }),
+      ...validateTargetUrl(url, { name: "'url' query param" }),
     ];
 
     if (validationErrors.length > 0) {
-      res.status(400).json({ errors: validationErrors });
+      res.status(400).json({
+        errors: validationErrors,
+      });
       return;
     }
 
     const { image, errors } = await getScreenshot({
       timeout: castTimeout(timeout),
-      targetUrl: castTargetUrl(targetUrl),
+      targetUrl: castTargetUrl(url),
     });
 
     if (errors.length > 0) {
-      res.status(400).json({ errors });
+      res.status(400).json({
+        errors,
+      });
       return;
     }
 
     if (!image) {
-      res.status(400).json({ errors: [{ message: "Something went wrong" }] });
+      res.status(400).json({
+        errors: [
+          {
+            message: "Something went wrong",
+          },
+        ],
+      });
       return;
     }
 
