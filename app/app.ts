@@ -3,13 +3,23 @@ import express from "express";
 import { createGetScreenshot } from "./screenshot";
 import { castTargetUrl, validateTargetUrl } from "./target-url";
 import { castTimeout, validateTimeout } from "./timeout";
+import { getWhitelist, isOnWhitelist } from "./whitelist";
 
 export const createApp = async () => {
   const app = express();
 
   app.use(
     cors({
-      origin: "*",
+      origin: async (origin, callback) => {
+        const whitelist = await getWhitelist();
+
+        if (origin && isOnWhitelist(whitelist, origin)) {
+          callback(null);
+          return;
+        }
+
+        callback(new Error(`Origin ${origin} is not on the whitelist`));
+      },
     })
   );
 
