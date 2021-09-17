@@ -1,4 +1,4 @@
-import puppeteer from "puppeteer";
+import { getPuppeteerBrowser } from "./puppeteer";
 import { ITargetUrl } from "./target-url";
 import { ITimeout } from "./timeout";
 
@@ -13,22 +13,11 @@ const setTimeoutPromise = (timeout: number) => {
 export const createGetScreenshot = async () => {
   console.log("started launching puppeteer browser");
 
-  const browser = await puppeteer.launch({
-    headless: true,
-    defaultViewport: null,
-    args: [
-      "--incognito",
-      "--no-sandbox",
-      "--single-process",
-      "--no-zygote",
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-    ],
-  });
+  const browser = await getPuppeteerBrowser();
 
   console.log("done launching puppeteer browser");
 
-  return async ({
+  const getScreenshot = async ({
     timeout,
     targetUrl,
   }: {
@@ -88,4 +77,6 @@ export const createGetScreenshot = async () => {
       };
     }
   };
+
+  return getScreenshot;
 };
