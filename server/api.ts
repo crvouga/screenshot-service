@@ -7,74 +7,81 @@ import {
   validateTimeout,
 } from "../screenshot";
 import { getWhitelist } from "./security";
+import apicache from "apicache";
 
 export const GET_SCREENSHOT = "/api/screenshot";
 
 export const useAPI = async (app: Application) => {
   const getScreenshot = await createGetScreenshot();
 
-  app.get(GET_SCREENSHOT, async (req, res) => {
-    const { url, timeout } = req.query;
+  app.get(
+    GET_SCREENSHOT,
 
-    const validationErrors = [
-      ...validateTimeout(timeout, { name: "'timeout' query param" }),
-      ...validateTargetUrl(url, { name: "'url' query param" }),
-    ];
+    apicache.middleware("10 minutes"),
 
-    if (validationErrors.length > 0) {
-      res.status(400).json({
-        errors: validationErrors,
-      });
-      return;
-    }
+    async (req, res) => {
+      const { url, timeout } = req.query;
 
-    const { image, errors } = await getScreenshot({
-      whitelist: await getWhitelist(),
-      timeout: castTimeout(timeout),
-      targetUrl: castTargetUrl(url),
-    });
-
-    if (errors.length > 0) {
-      res
-        .status(400)
-        .json({
-          errors,
-        })
-        .end();
-
-      console.error(errors);
-
-      return;
-    }
-
-    if (!image) {
-      const errors = [
-        {
-          message: "Failed to get screenshot",
-        },
+      const validationErrors = [
+        ...validateTimeout(timeout, { name: "'timeout' query param" }),
+        ...validateTargetUrl(url, { name: "'url' query param" }),
       ];
-      res
-        .status(400)
-        .json({
-          errors,
-        })
-        .end();
 
-      console.error(errors);
+      if (validationErrors.length > 0) {
+        res.status(400).json({
+          errors: validationErrors,
+        });
+        return;
+      }
 
-      return;
-    }
+      const { image, errors } = await getScreenshot({
+        whitelist: await getWhitelist(),
+        timeout: castTimeout(timeout),
+        targetUrl: castTargetUrl(url),
+      });
 
-    console.log("SUCCESS", {
-      "Content-Type": "image/png",
-      "Content-Length": image.length,
-    });
+      if (errors.length > 0) {
+        res
+          .status(400)
+          .json({
+            errors,
+          })
+          .end();
 
-    res
-      .writeHead(200, {
+        console.error(errors);
+
+        return;
+      }
+
+      if (!image) {
+        const errors = [
+          {
+            message: "Failed to get screenshot",
+          },
+        ];
+        res
+          .status(400)
+          .json({
+            errors,
+          })
+          .end();
+
+        console.error(errors);
+
+        return;
+      }
+
+      console.log("SUCCESS", {
         "Content-Type": "image/png",
         "Content-Length": image.length,
-      })
-      .end(image);
-  });
+      });
+
+      res
+        .writeHead(200, {
+          "Content-Type": "image/png",
+          "Content-Length": image.length,
+        })
+        .end(image);
+    }
+  );
 };
