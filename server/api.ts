@@ -7,10 +7,12 @@ import {
   validateTimeout,
 } from "../screenshot";
 
+export const GET_SCREENSHOT = "/api/screenshot";
+
 export const useAPI = async (app: Application) => {
   const getScreenshot = await createGetScreenshot();
 
-  app.get("/api/screenshot", async (req, res) => {
+  app.get(GET_SCREENSHOT, async (req, res) => {
     const { url, timeout } = req.query;
 
     const validationErrors = [
@@ -26,25 +28,32 @@ export const useAPI = async (app: Application) => {
     }
 
     const { image, errors } = await getScreenshot({
+      originUrl: req.headers.origin,
       timeout: castTimeout(timeout),
       targetUrl: castTargetUrl(url),
     });
 
     if (errors.length > 0) {
-      res.status(400).json({
-        errors,
-      });
+      res
+        .status(400)
+        .json({
+          errors,
+        })
+        .end();
       return;
     }
 
     if (!image) {
-      res.status(400).json({
-        errors: [
-          {
-            message: "Something went wrong",
-          },
-        ],
-      });
+      res
+        .status(400)
+        .json({
+          errors: [
+            {
+              message: "Something went wrong",
+            },
+          ],
+        })
+        .end();
       return;
     }
 

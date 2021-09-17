@@ -11,54 +11,47 @@ const setTimeoutPromise = (timeout: number) => {
 //run on heroku: https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#running-puppeteer-on-heroku
 
 export const createGetScreenshot = async () => {
-  console.log("started launching puppeteer browser");
-
   const browser = await createPuppeteerBrowser();
-
-  console.log("done launching puppeteer browser");
 
   const getScreenshot = async ({
     timeout,
+    originUrl,
     targetUrl,
   }: {
+    originUrl?: string;
     timeout: ITimeout;
     targetUrl: ITargetUrl;
   }): Promise<{
     image?: Buffer | string | void;
     errors: {
-      message: string;
+      [key: string]: string;
     }[];
   }> => {
-    console.log("started getting screenshot");
+    // prevents infinite loop
+    if (originUrl === targetUrl) {
+      return {
+        errors: [
+          {
+            message: "the originUrl can not equal the targetUrl",
+            originUrl,
+            targetUrl,
+          },
+        ],
+      };
+    }
 
     try {
-      console.log("started new page");
-
       const page = await browser.newPage();
-
-      console.log("done new page");
-
-      console.log(`started goto ${targetUrl}`);
 
       await page.goto(targetUrl, {
         waitUntil: "networkidle2",
       });
 
-      console.log("done goto");
-
-      console.log(`started to wait ${timeout}ms`);
-
       await setTimeoutPromise(timeout);
-
-      console.log(`done waiting`);
-
-      console.log(`started screenshot`);
 
       const image = await page.screenshot({
         type: "png",
       });
-
-      console.log(`done screenshot`);
 
       return {
         image,

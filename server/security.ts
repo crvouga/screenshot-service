@@ -4,7 +4,7 @@ import { Application } from "express";
 import env from "../dotenv";
 
 const getWhitelist = async () => {
-  return env.URL_WHITELIST_CSV?.split(", ") ?? [];
+  return env.URL_WHITELIST_CSV?.split(",").map((item) => item.trim()) ?? [];
 };
 
 const toHostname = (maybeUrl: string) => {
@@ -32,10 +32,13 @@ export const useSecuritry = async (app: Application) => {
     const whitelist = await getWhitelist();
     const originUrl = req.headers.origin;
 
-    console.log({
+    const log = {
+      message: `checking if whitelist contains originUrl`,
       whitelist,
       originUrl,
-    });
+    };
+
+    console.log(log);
 
     if (!originUrl) {
       next();
@@ -47,14 +50,6 @@ export const useSecuritry = async (app: Application) => {
       return;
     }
 
-    res.status(400).json({
-      errors: [
-        {
-          message: `request url is not on the url whitelist`,
-          requestUrl: originUrl,
-          whitelist,
-        },
-      ],
-    });
+    res.status(400).json(log);
   });
 };
