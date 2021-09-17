@@ -13,6 +13,8 @@ export const createApp = async () => {
       origin: async (origin, callback) => {
         const whitelist = await getWhitelist();
 
+        console.log(`checking if ${origin} is in ${whitelist.join(", ")}`);
+
         if (!origin) {
           callback(null);
           return;
