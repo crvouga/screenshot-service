@@ -13,7 +13,12 @@ export const createApp = async () => {
       origin: async (origin, callback) => {
         const whitelist = await getWhitelist();
 
-        if (origin && isOnWhitelist(whitelist, origin)) {
+        if (!origin) {
+          callback(null);
+          return;
+        }
+
+        if (isOnWhitelist(whitelist, origin)) {
           callback(null);
           return;
         }
