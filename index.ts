@@ -1,13 +1,13 @@
-import { createApp } from "./app/app";
+import { createServer } from "./server/create-server";
 
-const runApp = async () => {
-  const app = await createApp();
+const run = async () => {
+  const server = await createServer();
 
   const port = process.env.PORT || 8000;
 
-  app.listen(port, () => {
+  server.listen(port, () => {
     console.log(`App is running on http://localhost:${port}/`);
   });
 };
 
-runApp();
+run();

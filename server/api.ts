@@ -1,35 +1,13 @@
-import cors from "cors";
-import express from "express";
-import { createGetScreenshot } from "./screenshot";
-import { castTargetUrl, validateTargetUrl } from "./target-url";
-import { castTimeout, validateTimeout } from "./timeout";
-import { getWhitelist, isOnWhitelist } from "./whitelist";
+import { Application } from "express";
+import {
+  castTargetUrl,
+  castTimeout,
+  createGetScreenshot,
+  validateTargetUrl,
+  validateTimeout,
+} from "../screenshot";
 
-export const createApp = async () => {
-  const app = express();
-
-  app.use(
-    cors({
-      origin: async (origin, callback) => {
-        const whitelist = await getWhitelist();
-
-        console.log(`checking if ${origin} is in ${whitelist.join(", ")}`);
-
-        if (!origin) {
-          callback(null);
-          return;
-        }
-
-        if (isOnWhitelist(whitelist, origin)) {
-          callback(null);
-          return;
-        }
-
-        callback(new Error(`Origin ${origin} is not on the whitelist`));
-      },
-    })
-  );
-
+export const useAPI = async (app: Application) => {
   const getScreenshot = await createGetScreenshot();
 
   app.get("/api/screenshot", async (req, res) => {
@@ -77,6 +55,4 @@ export const createApp = async () => {
       })
       .end(image);
   });
-
-  return app;
 };
