@@ -50,6 +50,6 @@ export const useSecuritry = async (app: Application) => {
       return;
     }
 
-    res.status(400).json(log);
+    res.status(400).json(log).end();
   });
 };

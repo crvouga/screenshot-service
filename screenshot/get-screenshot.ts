@@ -25,7 +25,7 @@ export const createGetScreenshot = async () => {
   }): Promise<{
     image?: Buffer | string | void;
     errors: {
-      [key: string]: string;
+      [key: string]: any;
     }[];
   }> => {
     if (isOnWhitelist(whitelist, targetUrl)) {
@@ -34,23 +34,37 @@ export const createGetScreenshot = async () => {
           {
             message:
               "To prevent infinte loops the targetUrl is not allowed to be on the whitelist when getting screenshots.",
+            whitelist,
+            targetUrl,
           },
         ],
       };
     }
 
     try {
+      console.log(`START GET ${targetUrl}`);
+
       const page = await browser.newPage();
 
       await page.goto(targetUrl, {
         waitUntil: "networkidle2",
       });
 
+      console.log(`DONE GET ${targetUrl}`);
+
+      console.log(`START WAIT ${targetUrl}`);
+
       await setTimeoutPromise(timeout);
+
+      console.log(`DONE WAIT ${targetUrl}`);
+
+      console.log(`START SCREENSHOT ${targetUrl}`);
 
       const image = await page.screenshot({
         type: "png",
       });
+
+      console.log(`DONE SCREENSHOT ${targetUrl}`);
 
       return {
         image,
@@ -59,6 +73,8 @@ export const createGetScreenshot = async () => {
     } catch (error) {
       //@ts-ignore
       const message = error?.toString?.();
+
+      console.log(`ERROR ${targetUrl} ${message}`);
 
       return {
         errors: [

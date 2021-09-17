@@ -48,19 +48,27 @@ export const useAPI = async (app: Application) => {
     }
 
     if (!image) {
+      const errors = [
+        {
+          message: "Failed to get screenshot",
+        },
+      ];
       res
         .status(400)
         .json({
-          errors: [
-            {
-              message: "Something went wrong",
-            },
-          ],
+          errors,
         })
         .end();
 
+      console.error(errors);
+
       return;
     }
+
+    console.log("SUCCESS", {
+      "Content-Type": "image/png",
+      "Content-Length": image.length,
+    });
 
     res
       .writeHead(200, {
