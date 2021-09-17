@@ -6,6 +6,7 @@ import {
   validateTargetUrl,
   validateTimeout,
 } from "../screenshot";
+import { getWhitelist } from "./security";
 
 export const GET_SCREENSHOT = "/api/screenshot";
 
@@ -28,7 +29,7 @@ export const useAPI = async (app: Application) => {
     }
 
     const { image, errors } = await getScreenshot({
-      originUrl: req.headers.origin,
+      whitelist: await getWhitelist(),
       timeout: castTimeout(timeout),
       targetUrl: castTargetUrl(url),
     });
@@ -40,6 +41,9 @@ export const useAPI = async (app: Application) => {
           errors,
         })
         .end();
+
+      console.error(errors);
+
       return;
     }
 
@@ -54,6 +58,7 @@ export const useAPI = async (app: Application) => {
           ],
         })
         .end();
+
       return;
     }
 

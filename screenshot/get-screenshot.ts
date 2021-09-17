@@ -1,3 +1,4 @@
+import { isOnWhitelist } from "../server/security";
 import { createPuppeteerBrowser } from "./puppeteer";
 import { ITargetUrl } from "./target-url";
 import { ITimeout } from "./timeout";
@@ -15,10 +16,10 @@ export const createGetScreenshot = async () => {
 
   const getScreenshot = async ({
     timeout,
-    originUrl,
     targetUrl,
+    whitelist,
   }: {
-    originUrl?: string;
+    whitelist: string[];
     timeout: ITimeout;
     targetUrl: ITargetUrl;
   }): Promise<{
@@ -27,14 +28,12 @@ export const createGetScreenshot = async () => {
       [key: string]: string;
     }[];
   }> => {
-    // prevents infinite loop
-    if (originUrl === targetUrl) {
+    if (isOnWhitelist(whitelist, targetUrl)) {
       return {
         errors: [
           {
-            message: "the originUrl can not equal the targetUrl",
-            originUrl,
-            targetUrl,
+            message:
+              "To prevent infinte loops the targetUrl is not allowed to be on the whitelist when getting screenshots.",
           },
         ],
       };

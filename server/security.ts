@@ -3,7 +3,7 @@ import { Application } from "express";
 
 import env from "../dotenv";
 
-const getWhitelist = async () => {
+export const getWhitelist = async () => {
   return env.URL_WHITELIST_CSV?.split(",").map((item) => item.trim()) ?? [];
 };
 
