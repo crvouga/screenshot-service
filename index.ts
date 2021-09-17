@@ -6,7 +6,7 @@ const runApp = async () => {
   const port = process.env.PORT || 8000;
 
   app.listen(port, () => {
-    console.log(`App is running http://localhost:${port}/`);
+    console.log(`App is running on http://localhost:${port}/`);
   });
 };
 
