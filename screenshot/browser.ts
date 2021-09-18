@@ -1,6 +1,6 @@
 import puppeteer from "puppeteer";
 
-export const createPuppeteerBrowser = async () => {
+export const createBrowser = async () => {
   const browser = await puppeteer.launch({
     args: [
       "--hide-scrollbars",

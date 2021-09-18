@@ -1,23 +1,23 @@
+import apicache from "apicache";
 import { Application } from "express";
 import {
   castTargetUrl,
   castTimeout,
-  createGetScreenshot,
+  createBrowser,
+  getScreenshot,
   validateTargetUrl,
   validateTimeout,
 } from "../screenshot";
-import { getWhitelist } from "./security";
-import apicache from "apicache";
 
-export const GET_SCREENSHOT = "/api/screenshot";
+export const SCREENSHOT_ENDPOINT = "/api/screenshot";
 
 export const useAPI = async (app: Application) => {
-  const getScreenshot = await createGetScreenshot();
+  const browser = await createBrowser();
 
   app.get(
-    GET_SCREENSHOT,
+    SCREENSHOT_ENDPOINT,
 
-    apicache.middleware("10 minutes"),
+    apicache.middleware("60 seconds"),
 
     async (req, res) => {
       const { url, timeout } = req.query;
@@ -35,10 +35,17 @@ export const useAPI = async (app: Application) => {
       }
 
       const { image, errors } = await getScreenshot({
-        whitelist: await getWhitelist(),
+        browser,
         timeout: castTimeout(timeout),
         targetUrl: castTargetUrl(url),
       });
+
+      console.log(
+        `getScreenshot${JSON.stringify({
+          timeout,
+          targetUrl: url,
+        })}) => ${JSON.stringify({ errors })}`
+      );
 
       if (errors.length > 0) {
         res
@@ -70,11 +77,6 @@ export const useAPI = async (app: Application) => {
 
         return;
       }
-
-      console.log("SUCCESS", {
-        "Content-Type": "image/png",
-        "Content-Length": image.length,
-      });
 
       res
         .writeHead(200, {

@@ -28,14 +28,6 @@ export const useSecuritry = async (app: Application) => {
     const whitelist = await getWhitelist();
     const originUrl = req.headers.origin;
 
-    const log = {
-      message: `checking if whitelist contains originUrl`,
-      whitelist,
-      originUrl,
-    };
-
-    console.log(log);
-
     if (!originUrl) {
       next();
       return;
@@ -45,6 +37,14 @@ export const useSecuritry = async (app: Application) => {
       next();
       return;
     }
+
+    const log = {
+      message: `originUrl is not in whitelist`,
+      whitelist,
+      originUrl,
+    };
+
+    console.log(log);
 
     res.status(400).json(log).end();
   });
