@@ -12,12 +12,17 @@ export const getScreenshot = async ({
   browser,
   timeout,
   targetUrl,
+  imageType,
 }: {
+  imageType: "png" | "jpeg";
   browser: Browser;
   timeout: ITimeout;
   targetUrl: ITargetUrl;
 }): Promise<{
-  image?: Buffer | string | void;
+  image?: {
+    type: "png" | "jpeg";
+    data: Buffer | string | void;
+  };
   errors: {
     [key: string]: any;
   }[];
@@ -31,12 +36,15 @@ export const getScreenshot = async ({
 
     await setTimeoutPromise(timeout);
 
-    const image = await page.screenshot({
-      type: "png",
+    const data = await page.screenshot({
+      type: imageType,
     });
 
     return {
-      image,
+      image: {
+        data,
+        type: imageType,
+      },
       errors: [],
     };
   } catch (error) {

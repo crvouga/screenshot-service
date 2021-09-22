@@ -8,6 +8,7 @@ import {
   validateTargetUrl,
   validateTimeout,
 } from "../screenshot";
+import { castImageType, validateImageType } from "../screenshot/imageType";
 
 export const SCREENSHOT_ENDPOINT = "/api/screenshot";
 
@@ -16,15 +17,14 @@ export const useAPI = async (app: Application) => {
 
   app.get(
     SCREENSHOT_ENDPOINT,
-
-    apicache.middleware("60 seconds"),
-
+    apicache.middleware("24 hours"),
     async (req, res) => {
-      const { url, timeout } = req.query;
+      const { url, timeout, type } = req.query;
 
       const validationErrors = [
         ...validateTimeout(timeout, { name: "'timeout' query param" }),
         ...validateTargetUrl(url, { name: "'url' query param" }),
+        ...validateImageType(type, { name: "'type' query param" }),
       ];
 
       if (validationErrors.length > 0) {
@@ -35,17 +35,11 @@ export const useAPI = async (app: Application) => {
       }
 
       const { image, errors } = await getScreenshot({
+        imageType: castImageType(type),
         browser,
         timeout: castTimeout(timeout),
         targetUrl: castTargetUrl(url),
       });
-
-      console.log(
-        `getScreenshot${JSON.stringify({
-          timeout,
-          targetUrl: url,
-        })}) => ${JSON.stringify({ errors })}`
-      );
 
       if (errors.length > 0) {
         res
@@ -60,7 +54,7 @@ export const useAPI = async (app: Application) => {
         return;
       }
 
-      if (!image) {
+      if (!image?.data) {
         const errors = [
           {
             message: "Failed to get screenshot",
@@ -80,10 +74,10 @@ export const useAPI = async (app: Application) => {
 
       res
         .writeHead(200, {
-          "Content-Type": "image/png",
-          "Content-Length": image.length,
+          "Content-Type": image.type,
+          "Content-Length": image.data.length,
         })
-        .end(image);
+        .end(image.data);
     }
   );
 };

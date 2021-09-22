@@ -9,8 +9,8 @@
     "start": "NODE_ENV=production node build/index.js",
     "dev": "NODE_ENV=development nodemon build/index.js",
     "postinstall": "tsc",
-    "deployment:dot-env": "heroku config -s -a crvouga-screenshot-service > .env",
-    "deployment:logs": "heroku logs --tail --app crvouga-screenshot-service"
+    "deployment-dot-env": "heroku config -s -a crvouga-screenshot-service > .env",
+    "deployment-logs": "heroku logs --tail --app crvouga-screenshot-service"
   },
   "devDependencies": {
     "@types/apicache": "^1.6.0",
