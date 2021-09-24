@@ -2,7 +2,7 @@ import express, { Application } from "express";
 import morgan from "morgan";
 import path from "path";
 import { createAPIRouter } from "./create-api-router";
-import { useSecuritry } from "./use-security";
+import { useSecurity } from "./use-security";
 
 const useAPIEndpoints = async (app: Application) => {
   const apiRputer = await createAPIRouter();
@@ -27,7 +27,7 @@ export const createServer = async () => {
 
   useLogger(app);
 
-  useSecuritry(app);
+  useSecurity(app);
 
   await useAPIEndpoints(app);
 

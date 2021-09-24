@@ -21,7 +21,7 @@ export const isOnWhitelist = (whitelist: string[], item: string) => {
   });
 };
 
-export const useSecuritry = async (app: Application) => {
+export const useSecurity = async (app: Application) => {
   app.use(cors());
 
   app.use(async (req, res, next) => {
