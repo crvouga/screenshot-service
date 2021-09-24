@@ -1,156 +1,107 @@
-import ContentPasteIcon from "@mui/icons-material/ContentPaste";
-import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
-import { LoadingButton } from "@mui/lab";
-import {
-  Box,
-  Container,
-  CssBaseline,
-  Divider,
-  IconButton,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography,
-} from "@mui/material";
-import {
-  createTheme,
-  responsiveFontSizes,
-  ThemeProvider,
-} from "@mui/material/styles";
-import React, { useRef, useState } from "react";
+import DownloadIcon from "@mui/icons-material/Download";
+import { Button, Container, Divider, Typography } from "@mui/material";
+import React from "react";
 import { Screenshot } from "./screenshot/Screenshot";
+import { ScreenshotButton } from "./screenshot/ScreenshotButton";
+import {
+  ScreenshotTypeInput,
+  useScreenshotTypeInputState,
+} from "./screenshot/ScreenshotTypeInput";
+import {
+  ScreenshotUrlInput,
+  useScreenshotUrlInputState,
+  validateScreenshotUrl,
+} from "./screenshot/ScreenshotUrlInput";
+
 import { useScreenshot } from "./screenshot/use-screenshot";
 
-const theme = responsiveFontSizes(
-  createTheme({
-    palette: {
-      mode: "dark",
-    },
-    typography: {
-      fontFamily: "monospace",
-    },
-  })
-);
-
 export const App = () => {
-  const [url, setUrl] = useState("");
-  const [delay] = useState(1000);
-  const [type, setType] = useState<"png" | "jpeg">("png");
+  const { url, setUrl } = useScreenshotUrlInputState();
+  const { type, changeType } = useScreenshotTypeInputState();
 
-  const handleChangeType = (nextType: unknown) => {
-    setType((currentType) => {
-      if (nextType === "png" || nextType === "jpeg") {
-        return nextType;
-      }
-      return currentType;
-    });
-  };
-
-  const urlInputRef = useRef<HTMLInputElement | null>(null);
+  const errors = [...validateScreenshotUrl(url)];
 
   const screenshot = useScreenshot();
 
-  const handleTakeSnapshot = async () => {
+  const handleTakeScreenshot = async () => {
     screenshot.fetch({
       targetUrl: url,
-      timeout: delay,
+      timeout: 1000,
       imageType: type,
     });
   };
 
-  const handlePasteClipBoard = async () => {
-    if (urlInputRef.current) {
-      const url = await navigator.clipboard.readText();
-
-      urlInputRef.current.value = url;
-
-      setUrl(url);
-    }
-  };
-
   return (
     <>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Container maxWidth="sm" sx={{ paddingTop: 4, overflowX: "hidden" }}>
-          <Typography variant="h4" align="center" sx={{ marginBottom: 4 }}>
-            Screenshot Service
-          </Typography>
+      <Typography variant="h4" align="center" sx={{ marginY: 4 }}>
+        Screenshot Service
+      </Typography>
 
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: 2,
-            }}
-          >
-            <TextField
-              fullWidth
-              inputRef={urlInputRef}
-              id="url"
-              label="Website URL"
-              value={url}
-              onChange={(event) => {
-                const url = event.target.value;
-                setUrl(url);
-              }}
-            />
-            <IconButton size="large" onClick={handlePasteClipBoard}>
-              <ContentPasteIcon />
-            </IconButton>
-          </Box>
+      <Container maxWidth="sm" sx={{ overflowX: "hidden" }}>
+        <Typography gutterBottom color="text.secondary">
+          URL
+        </Typography>
 
-          <Typography gutterBottom color="text.secondary">
-            Type
-          </Typography>
-
-          <ToggleButtonGroup
-            value={type}
-            onChange={(_event, nextType) => {
-              handleChangeType(nextType);
-            }}
-            exclusive
-            sx={{
-              marginBottom: 4,
-            }}
-          >
-            <ToggleButton value="png">PNG</ToggleButton>
-            <ToggleButton value="jpeg">JPEG</ToggleButton>
-          </ToggleButtonGroup>
-
-          <LoadingButton
-            onClick={handleTakeSnapshot}
-            loading={screenshot.state === "loading"}
-            startIcon={<PhotoCameraIcon />}
-            fullWidth
-            size="large"
-            variant="contained"
-            sx={{
-              marginBottom: 4,
-            }}
-          >
-            Take Screenshot
-          </LoadingButton>
-        </Container>
-
-        <Divider
-          sx={{
-            marginBottom: 4,
-          }}
+        <ScreenshotUrlInput
+          url={url}
+          onChange={setUrl}
+          helperText={validateScreenshotUrl(url).join(", ")}
         />
 
-        <Container maxWidth="sm">
-          <Screenshot
-            state={screenshot.state}
-            alt={`screenshot of ${url}`}
-            src={screenshot.src}
-            sx={{
-              marginBottom: 4,
-            }}
-          />
-        </Container>
-      </ThemeProvider>
+        <Typography gutterBottom color="text.secondary">
+          Type
+        </Typography>
+
+        <ScreenshotTypeInput type={type} onChange={changeType} />
+
+        <ScreenshotButton
+          disabled={errors.length > 0}
+          onClick={handleTakeScreenshot}
+          loading={screenshot.state === "loading"}
+        />
+      </Container>
+
+      <Divider
+        sx={{
+          marginBottom: 4,
+        }}
+      />
+
+      <Container
+        maxWidth="sm"
+        sx={{
+          marginBottom: 4,
+        }}
+      >
+        <Screenshot
+          state={screenshot.state}
+          alt={`screenshot of ${url}`}
+          src={screenshot.src}
+        />
+
+        {screenshot.state === "success" && screenshot.src && (
+          <>
+            <Typography
+              variant="subtitle2"
+              color="text.secondary"
+              sx={{ marginBottom: 2 }}
+            >
+              {url}
+            </Typography>
+            <Button
+              fullWidth
+              size="large"
+              variant="contained"
+              startIcon={<DownloadIcon />}
+              title={url}
+              href={screenshot.src}
+              download={screenshot.src}
+            >
+              Download Screenshot
+            </Button>
+          </>
+        )}
+      </Container>
     </>
   );
 };

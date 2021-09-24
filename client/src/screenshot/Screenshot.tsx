@@ -1,24 +1,29 @@
 import BrokenImageIcon from "@mui/icons-material/BrokenImage";
-import { BoxProps, Box, Skeleton } from "@mui/material";
+import { Box, Paper, PaperProps, Skeleton } from "@mui/material";
 import React from "react";
 
 export const Screenshot = ({
   alt,
   src,
   state,
-  ...BoxProps
+  sx,
+  ...props
 }: {
   alt: string;
   src: string | null;
   state: "loading" | "error" | "success" | "idle";
-} & BoxProps) => {
+} & PaperProps) => {
   return (
-    <Box
-      position="relative"
-      height="0"
-      paddingTop="75%"
-      width="100%"
-      {...BoxProps}
+    <Paper
+      variant="outlined"
+      sx={{
+        position: "relative",
+        height: "0",
+        paddingTop: "75%",
+        width: "100%",
+        ...sx,
+      }}
+      {...props}
     >
       {state === "success" && (
         <img
@@ -71,6 +76,6 @@ export const Screenshot = ({
           <BrokenImageIcon />
         </Box>
       )}
-    </Box>
+    </Paper>
   );
 };
