@@ -9,13 +9,14 @@
     "start": "yarn server:start",
     "dev": "concurrently \"yarn server:dev\" \"cd client && yarn start\"",
     "server:start": "NODE_ENV=production node build/index.js",
-    "server:dev": "NODE_ENV=development nodemon build/index.js",
+    "server:dev": "NODE_ENV=development nodemon index.ts",
     "postinstall": "tsc",
     "_comment": "heroku invokes \"heroku-postbuild\" during deployment",
     "heroku-postbuild": "cd client && yarn && yarn run build",
     "heroku:local": "yarn heroku-postbuild && yarn heroku-dot-env && heroku local",
     "heroku:dot-env": "heroku config -s -a crvouga-screenshot-service > .env",
-    "heroku:logs": "heroku logs --tail --app crvouga-screenshot-service"
+    "heroku:logs": "heroku logs --tail --app crvouga-screenshot-service",
+    "kill": "npx kill-port 8000 && npx kill-port 3000"
   },
   "devDependencies": {
     "@types/apicache": "^1.6.0",

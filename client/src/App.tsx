@@ -36,6 +36,12 @@ export const App = () => {
         Screenshot Service
       </Typography>
 
+      <Divider
+        sx={{
+          marginBottom: 4,
+        }}
+      />
+
       <Container maxWidth="sm" sx={{ overflowX: "hidden" }}>
         <Typography gutterBottom color="text.secondary">
           URL
@@ -81,6 +87,7 @@ export const App = () => {
         {screenshot.state === "success" && screenshot.src && (
           <>
             <Button
+              sx={{ marginTop: 4 }}
               fullWidth
               size="large"
               variant="contained"
