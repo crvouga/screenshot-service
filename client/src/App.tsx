@@ -82,7 +82,7 @@ export const App = () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              marginBottom: 4,
+              marginBottom: 2,
             }}
           >
             <TextField
