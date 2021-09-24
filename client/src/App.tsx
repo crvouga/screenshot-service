@@ -12,7 +12,6 @@ import {
   useScreenshotUrlInputState,
   validateScreenshotUrl,
 } from "./screenshot/ScreenshotUrlInput";
-
 import { useScreenshot } from "./screenshot/use-screenshot";
 
 export const App = () => {
@@ -81,13 +80,6 @@ export const App = () => {
 
         {screenshot.state === "success" && screenshot.src && (
           <>
-            <Typography
-              variant="subtitle2"
-              color="text.secondary"
-              sx={{ marginBottom: 2 }}
-            >
-              {url}
-            </Typography>
             <Button
               fullWidth
               size="large"
