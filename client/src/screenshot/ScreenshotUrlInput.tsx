@@ -3,18 +3,28 @@ import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import { InputAdornment, TextField, TextFieldProps } from "@mui/material";
 import React, { useRef, useState } from "react";
 
-export const validateScreenshotUrl = (url: string) => {
+export const validateUrl = (url: string) => {
   try {
     new URL(url);
-
-    if (url.includes("#")) {
-      return [new Error(`URL's are not allowed to contain "#"`)];
-    }
 
     return [];
   } catch (error) {
     return [new Error("Invalid URL")];
   }
+};
+
+export const validateScreenshotUrl = (url: string): Error[] => {
+  const errors = validateUrl(url);
+
+  if (errors.length > 0) {
+    return errors;
+  }
+
+  if (url.includes("#")) {
+    return [new Error(`URL's are not allowed to contain "#"`)];
+  }
+
+  return [];
 };
 
 export const useScreenshotUrlInputState = () => {
