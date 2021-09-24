@@ -1,5 +1,5 @@
 import apicache from "apicache";
-import { Application } from "express";
+import { Router } from "express";
 import {
   castTargetUrl,
   castTimeout,
@@ -10,13 +10,13 @@ import {
 } from "../screenshot";
 import { castImageType, validateImageType } from "../screenshot/imageType";
 
-export const SCREENSHOT_ENDPOINT = "/api/screenshot";
-
-export const useAPIEndpoints = async (app: Application) => {
+export const createAPIRouter = async () => {
   const browser = await createBrowser();
 
-  app.get(
-    SCREENSHOT_ENDPOINT,
+  const router = Router();
+
+  router.get(
+    "/screenshot",
     apicache.middleware("24 hours"),
     async (req, res) => {
       const { url, timeout, type } = req.query;
@@ -80,4 +80,6 @@ export const useAPIEndpoints = async (app: Application) => {
         .end(image.data);
     }
   );
+
+  return router;
 };

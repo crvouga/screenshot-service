@@ -1,8 +1,26 @@
-import express from "express";
-import { useAPIEndpoints } from "./use-api-endpoints";
-import { useClientEndpoints } from "./use-client-endpoints";
-import { useLogger } from "./use-logger";
+import express, { Application } from "express";
+import morgan from "morgan";
+import path from "path";
+import { createAPIRouter } from "./create-api-router";
 import { useSecuritry } from "./use-security";
+
+const useAPIEndpoints = async (app: Application) => {
+  const apiRputer = await createAPIRouter();
+
+  app.use("/api", apiRputer);
+};
+
+const useClientEndpoints = (app: Application) => {
+  app.use(express.static(path.join(__dirname + "../../../client/build")));
+
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(__dirname + "../../../client/build/index.html"));
+  });
+};
+
+const useLogger = (app: Application) => {
+  app.use(morgan("tiny"));
+};
 
 export const createServer = async () => {
   const app = express();
@@ -11,7 +29,7 @@ export const createServer = async () => {
 
   useSecuritry(app);
 
-  useAPIEndpoints(app);
+  await useAPIEndpoints(app);
 
   useClientEndpoints(app);
 

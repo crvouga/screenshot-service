@@ -17,7 +17,7 @@ import {
   responsiveFontSizes,
   ThemeProvider,
 } from "@mui/material/styles";
-import React, { useState, useRef } from "react";
+import React, { useRef, useState } from "react";
 import { Screenshot } from "./screenshot/Screenshot";
 import { useScreenshot } from "./screenshot/use-screenshot";
 
@@ -37,6 +37,15 @@ export const App = () => {
   const [delay] = useState(1000);
   const [type, setType] = useState<"png" | "jpeg">("png");
 
+  const handleChangeType = (nextType: unknown) => {
+    setType((currentType) => {
+      if (nextType === "png" || nextType === "jpeg") {
+        return nextType;
+      }
+      return currentType;
+    });
+  };
+
   const urlInputRef = useRef<HTMLInputElement | null>(null);
 
   const screenshot = useScreenshot();
@@ -51,10 +60,11 @@ export const App = () => {
 
   const handlePasteClipBoard = async () => {
     if (urlInputRef.current) {
-      const text = await navigator.clipboard.readText();
+      const url = await navigator.clipboard.readText();
 
-      urlInputRef.current.value = text;
-      setUrl(text);
+      urlInputRef.current.value = url;
+
+      setUrl(url);
     }
   };
 
@@ -62,7 +72,7 @@ export const App = () => {
     <>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Container maxWidth="sm" sx={{ paddingTop: 4 }}>
+        <Container maxWidth="sm" sx={{ paddingTop: 4, overflowX: "hidden" }}>
           <Typography variant="h4" align="center" sx={{ marginBottom: 4 }}>
             Screenshot Service
           </Typography>
@@ -97,8 +107,8 @@ export const App = () => {
 
           <ToggleButtonGroup
             value={type}
-            onChange={(_event, value) => {
-              setType(value);
+            onChange={(_event, nextType) => {
+              handleChangeType(nextType);
             }}
             exclusive
             sx={{
@@ -122,20 +132,18 @@ export const App = () => {
           >
             Take Screenshot
           </LoadingButton>
+        </Container>
 
-          <Divider
-            sx={{
-              marginBottom: 4,
-            }}
-          />
+        <Divider
+          sx={{
+            marginBottom: 4,
+          }}
+        />
 
-          <Typography variant="h6" align="center" sx={{ marginBottom: 2 }}>
-            Output
-          </Typography>
-
+        <Container maxWidth="sm">
           <Screenshot
             state={screenshot.state}
-            alt="screenshot of a website"
+            alt={`screenshot of ${url}`}
             src={screenshot.src}
             sx={{
               marginBottom: 4,
