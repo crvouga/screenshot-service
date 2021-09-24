@@ -1,16 +1,19 @@
 import express from "express";
-import { useAPI } from "./api";
-import { useSecuritry } from "./security";
-import morgan from "morgan";
+import { useAPIEndpoints } from "./use-api-endpoints";
+import { useClientEndpoints } from "./use-client-endpoints";
+import { useLogger } from "./use-logger";
+import { useSecuritry } from "./use-security";
 
 export const createServer = async () => {
   const app = express();
 
-  app.use(morgan("tiny"));
+  useLogger(app);
 
   useSecuritry(app);
 
-  useAPI(app);
+  useAPIEndpoints(app);
+
+  useClientEndpoints(app);
 
   return app;
 };

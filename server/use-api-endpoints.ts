@@ -12,7 +12,7 @@ import { castImageType, validateImageType } from "../screenshot/imageType";
 
 export const SCREENSHOT_ENDPOINT = "/api/screenshot";
 
-export const useAPI = async (app: Application) => {
+export const useAPIEndpoints = async (app: Application) => {
   const browser = await createBrowser();
 
   app.get(
