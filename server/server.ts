@@ -9,11 +9,6 @@ export const createServer = async () => {
 
   app.use(morgan("dev"));
 
-  app.use((req, _res, next) => {
-    console.log(req.headers);
-    next();
-  });
-
   useSecurity(app);
 
   useAPI(app);
