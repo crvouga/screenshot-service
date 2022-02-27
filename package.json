@@ -45,7 +45,7 @@
     "client:test": "react-scripts test",
     "server:start": "node ./server-build/src/server/main.js",
     "server:build": "tsc --project ./tsconfig.server.json",
-    "server:dev": "tsc-watch --noClear --project ./tsconfig.server.json --onSuccess \"yarn server:start\"",
+    "server:dev": "tsc-watch --project ./tsconfig.server.json --onSuccess \"yarn server:start\"",
     "heroku-postbuild": "yarn && yarn server:build && yarn client:build",
     "heroku:local": "yarn && yarn heroku-postbuild && yarn heroku:env && heroku local",
     "heroku:env": "npx heroku config -s -a crvouga-screenshot-service > .env",

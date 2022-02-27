@@ -12,7 +12,7 @@ export const createServer = async () => {
 
   app.use(cors());
 
-  useAPI(app);
+  await useAPI(app);
 
   useServeClientApp(app);
 
