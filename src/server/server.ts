@@ -1,4 +1,4 @@
-import express, { Application } from "express";
+import express, { Application, ErrorRequestHandler } from "express";
 import morgan from "morgan";
 import path from "path";
 import { useAPI } from "./server-api";
@@ -14,6 +14,17 @@ export const createServer = async () => {
   useAPI(app);
 
   useServeClientApp(app);
+
+  const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+    if (err) {
+      res.status(500).send("Something broke!").end();
+      return;
+    }
+
+    next();
+  };
+
+  app.use(errorHandler);
 
   return app;
 };
