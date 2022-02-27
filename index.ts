@@ -1,4 +1,4 @@
-import { createServer } from "./server/create-server";
+import { createServer } from "./server/server";
 
 const run = async () => {
   const server = await createServer();

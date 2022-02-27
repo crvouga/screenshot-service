@@ -1,27 +1,25 @@
 import apicache from "apicache";
-import { Request, Response, Router } from "express";
+import { Application, Request, Response } from "express";
 import {
+  castImageType,
   castTargetUrl,
   castTimeout,
-  createBrowser,
-  getScreenshot,
+  validateImageType,
   validateTargetUrl,
   validateTimeout,
-} from "../screenshot";
-import { castImageType, validateImageType } from "../screenshot/imageType";
+} from "./screenshot-data";
+import { getScreenshot } from "./screenshot-data-access";
+import { GET_SCREEN_SHOT_ENDPOINT, IApiErrorBody } from "./server-data";
 
 const cache = apicache.middleware;
 
-const onlyStatus200 = (_req: Request, res: Response) => res.statusCode === 200;
+const cacheSuccesses = cache(
+  "1 hour",
+  (_req: Request, res: Response) => res.statusCode === 200
+);
 
-const cacheSuccesses = cache("12 hours", onlyStatus200);
-
-export const createAPIRouter = async () => {
-  const browser = await createBrowser();
-
-  const router = Router();
-
-  router.get("/screenshot", cacheSuccesses, async (req, res) => {
+export const useAPI = async (app: Application) => {
+  app.get(GET_SCREEN_SHOT_ENDPOINT, cacheSuccesses, async (req, res) => {
     const { url, timeout, type } = req.query;
 
     const validationErrors = [
@@ -31,46 +29,34 @@ export const createAPIRouter = async () => {
     ];
 
     if (validationErrors.length > 0) {
-      res.status(400).json({
-        errors: validationErrors,
-      });
+      const apiErrorBody: IApiErrorBody = validationErrors;
+
+      res.status(400).json(apiErrorBody);
       return;
     }
 
     const { image, errors } = await getScreenshot({
       imageType: castImageType(type),
-      browser,
       timeout: castTimeout(timeout),
       targetUrl: castTargetUrl(url),
     });
 
     if (errors.length > 0) {
-      res
-        .status(400)
-        .json({
-          errors,
-        })
-        .end();
+      const apiErrorBody: IApiErrorBody = errors;
 
-      console.error(errors);
+      res.status(400).json(apiErrorBody).end();
 
       return;
     }
 
     if (!image?.data) {
-      const errors = [
+      const apiErrorBody: IApiErrorBody = [
         {
           message: "Failed to get screenshot",
         },
       ];
-      res
-        .status(400)
-        .json({
-          errors,
-        })
-        .end();
 
-      console.error(errors);
+      res.status(400).json(apiErrorBody).end();
 
       return;
     }
@@ -82,6 +68,4 @@ export const createAPIRouter = async () => {
       })
       .end(image.data);
   });
-
-  return router;
 };

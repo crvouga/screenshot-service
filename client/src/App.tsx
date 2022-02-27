@@ -1,18 +1,30 @@
+import BrokenImageIcon from "@mui/icons-material/BrokenImage";
 import DownloadIcon from "@mui/icons-material/Download";
-import { Button, Container, Divider, Typography } from "@mui/material";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import { LoadingButton } from "@mui/lab";
+import {
+  Alert,
+  AlertTitle,
+  Box,
+  Button,
+  Container,
+  Divider,
+  Paper,
+  PaperProps,
+  Skeleton,
+  Typography,
+} from "@mui/material";
 import React from "react";
-import { Screenshot } from "./screenshot/Screenshot";
-import { ScreenshotButton } from "./screenshot/ScreenshotButton";
+import { useFetchScreenshotMutation } from "./screenshot-data-access";
 import {
   ScreenshotTypeInput,
   useScreenshotTypeInputState,
-} from "./screenshot/ScreenshotTypeInput";
+} from "./ScreenshotTypeInput";
 import {
   ScreenshotUrlInput,
   useScreenshotUrlInputState,
   validateScreenshotUrl,
-} from "./screenshot/ScreenshotUrlInput";
-import { useScreenshot } from "./screenshot/use-screenshot";
+} from "./ScreenshotUrlInput";
 
 export const App = () => {
   const { url, setUrl } = useScreenshotUrlInputState();
@@ -20,10 +32,10 @@ export const App = () => {
 
   const errors = [...validateScreenshotUrl(url)];
 
-  const screenshot = useScreenshot();
+  const fetchScreenshotMutation = useFetchScreenshotMutation();
 
   const handleTakeScreenshot = async () => {
-    screenshot.fetch({
+    fetchScreenshotMutation.mutate({
       targetUrl: url,
       timeout: 1000,
       imageType: type,
@@ -59,11 +71,35 @@ export const App = () => {
 
         <ScreenshotTypeInput type={type} onChange={changeType} />
 
-        <ScreenshotButton
+        <LoadingButton
+          startIcon={<PhotoCameraIcon />}
+          fullWidth
+          size="large"
+          variant="contained"
+          sx={{
+            marginBottom: 4,
+          }}
           disabled={errors.length > 0}
           onClick={handleTakeScreenshot}
-          loading={screenshot.state === "loading"}
-        />
+          loading={fetchScreenshotMutation.status === "loading"}
+        >
+          Take Screenshot
+        </LoadingButton>
+
+        {fetchScreenshotMutation.error && (
+          <Box sx={{ marginBottom: 4 }}>
+            {fetchScreenshotMutation.error.map((error) => (
+              <Alert
+                key={error.message}
+                severity="error"
+                sx={{ marginBottom: 2 }}
+              >
+                <AlertTitle>Server Error</AlertTitle>
+                {JSON.stringify(error, null, 4)}
+              </Alert>
+            ))}
+          </Box>
+        )}
       </Container>
 
       <Divider
@@ -79,28 +115,107 @@ export const App = () => {
         }}
       >
         <Screenshot
-          state={screenshot.state}
+          state={fetchScreenshotMutation.status}
           alt={`screenshot of ${url}`}
-          src={screenshot.src}
+          src={fetchScreenshotMutation.data?.src}
         />
 
-        {screenshot.state === "success" && screenshot.src && (
-          <>
-            <Button
-              sx={{ marginTop: 4 }}
-              fullWidth
-              size="large"
-              variant="contained"
-              startIcon={<DownloadIcon />}
-              title={url}
-              href={screenshot.src}
-              download={screenshot.src}
-            >
-              Download Screenshot
-            </Button>
-          </>
-        )}
+        {fetchScreenshotMutation.status === "success" &&
+          fetchScreenshotMutation.data.src && (
+            <>
+              <Button
+                sx={{ marginTop: 4 }}
+                fullWidth
+                size="large"
+                variant="contained"
+                startIcon={<DownloadIcon />}
+                title={url}
+                href={fetchScreenshotMutation.data.src}
+                download={fetchScreenshotMutation.data.src}
+              >
+                Download Screenshot
+              </Button>
+            </>
+          )}
       </Container>
     </>
+  );
+};
+
+const Screenshot = ({
+  alt,
+  src,
+  state,
+  sx,
+  ...props
+}: {
+  alt: string;
+  src?: string;
+  state: "loading" | "error" | "success" | "idle";
+} & PaperProps) => {
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        position: "relative",
+        height: "0",
+        paddingTop: "75%",
+        width: "100%",
+        ...sx,
+      }}
+      {...props}
+    >
+      {state === "success" && (
+        <img
+          src={src ?? ""}
+          alt={alt}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+          }}
+        />
+      )}
+
+      {state === "loading" && (
+        <Box
+          position="absolute"
+          top={0}
+          left={0}
+          width="100%"
+          height="100%"
+          display="flex"
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Skeleton
+            animation="wave"
+            width="100%"
+            height="100%"
+            variant="rectangular"
+          />
+        </Box>
+      )}
+
+      {state === "error" && (
+        <Box
+          position="absolute"
+          top={0}
+          left={0}
+          width="100%"
+          height="100%"
+          display="flex"
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+          color="text.secondary"
+        >
+          <BrokenImageIcon />
+        </Box>
+      )}
+    </Paper>
   );
 };
