@@ -1,4 +1,3 @@
-// import apicache from "apicache";
 import { Application } from "express";
 import {
   castImageType,
@@ -10,13 +9,6 @@ import {
 } from "./screenshot-data";
 import { getScreenshot } from "./screenshot-data-access";
 import { GET_SCREEN_SHOT_ENDPOINT, IApiErrorBody } from "./server-data";
-
-// const cache = apicache.middleware;
-
-// const cacheSuccesses = cache(
-//   "1 hour",
-//   (_req: Request, res: Response) => res.statusCode === 200
-// );
 
 export const useAPI = async (app: Application) => {
   app.get(GET_SCREEN_SHOT_ENDPOINT, async (req, res) => {
