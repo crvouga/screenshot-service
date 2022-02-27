@@ -19,11 +19,7 @@ export const fetchScreenshot = async ({
 }: IVariables): Promise<IData> => {
   const url = `/api/screenshot?url=${targetUrl}&timeout=${timeout}&type=${imageType}`;
 
-  const response = await fetch(url, {
-    headers: {
-      origin: window.location.origin,
-    },
-  });
+  const response = await fetch(url);
 
   if (response.ok) {
     const blob = await response.blob();
