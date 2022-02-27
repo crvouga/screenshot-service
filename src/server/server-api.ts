@@ -11,10 +11,12 @@ import {
   castTimeoutMs,
   resultToErrors,
 } from "./screenshot-data";
-import { fetchScreenshot } from "./screenshot-data-access";
+import { createFetchScreenshot } from "./screenshot-data-access";
 import { useAPISecurity } from "./server-api-security";
 
-export const useAPI = (app: Application) => {
+export const useAPI = async (app: Application) => {
+  const fetchScreenshot = await createFetchScreenshot();
+
   const apiRouter = Router();
 
   useAPISecurity(apiRouter);

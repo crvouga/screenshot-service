@@ -16,62 +16,64 @@ type IFetchScreenshotResult =
       }[];
     };
 
-export const fetchScreenshot = async ({
-  timeoutMs,
-  targetUrl,
-  imageType,
-}: {
-  imageType: IImageType;
-  timeoutMs: ITimeoutMs;
-  targetUrl: ITargetUrl;
-}): Promise<IFetchScreenshotResult> => {
-  try {
-    const browser = await createBrowser();
+export const createFetchScreenshot = async () => {
+  const browser = await createBrowser();
 
-    const page = await browser.newPage();
+  return async ({
+    timeoutMs,
+    targetUrl,
+    imageType,
+  }: {
+    imageType: IImageType;
+    timeoutMs: ITimeoutMs;
+    targetUrl: ITargetUrl;
+  }): Promise<IFetchScreenshotResult> => {
+    try {
+      const page = await browser.newPage();
 
-    await page.goto(targetUrl, {
-      waitUntil: "networkidle2",
-    });
+      await page.goto(targetUrl, {
+        waitUntil: "networkidle2",
+      });
 
-    await setTimeoutPromise(timeoutMs);
+      await setTimeoutPromise(timeoutMs);
 
-    const data = await page.screenshot({
-      type: imageType,
-    });
+      const data = await page.screenshot({
+        type: imageType,
+      });
 
-    if (data) {
+      if (data) {
+        return {
+          type: "success",
+          image: {
+            type: imageType,
+            data,
+          },
+        };
+      }
+
       return {
-        type: "success",
-        image: {
-          type: imageType,
-          data,
-        },
+        type: "error",
+        errors: [
+          {
+            message: "puppeteer did not return an image",
+          },
+        ],
+      };
+    } catch (error) {
+      const message = String(
+        (error as any)?.toString?.() ?? "puppeteer threw an error"
+      );
+
+      return {
+        type: "error",
+        errors: [
+          {
+            message,
+          },
+        ],
       };
     }
-
-    return {
-      type: "error",
-      errors: [
-        {
-          message: "puppeteer did not return an image",
-        },
-      ],
-    };
-  } catch (error) {
-    const message = String(
-      (error as any)?.toString?.() ?? "puppeteer threw an error"
-    );
-
-    return {
-      type: "error",
-      errors: [
-        {
-          message,
-        },
-      ],
-    };
-  }
+  };
 };
 
 export const createBrowser = async () => {
