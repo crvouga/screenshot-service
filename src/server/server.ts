@@ -3,6 +3,7 @@ import morgan from "morgan";
 import path from "path";
 import { useAPI } from "./server-api";
 import cors from "cors";
+import { IApiErrorBody } from "../shared/server-interface";
 
 export const createServer = async () => {
   const app = express();
@@ -17,7 +18,17 @@ export const createServer = async () => {
 
   const errorHandler: ErrorRequestHandler = (err, _req, res, next) => {
     if (err) {
-      res.status(500).send("Something broke!").end();
+      const errorString = String(
+        err?.toString?.() ?? "And I don't know why >:{"
+      );
+
+      const apiErrorBody: IApiErrorBody = [
+        {
+          message: `Something broke! ${errorString}`,
+        },
+      ];
+
+      res.status(500).json(apiErrorBody).end();
       return;
     }
 
