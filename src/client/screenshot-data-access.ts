@@ -1,23 +1,21 @@
 import { useMutation } from "react-query";
-
-// COPYED FROM SERVER
-type IApiErrorBody = { message: string }[];
-//
+import {
+  GET_SCREENSHOT_ENDPOINT,
+  API_ENDPOINT,
+  IApiErrorBody,
+  IGetScreenshotQueryParams,
+} from "../shared/server-interface";
 
 type IData = { src: string };
-type IVariables = {
-  imageType: string;
-  targetUrl: string;
-  timeout?: number;
-};
+type IVariables = IGetScreenshotQueryParams;
 type IContext = unknown;
 
-export const fetchScreenshot = async ({
-  targetUrl,
-  timeout = 0,
-  imageType,
-}: IVariables): Promise<IData> => {
-  const url = `/api/screenshot?url=${targetUrl}&timeout=${timeout}&type=${imageType}`;
+export const fetchScreenshot = async (
+  params: IGetScreenshotQueryParams
+): Promise<IData> => {
+  const queryParams = new URLSearchParams(params);
+
+  const url = `${API_ENDPOINT}${GET_SCREENSHOT_ENDPOINT}?${queryParams.toString()}`;
 
   const response = await fetch(url);
 

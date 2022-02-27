@@ -1,7 +1,7 @@
 import ClearIcon from "@mui/icons-material/Clear";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import { InputAdornment, TextField, TextFieldProps } from "@mui/material";
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 export const validateUrl = (url: string) => {
   try {

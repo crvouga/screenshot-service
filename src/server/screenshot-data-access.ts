@@ -1,23 +1,30 @@
 import puppeteer from "puppeteer";
-import { IImageType, ITargetUrl, ITimeout } from "./screenshot-data";
+import { IImageType, ITargetUrl, ITimeoutMs } from "./screenshot-data";
 
-export const getScreenshot = async ({
-  timeout,
+type IFetchScreenshotResult =
+  | {
+      type: "success";
+      image: {
+        type: IImageType;
+        data: Buffer | string;
+      };
+    }
+  | {
+      type: "error";
+      errors: {
+        message: string;
+      }[];
+    };
+
+export const fetchScreenshot = async ({
+  timeoutMs,
   targetUrl,
   imageType,
 }: {
   imageType: IImageType;
-  timeout: ITimeout;
+  timeoutMs: ITimeoutMs;
   targetUrl: ITargetUrl;
-}): Promise<{
-  image?: {
-    type: IImageType;
-    data: Buffer | string | void;
-  };
-  errors: {
-    message: string;
-  }[];
-}> => {
+}): Promise<IFetchScreenshotResult> => {
   try {
     const browser = await createBrowser();
 
@@ -27,23 +34,37 @@ export const getScreenshot = async ({
       waitUntil: "networkidle2",
     });
 
-    await setTimeoutPromise(timeout);
+    await setTimeoutPromise(timeoutMs);
 
     const data = await page.screenshot({
       type: imageType,
     });
 
-    return {
-      image: {
-        data,
-        type: imageType,
-      },
-      errors: [],
-    };
-  } catch (error) {
-    const message = String((error as any)?.toString?.());
+    if (data) {
+      return {
+        type: "success",
+        image: {
+          type: imageType,
+          data,
+        },
+      };
+    }
 
     return {
+      type: "error",
+      errors: [
+        {
+          message: "puppeteer did not return an image",
+        },
+      ],
+    };
+  } catch (error) {
+    const message = String(
+      (error as any)?.toString?.() ?? "puppeteer threw an error"
+    );
+
+    return {
+      type: "error",
       errors: [
         {
           message,

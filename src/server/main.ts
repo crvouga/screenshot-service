@@ -1,6 +1,6 @@
-import { createServer } from "./server/server";
+import { createServer } from "./server";
 
-const run = async () => {
+const main = async () => {
   const server = await createServer();
 
   const port = process.env.PORT ?? 8000;
@@ -10,4 +10,4 @@ const run = async () => {
   });
 };
 
-run();
+main();

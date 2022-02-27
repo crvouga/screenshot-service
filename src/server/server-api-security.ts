@@ -1,8 +1,6 @@
-import cors from "cors";
-import { Application } from "express";
-
-import env from "../dotenv";
-import { IApiErrorBody } from "./server-data";
+import { Router } from "express";
+import { IApiErrorBody } from "../shared/server-interface";
+import env from "./dotenv";
 
 export const getWhitelist = async () => {
   return env.URL_WHITELIST_CSV?.split(",").map((item) => item.trim()) ?? [];
@@ -22,17 +20,15 @@ export const isOnWhitelist = (whitelist: string[], item: string) => {
   });
 };
 
-export const useSecurity = async (app: Application) => {
-  app.use(cors());
-
-  app.use(async (req, res, next) => {
+export const useAPISecurity = async (router: Router) => {
+  router.use(async (req, res, next) => {
     const whitelist = await getWhitelist();
     const clientUrl = req.headers.origin ?? req.headers.referer;
 
     if (!clientUrl) {
       const apiErrorBody: IApiErrorBody = [
         {
-          message: `'origin' header is undefined and 'referer' header is undefined. One of these headers has to be defined so I can check if you are on the whitelist.`,
+          message: `'origin' header is undefined or 'referer' header is undefined. One of these headers has to be defined so I can check if you are on the whitelist.`,
         },
       ];
 

@@ -14,7 +14,6 @@ import {
   Skeleton,
   Typography,
 } from "@mui/material";
-import React from "react";
 import { useFetchScreenshotMutation } from "./screenshot-data-access";
 import {
   ScreenshotTypeInput,
@@ -37,7 +36,7 @@ export const App = () => {
   const handleTakeScreenshot = async () => {
     fetchScreenshotMutation.mutate({
       targetUrl: url,
-      timeout: 1000,
+      timeoutMs: String(1000),
       imageType: type,
     });
   };

@@ -1,5 +1,5 @@
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
-import React, { useState } from "react";
+import { useState } from "react";
 
 export const useScreenshotTypeInputState = () => {
   const [type, setType] = useState<"png" | "jpeg">("png");

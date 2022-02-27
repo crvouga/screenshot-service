@@ -1,38 +1,78 @@
 {
-  "name": "screenshot",
-  "version": "1.0.0",
-  "main": "index.js",
+  "name": "client",
+  "version": "0.1.0",
+  "private": true,
+  "proxy": "http://localhost:8000",
   "repository": "https://github.com/crvouga/screenshot.git",
   "author": "Christopher Vouga <crvouga@gmail.com>",
-  "license": "MIT",
-  "scripts": {
-    "start": "yarn server:start",
-    "dev": "concurrently \"yarn server:dev\" \"cd client && yarn start\"",
-    "server:start": "NODE_ENV=production node build/index.js",
-    "server:dev": "NODE_ENV=development nodemon index.ts",
-    "postinstall": "tsc",
-    "heroku-postbuild": "cd client && yarn && yarn run build",
-    "heroku:local": "yarn && yarn heroku-postbuild && yarn heroku-dot-env && heroku local",
-    "heroku:env": "npx heroku config -s -a crvouga-screenshot-service > .env",
-    "heroku:logs": "heroku logs --tail --app crvouga-screenshot-service",
-    "kill": "npx kill-port 8000 && npx kill-port 3000"
-  },
-  "devDependencies": {
+  "dependencies": {
+    "@emotion/react": "^11.4.1",
+    "@emotion/styled": "^11.3.0",
+    "@mui/icons-material": "^5.0.0",
+    "@mui/lab": "^5.0.0-alpha.47",
+    "@mui/material": "^5.0.0",
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.1.0",
+    "@testing-library/user-event": "^12.1.10",
     "@types/apicache": "^1.6.0",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
+    "@types/jest": "^26.0.15",
     "@types/morgan": "^1.9.3",
-    "concurrently": "^6.2.1",
-    "nodemon": "^2.0.12",
-    "ts-node": "^10.5.0",
-    "typescript": "^4.4.3"
-  },
-  "dependencies": {
+    "@types/node": "^12.0.0",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
     "apicache": "^1.6.2",
+    "concurrently": "^6.2.1",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "morgan": "^1.10.0",
-    "puppeteer": "^10.2.0"
+    "nodemon": "^2.0.12",
+    "puppeteer": "^10.2.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-query": "^3.34.16",
+    "react-scripts": "4.0.3",
+    "ts-node": "^10.5.0",
+    "typescript": "^4.1.2",
+    "web-vitals": "^1.0.1"
+  },
+  "scripts": {
+    "dev": "concurrently \"yarn server:dev\" \"yarn client:start\"",
+    "client:start": "react-scripts start",
+    "client:build": "react-scripts build",
+    "client:test": "react-scripts test",
+    "server:start": "node ./server-build/src/server/main.js",
+    "server:build": "tsc --project ./tsconfig.server.json",
+    "server:dev": "tsc-watch --noClear --project ./tsconfig.server.json --onSuccess \"yarn server:start\"",
+    "heroku-postbuild": "yarn && yarn server:build && yarn client:build",
+    "heroku:local": "yarn && yarn heroku-postbuild && yarn heroku:env && heroku local",
+    "heroku:env": "npx heroku config -s -a crvouga-screenshot-service > .env",
+    "heroku:logs": "heroku logs --tail --app crvouga-screenshot-service",
+    "heroku:start": "yarn server:start",
+    "kill": "npx kill-port 8000 && npx kill-port 3000"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "heroku": "^7.59.2",
+    "tsc-watch": "^4.6.0"
   }
 }
