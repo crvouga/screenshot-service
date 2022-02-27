@@ -9,3 +9,11 @@ export type IGetScreenshotQueryParams = {
   imageType?: string;
   targetUrl?: string;
 };
+
+export const toGetScreenshotEndpoint = (params: IGetScreenshotQueryParams) => {
+  const queryParams = new URLSearchParams(params);
+
+  const url = `${API_ENDPOINT}${GET_SCREENSHOT_ENDPOINT}?${queryParams.toString()}`;
+
+  return url;
+};

@@ -1,9 +1,8 @@
 import { useMutation } from "react-query";
 import {
-  GET_SCREENSHOT_ENDPOINT,
-  API_ENDPOINT,
   IApiErrorBody,
   IGetScreenshotQueryParams,
+  toGetScreenshotEndpoint,
 } from "../shared/server-interface";
 
 type IData = { src: string };
@@ -13,11 +12,7 @@ type IContext = unknown;
 export const fetchScreenshot = async (
   params: IGetScreenshotQueryParams
 ): Promise<IData> => {
-  const queryParams = new URLSearchParams(params);
-
-  const url = `${API_ENDPOINT}${GET_SCREENSHOT_ENDPOINT}?${queryParams.toString()}`;
-
-  const response = await fetch(url);
+  const response = await fetch(toGetScreenshotEndpoint(params));
 
   if (response.ok) {
     const blob = await response.blob();
