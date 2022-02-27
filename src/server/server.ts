@@ -15,7 +15,7 @@ export const createServer = async () => {
 
   useServeClientApp(app);
 
-  const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+  const errorHandler: ErrorRequestHandler = (err, _req, res, next) => {
     if (err) {
       res.status(500).send("Something broke!").end();
       return;
