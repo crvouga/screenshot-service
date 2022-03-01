@@ -16,10 +16,9 @@ type IFetchScreenshotResult =
       }[];
     };
 
-export const createFetchScreenshot = async () => {
-  const browser = await createBrowser();
-
-  return async ({
+export const fetchScreenshot = async (
+  browser: Awaited<ReturnType<typeof createBrowser>>,
+  {
     timeoutMs,
     targetUrl,
     imageType,
@@ -27,53 +26,55 @@ export const createFetchScreenshot = async () => {
     imageType: IImageType;
     timeoutMs: ITimeoutMs;
     targetUrl: ITargetUrl;
-  }): Promise<IFetchScreenshotResult> => {
-    try {
-      const page = await browser.newPage();
+  }
+): Promise<IFetchScreenshotResult> => {
+  const page = await browser.newPage();
 
-      await page.goto(targetUrl, {
-        waitUntil: "networkidle2",
-      });
+  try {
+    await page.goto(targetUrl, {
+      waitUntil: "networkidle2",
+    });
 
-      await setTimeoutPromise(timeoutMs);
+    await setTimeoutPromise(timeoutMs);
 
-      const data = await page.screenshot({
-        type: imageType,
-      });
+    const data = await page.screenshot({
+      type: imageType,
+    });
 
-      if (data) {
-        return {
-          type: "success",
-          image: {
-            type: imageType,
-            data,
-          },
-        };
-      }
-
+    if (data) {
       return {
-        type: "error",
-        errors: [
-          {
-            message: "puppeteer did not return an image",
-          },
-        ],
-      };
-    } catch (error) {
-      const message = String(
-        (error as any)?.toString?.() ?? "puppeteer threw an error"
-      );
-
-      return {
-        type: "error",
-        errors: [
-          {
-            message,
-          },
-        ],
+        type: "success",
+        image: {
+          type: imageType,
+          data,
+        },
       };
     }
-  };
+
+    return {
+      type: "error",
+      errors: [
+        {
+          message: "puppeteer did not return an image",
+        },
+      ],
+    };
+  } catch (error) {
+    const message = String(
+      (error as any)?.toString?.() ?? "puppeteer threw an error"
+    );
+
+    return {
+      type: "error",
+      errors: [
+        {
+          message,
+        },
+      ],
+    };
+  } finally {
+    await page.close();
+  }
 };
 
 export const createBrowser = async () => {

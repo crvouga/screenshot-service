@@ -11,11 +11,11 @@ import {
   castTimeoutMs,
   resultToErrors,
 } from "./screenshot-data";
-import { createFetchScreenshot } from "./screenshot-data-access";
+import { createBrowser, fetchScreenshot } from "./screenshot-data-access";
 import { useAPISecurity } from "./server-api-security";
 
 export const useAPI = async (app: Application) => {
-  const fetchScreenshot = await createFetchScreenshot();
+  const browser = await createBrowser();
 
   const apiRouter = Router();
 
@@ -45,20 +45,20 @@ export const useAPI = async (app: Application) => {
       return;
     }
 
-    const fetchScreenshotResult = await fetchScreenshot({
+    const result = await fetchScreenshot(browser, {
       imageType: imageTypeResult.data,
       timeoutMs: timeoutMsResult.data,
       targetUrl: targetUrlResult.data,
     });
 
-    if (fetchScreenshotResult.type === "error") {
-      const apiErrorBody: IApiErrorBody = fetchScreenshotResult.errors;
+    if (result.type === "error") {
+      const apiErrorBody: IApiErrorBody = result.errors;
 
       res.status(400).json(apiErrorBody).end();
       return;
     }
 
-    const image = fetchScreenshotResult.image;
+    const image = result.image;
 
     res
       .writeHead(200, {
