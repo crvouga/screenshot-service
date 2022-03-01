@@ -5,6 +5,7 @@ import { LoadingButton } from "@mui/lab";
 import {
   Alert,
   AlertTitle,
+  AppBar,
   Box,
   Button,
   Container,
@@ -14,6 +15,7 @@ import {
   Skeleton,
   ToggleButton,
   ToggleButtonGroup,
+  Toolbar,
   Typography,
 } from "@mui/material";
 import { useState } from "react";
@@ -42,17 +44,15 @@ export const App = () => {
 
   return (
     <>
-      <Typography variant="h4" align="center" sx={{ marginY: 4 }}>
-        Screenshot Service
-      </Typography>
+      <AppBar position="sticky">
+        <Toolbar>
+          <Typography variant="h6" align="center">
+            Screenshot Service
+          </Typography>
+        </Toolbar>
+      </AppBar>
 
-      <Divider
-        sx={{
-          marginBottom: 4,
-        }}
-      />
-
-      <Container maxWidth="sm" sx={{ overflowX: "hidden" }}>
+      <Container maxWidth="sm" sx={{ marginTop: 2, overflowX: "hidden" }}>
         <Typography gutterBottom color="text.secondary">
           targetUrl
         </Typography>
@@ -61,6 +61,8 @@ export const App = () => {
           value={targetUrl}
           onChange={setTargetUrl}
           helperText={targetUrlHelperText}
+          id="targetUrl"
+          placeholder="https://www.example.com/"
           sx={{ marginBottom: 2 }}
         />
 
@@ -70,8 +72,10 @@ export const App = () => {
 
         <ToggleButtonGroup
           value={imageType}
-          onChange={(_event, nextType) => {
-            setImageType(nextType);
+          onChange={(_event, value) => {
+            if (value === "png" || value === "jpeg") {
+              setImageType(value);
+            }
           }}
           exclusive
           sx={{
@@ -87,6 +91,20 @@ export const App = () => {
         </Typography>
 
         <TextFieldInput
+          id="timeoutMs"
+          placeholder="3000"
+          value={timeoutMs}
+          onChange={setTimeoutMs}
+          sx={{ marginBottom: 2 }}
+        />
+
+        <Typography gutterBottom color="text.secondary">
+          maxAgeMs
+        </Typography>
+
+        <TextFieldInput
+          id="timeoutMs"
+          placeholder="3000"
           value={timeoutMs}
           onChange={setTimeoutMs}
           sx={{ marginBottom: 2 }}

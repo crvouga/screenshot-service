@@ -34,8 +34,6 @@ export const TextFieldInput = ({
     <TextField
       fullWidth
       inputRef={inputRef}
-      id="url"
-      placeholder="https://www.example.com/"
       value={value}
       onChange={(event) => {
         const value = event.target.value;
