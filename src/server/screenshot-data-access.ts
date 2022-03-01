@@ -1,13 +1,10 @@
 import puppeteer from "puppeteer";
+import fs from "fs";
+import path from "path";
 import { IImageType, ITargetUrl, ITimeoutMs } from "../shared/screenshot-data";
+// import { firebaseAdminApp } from "./firebase";
 
-// type IScreenshotMeta = {
-//   imageType: IImageType;
-//   timeoutMs: ITimeoutMs;
-//   targetUrl: ITargetUrl;
-// };
-
-// export const eno
+// const screenshotsBucket = firebaseAdminApp.storage().bucket("screenshots");
 
 type IFetchScreenshotResult =
   | {
@@ -49,23 +46,26 @@ export const fetchScreenshot = async (
       type: imageType,
     });
 
-    if (data) {
+    if (typeof data !== "string" && !data) {
       return {
-        type: "success",
-        image: {
-          type: imageType,
-          data,
-        },
+        type: "error",
+        errors: [
+          {
+            message: "puppeteer did not return an image",
+          },
+        ],
       };
     }
 
+    await fs.writeFileSync(path.join(__dirname, "test.txt"), "test");
+    console.log({ path: path.join(__dirname, "test.txt") });
+
     return {
-      type: "error",
-      errors: [
-        {
-          message: "puppeteer did not return an image",
-        },
-      ],
+      type: "success",
+      image: {
+        type: imageType,
+        data,
+      },
     };
   } catch (error) {
     const message = String(
