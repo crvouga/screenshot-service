@@ -11,11 +11,14 @@ import {
   castTimeoutMs,
   resultToErrors,
 } from "./screenshot-data";
-import { createBrowser, fetchScreenshot } from "./screenshot-data-access";
+import {
+  createPuppeteerBrowser,
+  fetchScreenshot,
+} from "./screenshot-data-access";
 import { useAPISecurity } from "./server-api-security";
 
 export const useAPI = async (app: Application) => {
-  const browser = await createBrowser();
+  const browser = await createPuppeteerBrowser();
 
   const apiRouter = Router();
 

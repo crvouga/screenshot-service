@@ -17,7 +17,7 @@ type IFetchScreenshotResult =
     };
 
 export const fetchScreenshot = async (
-  browser: Awaited<ReturnType<typeof createBrowser>>,
+  browser: puppeteer.Browser,
   {
     timeoutMs,
     targetUrl,
@@ -77,7 +77,7 @@ export const fetchScreenshot = async (
   }
 };
 
-export const createBrowser = async () => {
+export const createPuppeteerBrowser = async () => {
   const browser = await puppeteer.launch({
     //why?: https://www.bannerbear.com/blog/ways-to-speed-up-puppeteer-screenshots/
     args: [
