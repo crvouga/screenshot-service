@@ -79,6 +79,6 @@
   ],
   "exclude": [
     "node_modules",
-    "client"
+    "src/client"
   ]
 }
