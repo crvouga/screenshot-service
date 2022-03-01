@@ -1,5 +1,13 @@
 import puppeteer from "puppeteer";
-import { IImageType, ITargetUrl, ITimeoutMs } from "./screenshot-data";
+import { IImageType, ITargetUrl, ITimeoutMs } from "../shared/screenshot-data";
+
+// type IScreenshotMeta = {
+//   imageType: IImageType;
+//   timeoutMs: ITimeoutMs;
+//   targetUrl: ITargetUrl;
+// };
+
+// export const eno
 
 type IFetchScreenshotResult =
   | {

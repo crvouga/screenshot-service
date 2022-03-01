@@ -80,7 +80,7 @@ export const validateTimeoutMs = (
     });
   }
 
-  if (Number(timeoutMs) === NaN) {
+  if (isNaN(Number(timeoutMs))) {
     errors.push({
       message: `${name} must be a valid number`,
     });
@@ -140,13 +140,13 @@ export const validateImageType = (
     ];
   }
 
-  if (imageType === "png" || imageType == "jpeg") {
+  if (imageType === "png" || imageType === "jpeg") {
     return [];
   }
 
   return [
     {
-      message: `{name} must equal 'png' or 'jpeg'`,
+      message: `${name} must equal 'png' or 'jpeg'`,
     },
   ];
 };

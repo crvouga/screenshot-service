@@ -1,4 +1,4 @@
-import { Application, Router } from "express";
+import { Application, ErrorRequestHandler, Router } from "express";
 import {
   API_ENDPOINT,
   GET_SCREENSHOT_ENDPOINT,
@@ -10,7 +10,7 @@ import {
   castTargetUrl,
   castTimeoutMs,
   resultToErrors,
-} from "./screenshot-data";
+} from "../shared/screenshot-data";
 import {
   createPuppeteerBrowser,
   fetchScreenshot,
@@ -70,6 +70,13 @@ export const useAPI = async (app: Application) => {
       })
       .end(image.data);
   });
+
+  const errorHandler: ErrorRequestHandler = (_err, _req, _res, next) => {
+    browser.close();
+    next();
+  };
+
+  apiRouter.use(errorHandler);
 
   app.use(API_ENDPOINT, apiRouter);
 };

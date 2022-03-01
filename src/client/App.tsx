@@ -12,34 +12,33 @@ import {
   Paper,
   PaperProps,
   Skeleton,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
+import { useState } from "react";
+import { castTargetUrl } from "../shared/screenshot-data";
 import { useFetchScreenshotMutation } from "./screenshot-data-access";
-import {
-  ScreenshotTypeInput,
-  useScreenshotTypeInputState,
-} from "./ScreenshotTypeInput";
-import {
-  ScreenshotUrlInput,
-  useScreenshotUrlInputState,
-  validateScreenshotUrl,
-} from "./ScreenshotUrlInput";
+import { TextFieldInput } from "./TextField";
 
 export const App = () => {
-  const { url, setUrl } = useScreenshotUrlInputState();
-  const { type, changeType } = useScreenshotTypeInputState();
+  const [targetUrl, setTargetUrl] = useState("");
+  const [imageType, setImageType] = useState<"png" | "jpeg">("jpeg");
+  const [timeoutMs, setTimeoutMs] = useState("1000");
 
-  const errors = [...validateScreenshotUrl(url)];
+  const castedTargetUrl = castTargetUrl(targetUrl);
+
+  const targetUrlHelperText =
+    castedTargetUrl.type === "error"
+      ? castedTargetUrl.errors.map((error) => error.message).join(", ")
+      : "";
 
   const fetchScreenshotMutation = useFetchScreenshotMutation();
 
-  const handleTakeScreenshot = async () => {
-    fetchScreenshotMutation.mutate({
-      targetUrl: url,
-      timeoutMs: String(1000),
-      imageType: type,
-    });
-  };
+  const error =
+    fetchScreenshotMutation.status === "error"
+      ? fetchScreenshotMutation.error
+      : [];
 
   return (
     <>
@@ -55,20 +54,58 @@ export const App = () => {
 
       <Container maxWidth="sm" sx={{ overflowX: "hidden" }}>
         <Typography gutterBottom color="text.secondary">
-          URL
+          targetUrl
         </Typography>
 
-        <ScreenshotUrlInput
-          url={url}
-          onChange={setUrl}
-          helperText={validateScreenshotUrl(url).join(", ")}
+        <TextFieldInput
+          value={targetUrl}
+          onChange={setTargetUrl}
+          helperText={targetUrlHelperText}
+          sx={{ marginBottom: 2 }}
         />
 
         <Typography gutterBottom color="text.secondary">
-          Type
+          imageType
         </Typography>
 
-        <ScreenshotTypeInput type={type} onChange={changeType} />
+        <ToggleButtonGroup
+          value={imageType}
+          onChange={(_event, nextType) => {
+            setImageType(nextType);
+          }}
+          exclusive
+          sx={{
+            marginBottom: 2,
+          }}
+        >
+          <ToggleButton value="png">PNG</ToggleButton>
+          <ToggleButton value="jpeg">JPEG</ToggleButton>
+        </ToggleButtonGroup>
+
+        <Typography gutterBottom color="text.secondary">
+          timeoutMs
+        </Typography>
+
+        <TextFieldInput
+          value={timeoutMs}
+          onChange={setTimeoutMs}
+          sx={{ marginBottom: 2 }}
+        />
+
+        {error.length > 0 && (
+          <Box sx={{ marginY: 2 }}>
+            {error.map((error) => (
+              <Alert
+                key={error.message}
+                severity="error"
+                sx={{ marginBottom: 2 }}
+              >
+                <AlertTitle>Server Error</AlertTitle>
+                {error.message}
+              </Alert>
+            ))}
+          </Box>
+        )}
 
         <LoadingButton
           startIcon={<PhotoCameraIcon />}
@@ -76,29 +113,20 @@ export const App = () => {
           size="large"
           variant="contained"
           sx={{
+            marginTop: 2,
             marginBottom: 4,
           }}
-          disabled={errors.length > 0}
-          onClick={handleTakeScreenshot}
+          onClick={() => {
+            fetchScreenshotMutation.mutate({
+              targetUrl,
+              timeoutMs,
+              imageType,
+            });
+          }}
           loading={fetchScreenshotMutation.status === "loading"}
         >
           Take Screenshot
         </LoadingButton>
-
-        {fetchScreenshotMutation.error && (
-          <Box sx={{ marginBottom: 4 }}>
-            {fetchScreenshotMutation.error.map((error) => (
-              <Alert
-                key={error.message}
-                severity="error"
-                sx={{ marginBottom: 2 }}
-              >
-                <AlertTitle>Server Error</AlertTitle>
-                {JSON.stringify(error, null, 4)}
-              </Alert>
-            ))}
-          </Box>
-        )}
       </Container>
 
       <Divider
@@ -115,7 +143,7 @@ export const App = () => {
       >
         <Screenshot
           state={fetchScreenshotMutation.status}
-          alt={`screenshot of ${url}`}
+          alt={`screenshot of ${targetUrl}`}
           src={fetchScreenshotMutation.data?.src}
         />
 
@@ -128,7 +156,7 @@ export const App = () => {
                 size="large"
                 variant="contained"
                 startIcon={<DownloadIcon />}
-                title={url}
+                title={targetUrl}
                 href={fetchScreenshotMutation.data.src}
                 download={fetchScreenshotMutation.data.src}
               >

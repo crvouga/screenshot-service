@@ -1,79 +1,45 @@
 import ClearIcon from "@mui/icons-material/Clear";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import { InputAdornment, TextField, TextFieldProps } from "@mui/material";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 
-export const validateUrl = (url: string) => {
-  try {
-    new URL(url);
-
-    return [];
-  } catch (error) {
-    return [new Error("Invalid URL")];
-  }
-};
-
-export const validateScreenshotUrl = (url: string): Error[] => {
-  const errors = validateUrl(url);
-
-  if (errors.length > 0) {
-    return errors;
-  }
-
-  if (url.includes("#")) {
-    return [new Error(`URL's are not allowed to contain "#"`)];
-  }
-
-  return [];
-};
-
-export const useScreenshotUrlInputState = () => {
-  const [url, setUrl] = useState("");
-
-  return {
-    url,
-    setUrl,
-  };
-};
-
-export const ScreenshotUrlInput = ({
-  url,
+export const TextFieldInput = ({
+  value,
   onChange,
   ...props
 }: {
-  url: string;
+  value: string;
   onChange: (url: string) => void;
 } & Omit<TextFieldProps, "onChange">) => {
-  const urlInputRef = useRef<HTMLInputElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const handlePasteClipBoard = async () => {
-    if (urlInputRef.current) {
+    if (inputRef.current) {
       const url = await navigator.clipboard.readText();
 
-      urlInputRef.current.value = url;
+      inputRef.current.value = url;
 
       onChange(url);
     }
   };
 
   const handleClear = () => {
-    if (urlInputRef.current) {
-      urlInputRef.current.value = "";
+    if (inputRef.current) {
+      inputRef.current.value = "";
       onChange("");
     }
   };
 
   return (
     <TextField
-      sx={{ marginBottom: 2 }}
       fullWidth
-      inputRef={urlInputRef}
+      inputRef={inputRef}
       id="url"
       placeholder="https://www.example.com/"
-      value={url}
+      value={value}
       onChange={(event) => {
-        const url = event.target.value;
-        onChange(url);
+        const value = event.target.value;
+        onChange(value);
       }}
       InputProps={{
         endAdornment: (
