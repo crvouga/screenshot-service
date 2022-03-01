@@ -11,14 +11,12 @@ import {
   castTimeoutMs,
   resultToErrors,
 } from "../shared/screenshot-data";
-import {
-  createPuppeteerBrowser,
-  fetchScreenshot,
-} from "./screenshot-data-access";
+import * as Screenshot from "./screenshot-data-access/screenshot-data-access";
+import * as ScreenshotPuppeteer from "./screenshot-data-access/screenshot-data-access-puppeteer";
 import { useAPISecurity } from "./server-api-security";
 
 export const useAPI = async (app: Application) => {
-  const browser = await createPuppeteerBrowser();
+  const browser = await ScreenshotPuppeteer.createPuppeteerBrowser();
 
   const apiRouter = Router();
 
@@ -48,7 +46,7 @@ export const useAPI = async (app: Application) => {
       return;
     }
 
-    const result = await fetchScreenshot(browser, {
+    const result = await Screenshot.get(browser, {
       imageType: imageTypeResult.data,
       timeoutMs: timeoutMsResult.data,
       targetUrl: targetUrlResult.data,

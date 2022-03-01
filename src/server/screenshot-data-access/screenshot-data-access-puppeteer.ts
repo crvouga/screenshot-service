@@ -1,38 +1,23 @@
 import puppeteer from "puppeteer";
-import fs from "fs";
-import path from "path";
-import { IImageType, ITargetUrl, ITimeoutMs } from "../shared/screenshot-data";
-// import { firebaseAdminApp } from "./firebase";
+import {
+  IImageType,
+  ITargetUrl,
+  ITimeoutMs,
+} from "../../shared/screenshot-data";
+import { IGetScreenshotResult } from "./screenshot-data-access-interface";
 
-// const screenshotsBucket = firebaseAdminApp.storage().bucket("screenshots");
-
-type IFetchScreenshotResult =
-  | {
-      type: "success";
-      image: {
-        type: IImageType;
-        data: Buffer | string;
-      };
-    }
-  | {
-      type: "error";
-      errors: {
-        message: string;
-      }[];
-    };
-
-export const fetchScreenshot = async (
+export const get = async (
   browser: puppeteer.Browser,
   {
+    imageType,
     timeoutMs,
     targetUrl,
-    imageType,
   }: {
-    imageType: IImageType;
-    timeoutMs: ITimeoutMs;
     targetUrl: ITargetUrl;
+    timeoutMs: ITimeoutMs;
+    imageType: IImageType;
   }
-): Promise<IFetchScreenshotResult> => {
+): Promise<IGetScreenshotResult> => {
   const page = await browser.newPage();
 
   try {
@@ -42,11 +27,11 @@ export const fetchScreenshot = async (
 
     await setTimeoutPromise(timeoutMs);
 
-    const data = await page.screenshot({
+    const screenshot = await page.screenshot({
       type: imageType,
     });
 
-    if (typeof data !== "string" && !data) {
+    if (typeof screenshot !== "string" && !screenshot) {
       return {
         type: "error",
         errors: [
@@ -57,14 +42,11 @@ export const fetchScreenshot = async (
       };
     }
 
-    await fs.writeFileSync(path.join(__dirname, "test.txt"), "test");
-    console.log({ path: path.join(__dirname, "test.txt") });
-
     return {
       type: "success",
       image: {
+        data: screenshot,
         type: imageType,
-        data,
       },
     };
   } catch (error) {
