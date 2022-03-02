@@ -17,6 +17,9 @@ export const put = async (
     fs.writeFileSync(filename, screenshot);
     return {
       type: "success",
+      image: {
+        createdAt: Date.now(),
+      },
     };
   } catch (error) {
     const message = String(
@@ -47,6 +50,7 @@ export const get = async ({
       image: {
         type: imageType,
         data: file,
+        createdAt: Date.now(),
       },
     };
   } catch (error) {

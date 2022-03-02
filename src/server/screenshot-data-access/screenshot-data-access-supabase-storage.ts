@@ -18,7 +18,7 @@ export const put = async (
   try {
     const uploadResponse = await supabaseClient.storage
       .from(BUCKET_NAME)
-      .upload(filename, screenshot);
+      .upload(filename, screenshot, { upsert: true });
 
     if (uploadResponse.error) {
       return {
@@ -33,6 +33,9 @@ export const put = async (
 
     return {
       type: "success",
+      image: {
+        createdAt: Date.now(),
+      },
     };
   } catch (error) {
     const message = String(
@@ -68,7 +71,7 @@ export const get = async ({
         type: "error",
         errors: [
           {
-            message: downloadResponse.error.message,
+            message: `Supbase couldn't download screenshot. ${downloadResponse.error.message}`,
           },
         ],
       };
@@ -97,6 +100,7 @@ export const get = async ({
       image: {
         type: imageType,
         data: buffer,
+        createdAt: Date.now(),
       },
     };
   } catch (error) {

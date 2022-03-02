@@ -5,11 +5,9 @@ import {
   ITimeoutMs,
 } from "../../shared/screenshot-data";
 import * as ScreenshotId from "../../shared/screenshot-id";
-// import * as ScreenshotFileSystem from "./screenshot-data-access-filesystem";
-// import * as ScreenshotFirebaseStorage from "./screenshot-data-access-firebase-storage";
-import * as ScreenshotSupabaseStorage from "./screenshot-data-access-supabase-storage";
 import { IGetScreenshotResult } from "./screenshot-data-access-interface";
 import * as ScreenshotPuppeteer from "./screenshot-data-access-puppeteer";
+import * as ScreenshotSupabaseStorage from "./screenshot-data-access-supabase-storage";
 
 export const get = async (
   browser: puppeteer.Browser,
@@ -24,8 +22,8 @@ export const get = async (
   }
 ): Promise<IGetScreenshotResult> => {
   const screenshotId = ScreenshotId.encode({
-    imageType,
     timeoutMs,
+    imageType,
     targetUrl,
   });
 
@@ -36,11 +34,11 @@ export const get = async (
     imageType,
   });
 
-  console.log(JSON.stringify({ supabaseGetResult }, null, 4));
-
   if (supabaseGetResult.type === "success") {
     return supabaseGetResult;
   }
+
+  console.log(JSON.stringify({ supabaseGetResult }, null, 4));
 
   const puppeteerGetResult = await ScreenshotPuppeteer.get(browser, {
     imageType,

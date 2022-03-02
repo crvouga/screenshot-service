@@ -47,6 +47,7 @@ export const get = async (
       image: {
         data: screenshot,
         type: imageType,
+        createdAt: Date.now(),
       },
     };
   } catch (error) {
