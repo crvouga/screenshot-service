@@ -19,6 +19,7 @@ export interface paths {
           id?: parameters["rowFilter.screenshots.id"];
           created_at?: parameters["rowFilter.screenshots.created_at"];
           filename?: parameters["rowFilter.screenshots.filename"];
+          updated_at?: parameters["rowFilter.screenshots.updated_at"];
           /** Filtering Columns */
           select?: parameters["select"];
           /** Ordering */
@@ -72,6 +73,7 @@ export interface paths {
           id?: parameters["rowFilter.screenshots.id"];
           created_at?: parameters["rowFilter.screenshots.created_at"];
           filename?: parameters["rowFilter.screenshots.filename"];
+          updated_at?: parameters["rowFilter.screenshots.updated_at"];
         };
         header: {
           /** Preference */
@@ -89,6 +91,7 @@ export interface paths {
           id?: parameters["rowFilter.screenshots.id"];
           created_at?: parameters["rowFilter.screenshots.created_at"];
           filename?: parameters["rowFilter.screenshots.filename"];
+          updated_at?: parameters["rowFilter.screenshots.updated_at"];
         };
         body: {
           /** screenshots */
@@ -123,6 +126,11 @@ export interface definitions {
     created_at: string;
     /** Format: text */
     filename: string;
+    /**
+     * Format: timestamp with time zone
+     * @default now()
+     */
+    updated_at: string;
   };
 }
 
@@ -167,6 +175,8 @@ export interface parameters {
   "rowFilter.screenshots.created_at": string;
   /** Format: text */
   "rowFilter.screenshots.filename": string;
+  /** Format: timestamp with time zone */
+  "rowFilter.screenshots.updated_at": string;
 }
 
 export interface operations {}

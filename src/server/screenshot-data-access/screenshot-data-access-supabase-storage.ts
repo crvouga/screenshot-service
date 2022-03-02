@@ -42,12 +42,17 @@ export const put = async (
       };
     }
 
-    const screenshotRow = await getElseCreateScreenshotRow({ filename });
+    const row = await getElseInsertRow({ filename });
+
+    await updateRow({
+      filename: row.filename,
+      updatedAtMs: Date.now(),
+    });
 
     return {
       type: "success",
       image: {
-        createdAt: screenshotRow.createdAt,
+        updatedAtMs: row.updatedAtMs,
       },
     };
   } catch (error) {
@@ -118,14 +123,14 @@ export const get = async ({
 
     const buffer = Buffer.from(arrayBuffer);
 
-    const screenshotRow = await getElseCreateScreenshotRow({ filename });
+    const row = await getElseInsertRow({ filename });
 
     return {
       type: "success",
       image: {
         type: imageType,
         data: buffer,
-        createdAt: screenshotRow.createdAt,
+        updatedAtMs: row.updatedAtMs,
       },
     };
   } catch (error) {
@@ -155,11 +160,16 @@ export const get = async ({
  *
  */
 
-const getScreenshotRow = async ({
+const getRow = async ({
   filename,
 }: {
   filename: string;
-}): Promise<{ filename: string; createdAt: number } | null> => {
+}): Promise<{
+  id: string;
+  filename: string;
+  createdAtMs: number;
+  updatedAtMs: number;
+} | null> => {
   const got = await supabaseClient
     .from<definitions["screenshots"]>("screenshots")
     .select("*")
@@ -168,38 +178,70 @@ const getScreenshotRow = async ({
 
   if (got.data) {
     return {
+      id: got.data.id,
       filename: got.data.filename,
-      createdAt: new Date(got.data.created_at).getTime(),
+      createdAtMs: new Date(got.data.created_at).getTime(),
+      updatedAtMs: new Date(got.data.created_at).getTime(),
     };
   }
 
   return null;
 };
 
-const insertScreenshotRow = async ({
-  filename,
-}: {
-  filename: string;
-}): Promise<void> => {
-  await supabaseClient.from<definitions["screenshots"]>("screenshots").insert({
-    filename,
-  });
+const insertRow = async ({ filename }: { filename: string }): Promise<void> => {
+  const result = await supabaseClient
+    .from<definitions["screenshots"]>("screenshots")
+    .insert({
+      filename,
+    });
+
+  if (result.error) {
+    console.error("insert row error", result.error);
+  }
 };
 
-const getElseCreateScreenshotRow = async ({
+const updateRow = async ({
+  filename,
+  updatedAtMs,
+}: {
+  filename: string;
+  updatedAtMs: number;
+}): Promise<void> => {
+  console.log("UPDATE ROW ", {
+    updated_at: new Date(updatedAtMs).toISOString(),
+    updatedAtMs,
+  });
+  const result = await supabaseClient
+    .from<definitions["screenshots"]>("screenshots")
+    .update({
+      updated_at: new Date(updatedAtMs).toISOString(),
+    })
+    .eq("filename", filename);
+
+  if (result.error) {
+    console.error("update row error", result.error);
+  }
+};
+
+const getElseInsertRow = async ({
   filename,
 }: {
   filename: string;
-}): Promise<{ filename: string; createdAt: number }> => {
-  const got = await getScreenshotRow({ filename });
+}): Promise<{
+  id: string;
+  filename: string;
+  createdAtMs: number;
+  updatedAtMs: number;
+}> => {
+  const got = await getRow({ filename });
 
   if (got) {
     return got;
   }
 
-  await insertScreenshotRow({ filename });
+  await insertRow({ filename });
 
-  const gotAfterCreated = await getScreenshotRow({ filename });
+  const gotAfterCreated = await getRow({ filename });
 
   if (gotAfterCreated) {
     return gotAfterCreated;

@@ -6,7 +6,7 @@ export type IGetScreenshotResult =
       image: {
         type: IImageType;
         data: Buffer | string;
-        createdAt: number;
+        updatedAtMs: number;
       };
     }
   | {
@@ -20,7 +20,7 @@ export type IPutScreenshotResult =
   | {
       type: "success";
       image: {
-        createdAt: number;
+        updatedAtMs: number;
       };
     }
   | {

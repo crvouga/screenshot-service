@@ -18,7 +18,7 @@ export const put = async (
     return {
       type: "success",
       image: {
-        createdAt: Date.now(),
+        updatedAtMs: Date.now(),
       },
     };
   } catch (error) {
@@ -50,7 +50,7 @@ export const get = async ({
       image: {
         type: imageType,
         data: file,
-        createdAt: Date.now(),
+        updatedAtMs: Date.now(),
       },
     };
   } catch (error) {

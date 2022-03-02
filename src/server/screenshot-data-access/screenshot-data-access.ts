@@ -16,7 +16,6 @@ export const get = async (
     timeoutMs,
     targetUrl,
     imageType,
-    maxAgeMs,
   }: {
     imageType: IImageType;
     timeoutMs: ITimeoutMs;
@@ -30,37 +29,26 @@ export const get = async (
     targetUrl,
   });
 
-  console.log({ maxAgeMs });
-
   const filename = `${screenshotId}.${imageType}`;
 
-  const supabaseGetResult = await ScreenshotSupabaseStorage.get({
+  const exisitngResult = await ScreenshotSupabaseStorage.get({
     filename,
     imageType,
   });
 
-  if (supabaseGetResult.type === "success") {
-    return supabaseGetResult;
+  if (exisitngResult.type === "error") {
+    const newResult = await ScreenshotPuppeteer.get(browser, {
+      imageType,
+      timeoutMs,
+      targetUrl,
+    });
+
+    if (newResult.type === "success") {
+      await ScreenshotSupabaseStorage.put({ filename }, newResult.image.data);
+    }
+
+    return newResult;
   }
 
-  console.log(JSON.stringify({ supabaseGetResult }, null, 4));
-
-  const puppeteerGetResult = await ScreenshotPuppeteer.get(browser, {
-    imageType,
-    timeoutMs,
-    targetUrl,
-  });
-
-  if (puppeteerGetResult.type === "success") {
-    const supabasePutResult = await ScreenshotSupabaseStorage.put(
-      { filename },
-      puppeteerGetResult.image.data
-    );
-
-    console.log(JSON.stringify({ supabasePutResult }, null, 4));
-
-    return puppeteerGetResult;
-  }
-
-  return puppeteerGetResult;
+  return exisitngResult;
 };

@@ -59,6 +59,7 @@ export const App = () => {
         </Typography>
 
         <TextFieldInput
+          type="url"
           value={targetUrl}
           onChange={setTargetUrl}
           helperText={targetUrlHelperText}
@@ -94,6 +95,7 @@ export const App = () => {
         <TextFieldInput
           id="timeoutMs"
           placeholder="3000"
+          type="number"
           value={timeoutMs}
           onChange={setTimeoutMs}
           sx={{ marginBottom: 2 }}
@@ -105,6 +107,7 @@ export const App = () => {
 
         <TextFieldInput
           id="maxAgeMs"
+          type="number"
           placeholder="Infinity"
           value={maxAgeMs}
           onChange={setMaxAgeMs}
