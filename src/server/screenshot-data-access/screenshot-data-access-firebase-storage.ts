@@ -1,9 +1,11 @@
-import fs from "fs";
 import { IImageType } from "../../shared/screenshot-data";
+import { firebaseStorage } from "../firebase";
 import {
   IGetScreenshotResult,
   IPutScreenshotResult,
 } from "./screenshot-data-access-interface";
+
+const screenshotBucket = firebaseStorage.bucket("screenshots");
 
 export const put = async (
   {
@@ -11,16 +13,17 @@ export const put = async (
   }: {
     filename: string;
   },
-  screenshot: Buffer | string
+  screenshot: Blob | Buffer | string
 ): Promise<IPutScreenshotResult> => {
   try {
-    fs.writeFileSync(filename, screenshot);
+    await screenshotBucket.file(filename).save(screenshot.toString());
+
     return {
       type: "success",
     };
   } catch (error) {
     const message = String(
-      (error as any)?.toString?.() ?? "failed to write screenshot file"
+      (error as any)?.toString?.() ?? "failed to upload screenshot to firebase"
     );
 
     return {
@@ -33,6 +36,7 @@ export const put = async (
     };
   }
 };
+
 export const get = async ({
   filename,
   imageType,
@@ -41,17 +45,23 @@ export const get = async ({
   imageType: IImageType;
 }): Promise<IGetScreenshotResult> => {
   try {
-    const file = fs.readFileSync(filename);
+    const fileRef = screenshotBucket.file(filename);
+
+    const response = await fileRef.download();
+
+    const buffer = response[0];
+
     return {
       type: "success",
       image: {
         type: imageType,
-        data: file,
+        data: buffer,
       },
     };
   } catch (error) {
     const message = String(
-      (error as any)?.toString?.() ?? "failed to read screenshot file"
+      (error as any)?.toString?.() ??
+        "failed to download screenshot file from firebase"
     );
 
     return {

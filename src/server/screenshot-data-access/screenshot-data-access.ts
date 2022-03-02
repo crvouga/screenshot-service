@@ -5,7 +5,9 @@ import {
   ITimeoutMs,
 } from "../../shared/screenshot-data";
 import * as ScreenshotId from "../../shared/screenshot-id";
-import * as ScreenshotFileSystem from "./screenshot-data-access-filesystem";
+// import * as ScreenshotFileSystem from "./screenshot-data-access-filesystem";
+// import * as ScreenshotFirebaseStorage from "./screenshot-data-access-firebase-storage";
+import * as ScreenshotSupabaseStorage from "./screenshot-data-access-supabase-storage";
 import { IGetScreenshotResult } from "./screenshot-data-access-interface";
 import * as ScreenshotPuppeteer from "./screenshot-data-access-puppeteer";
 
@@ -29,26 +31,33 @@ export const get = async (
 
   const filename = `${screenshotId}.${imageType}`;
 
-  const fileSystemResult = await ScreenshotFileSystem.get({
+  const supabaseGetResult = await ScreenshotSupabaseStorage.get({
     filename,
     imageType,
   });
 
-  if (fileSystemResult.type === "success") {
-    return fileSystemResult;
+  console.log(JSON.stringify({ supabaseGetResult }, null, 4));
+
+  if (supabaseGetResult.type === "success") {
+    return supabaseGetResult;
   }
 
-  const puppeteerResult = await ScreenshotPuppeteer.get(browser, {
+  const puppeteerGetResult = await ScreenshotPuppeteer.get(browser, {
     imageType,
     timeoutMs,
     targetUrl,
   });
 
-  if (puppeteerResult.type === "success") {
-    await ScreenshotFileSystem.put({ filename }, puppeteerResult.image.data);
+  if (puppeteerGetResult.type === "success") {
+    const supabasePutResult = await ScreenshotSupabaseStorage.put(
+      { filename },
+      puppeteerGetResult.image.data
+    );
 
-    return puppeteerResult;
+    console.log(JSON.stringify({ supabasePutResult }, null, 4));
+
+    return puppeteerGetResult;
   }
 
-  return puppeteerResult;
+  return puppeteerGetResult;
 };
