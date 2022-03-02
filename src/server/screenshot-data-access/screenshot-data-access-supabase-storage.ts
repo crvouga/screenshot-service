@@ -1,11 +1,22 @@
 import { IImageType } from "../../shared/screenshot-data";
 import { supabaseClient } from "../supabase";
+import { definitions } from "../supabase-types";
 import {
   IGetScreenshotResult,
   IPutScreenshotResult,
 } from "./screenshot-data-access-interface";
 
 const BUCKET_NAME = "screenshots";
+
+/**
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
 
 export const put = async (
   {
@@ -31,10 +42,12 @@ export const put = async (
       };
     }
 
+    const screenshotRow = await getElseCreateScreenshotRow({ filename });
+
     return {
       type: "success",
       image: {
-        createdAt: Date.now(),
+        createdAt: screenshotRow.createdAt,
       },
     };
   } catch (error) {
@@ -53,6 +66,16 @@ export const put = async (
     };
   }
 };
+
+/**
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
 
 export const get = async ({
   filename,
@@ -95,12 +118,14 @@ export const get = async ({
 
     const buffer = Buffer.from(arrayBuffer);
 
+    const screenshotRow = await getElseCreateScreenshotRow({ filename });
+
     return {
       type: "success",
       image: {
         type: imageType,
         data: buffer,
-        createdAt: Date.now(),
+        createdAt: screenshotRow.createdAt,
       },
     };
   } catch (error) {
@@ -118,4 +143,69 @@ export const get = async ({
       ],
     };
   }
+};
+
+/**
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+
+const getScreenshotRow = async ({
+  filename,
+}: {
+  filename: string;
+}): Promise<{ filename: string; createdAt: number } | null> => {
+  const got = await supabaseClient
+    .from<definitions["screenshots"]>("screenshots")
+    .select("*")
+    .eq("filename", filename)
+    .single();
+
+  if (got.data) {
+    return {
+      filename: got.data.filename,
+      createdAt: new Date(got.data.created_at).getTime(),
+    };
+  }
+
+  return null;
+};
+
+const insertScreenshotRow = async ({
+  filename,
+}: {
+  filename: string;
+}): Promise<void> => {
+  await supabaseClient.from<definitions["screenshots"]>("screenshots").insert({
+    filename,
+  });
+};
+
+const getElseCreateScreenshotRow = async ({
+  filename,
+}: {
+  filename: string;
+}): Promise<{ filename: string; createdAt: number }> => {
+  const got = await getScreenshotRow({ filename });
+
+  if (got) {
+    return got;
+  }
+
+  await insertScreenshotRow({ filename });
+
+  const gotAfterCreated = await getScreenshotRow({ filename });
+
+  if (gotAfterCreated) {
+    return gotAfterCreated;
+  }
+
+  throw new Error(
+    `Supabase is not working. Gettting a screenshot record after just creating one does not return any data.`
+  );
 };

@@ -12,6 +12,118 @@ export interface paths {
       };
     };
   };
+  "/screenshots": {
+    get: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.screenshots.id"];
+          created_at?: parameters["rowFilter.screenshots.created_at"];
+          filename?: parameters["rowFilter.screenshots.filename"];
+          /** Filtering Columns */
+          select?: parameters["select"];
+          /** Ordering */
+          order?: parameters["order"];
+          /** Limiting and Pagination */
+          offset?: parameters["offset"];
+          /** Limiting and Pagination */
+          limit?: parameters["limit"];
+        };
+        header: {
+          /** Limiting and Pagination */
+          Range?: parameters["range"];
+          /** Limiting and Pagination */
+          "Range-Unit"?: parameters["rangeUnit"];
+          /** Preference */
+          Prefer?: parameters["preferCount"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: {
+          schema: definitions["screenshots"][];
+        };
+        /** Partial Content */
+        206: unknown;
+      };
+    };
+    post: {
+      parameters: {
+        body: {
+          /** screenshots */
+          screenshots?: definitions["screenshots"];
+        };
+        query: {
+          /** Filtering Columns */
+          select?: parameters["select"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** Created */
+        201: unknown;
+      };
+    };
+    delete: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.screenshots.id"];
+          created_at?: parameters["rowFilter.screenshots.created_at"];
+          filename?: parameters["rowFilter.screenshots.filename"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+    patch: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.screenshots.id"];
+          created_at?: parameters["rowFilter.screenshots.created_at"];
+          filename?: parameters["rowFilter.screenshots.filename"];
+        };
+        body: {
+          /** screenshots */
+          screenshots?: definitions["screenshots"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+  };
+}
+
+export interface definitions {
+  screenshots: {
+    /**
+     * Format: uuid
+     * @description Note:
+     * This is a Primary Key.<pk/>
+     * @default extensions.uuid_generate_v4()
+     */
+    id: string;
+    /**
+     * Format: timestamp with time zone
+     * @default now()
+     */
+    created_at: string;
+    /** Format: text */
+    filename: string;
+  };
 }
 
 export interface parameters {
@@ -47,6 +159,14 @@ export interface parameters {
   offset: string;
   /** @description Limiting and Pagination */
   limit: string;
+  /** @description screenshots */
+  "body.screenshots": definitions["screenshots"];
+  /** Format: uuid */
+  "rowFilter.screenshots.id": string;
+  /** Format: timestamp with time zone */
+  "rowFilter.screenshots.created_at": string;
+  /** Format: text */
+  "rowFilter.screenshots.filename": string;
 }
 
 export interface operations {}
