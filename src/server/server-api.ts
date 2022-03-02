@@ -7,6 +7,7 @@ import {
 } from "../shared/server-interface";
 import {
   castImageType,
+  castMaxAgeMs,
   castTargetUrl,
   castTimeoutMs,
   resultToErrors,
@@ -28,18 +29,21 @@ export const useAPI = async (app: Application) => {
     const timeoutMsResult = castTimeoutMs(queryParams.timeoutMs);
     const targetUrlResult = castTargetUrl(queryParams.targetUrl);
     const imageTypeResult = castImageType(queryParams.imageType);
+    const maxAgeMsResult = castMaxAgeMs(queryParams.maxAgeMs);
 
     if (
       !(
         timeoutMsResult.type === "success" &&
         targetUrlResult.type === "success" &&
-        imageTypeResult.type === "success"
+        imageTypeResult.type === "success" &&
+        maxAgeMsResult.type === "success"
       )
     ) {
       const apiErrorBody: IApiErrorBody = [
         ...resultToErrors(timeoutMsResult),
         ...resultToErrors(targetUrlResult),
         ...resultToErrors(imageTypeResult),
+        ...resultToErrors(maxAgeMsResult),
       ];
 
       res.status(400).json(apiErrorBody);
@@ -50,6 +54,7 @@ export const useAPI = async (app: Application) => {
       imageType: imageTypeResult.data,
       timeoutMs: timeoutMsResult.data,
       targetUrl: targetUrlResult.data,
+      maxAgeMs: maxAgeMsResult.data,
     });
 
     if (result.type === "error") {

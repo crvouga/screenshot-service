@@ -27,6 +27,7 @@ export const App = () => {
   const [targetUrl, setTargetUrl] = useState("");
   const [imageType, setImageType] = useState<"png" | "jpeg">("jpeg");
   const [timeoutMs, setTimeoutMs] = useState("1000");
+  const [maxAgeMs, setMaxAgeMs] = useState<string>("");
 
   const castedTargetUrl = castTargetUrl(targetUrl);
 
@@ -103,10 +104,10 @@ export const App = () => {
         </Typography>
 
         <TextFieldInput
-          id="timeoutMs"
-          placeholder="3000"
-          value={timeoutMs}
-          onChange={setTimeoutMs}
+          id="maxAgeMs"
+          placeholder="Infinity"
+          value={maxAgeMs}
+          onChange={setMaxAgeMs}
           sx={{ marginBottom: 2 }}
         />
 
@@ -139,6 +140,7 @@ export const App = () => {
               targetUrl,
               timeoutMs,
               imageType,
+              maxAgeMs,
             });
           }}
           loading={fetchScreenshotMutation.status === "loading"}

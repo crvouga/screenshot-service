@@ -104,15 +104,73 @@ export const validateTimeoutMs = (
 export type ITimeoutMs = number & { type: "ITimeoutMs" };
 
 export const castTimeoutMs = (
-  timeout: unknown,
+  timeoutMs: unknown,
   name: string = "timeoutMs"
 ): ICastResult<ITimeoutMs> => {
-  const errors = validateTimeoutMs(timeout, { name });
+  const errors = validateTimeoutMs(timeoutMs, { name });
 
   if (errors.length === 0) {
     return {
       type: "success",
-      data: timeout as ITimeoutMs,
+      data: Number(timeoutMs) as ITimeoutMs,
+    };
+  }
+
+  return {
+    type: "error",
+    errors,
+  };
+};
+
+/**
+ *
+ *
+ *
+ */
+
+export const validateMaxAgeMs = (
+  timeoutMs: unknown,
+  options?: { name?: string }
+) => {
+  const name = options?.name ?? "maxAgeMs";
+
+  const errors = [];
+
+  if (!timeoutMs) {
+    errors.push({
+      message: `${name} can not be undefined`,
+    });
+  }
+
+  if (isNaN(Number(timeoutMs))) {
+    errors.push({
+      message: `${name} must be a valid number`,
+    });
+  }
+
+  if (Number(timeoutMs) < 0) {
+    errors.push({
+      message: `${name} must be a greater than 0`,
+    });
+  }
+
+  return errors;
+};
+
+export type IMaxAgeMs = number & { type: "IMaxAgeMs" };
+
+export const castMaxAgeMs = (
+  maxAgeMs: unknown,
+  name: string = "maxAgeMs"
+): ICastResult<IMaxAgeMs> => {
+  const maxAgeMsElseDefault = maxAgeMs || Infinity;
+
+  const errors = validateMaxAgeMs(maxAgeMsElseDefault, { name });
+
+  if (errors.length === 0) {
+    return {
+      type: "success",
+      data: Number(maxAgeMsElseDefault) as IMaxAgeMs,
     };
   }
 

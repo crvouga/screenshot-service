@@ -8,6 +8,7 @@ export type IGetScreenshotQueryParams = {
   timeoutMs?: string;
   imageType?: string;
   targetUrl?: string;
+  maxAgeMs?: string;
 };
 
 export const toGetScreenshotEndpoint = (params: IGetScreenshotQueryParams) => {

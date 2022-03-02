@@ -1,6 +1,7 @@
 import puppeteer from "puppeteer";
 import {
   IImageType,
+  IMaxAgeMs,
   ITargetUrl,
   ITimeoutMs,
 } from "../../shared/screenshot-data";
@@ -15,10 +16,12 @@ export const get = async (
     timeoutMs,
     targetUrl,
     imageType,
+    maxAgeMs,
   }: {
     imageType: IImageType;
     timeoutMs: ITimeoutMs;
     targetUrl: ITargetUrl;
+    maxAgeMs: IMaxAgeMs;
   }
 ): Promise<IGetScreenshotResult> => {
   const screenshotId = ScreenshotId.encode({
@@ -26,6 +29,8 @@ export const get = async (
     imageType,
     targetUrl,
   });
+
+  console.log({ maxAgeMs });
 
   const filename = `${screenshotId}.${imageType}`;
 
