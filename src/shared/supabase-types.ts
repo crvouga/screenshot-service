@@ -20,6 +20,7 @@ export interface paths {
           created_at?: parameters["rowFilter.projects.created_at"];
           name?: parameters["rowFilter.projects.name"];
           owner_id?: parameters["rowFilter.projects.owner_id"];
+          whitelisted_urls?: parameters["rowFilter.projects.whitelisted_urls"];
           /** Filtering Columns */
           select?: parameters["select"];
           /** Ordering */
@@ -74,6 +75,7 @@ export interface paths {
           created_at?: parameters["rowFilter.projects.created_at"];
           name?: parameters["rowFilter.projects.name"];
           owner_id?: parameters["rowFilter.projects.owner_id"];
+          whitelisted_urls?: parameters["rowFilter.projects.whitelisted_urls"];
         };
         header: {
           /** Preference */
@@ -92,6 +94,7 @@ export interface paths {
           created_at?: parameters["rowFilter.projects.created_at"];
           name?: parameters["rowFilter.projects.name"];
           owner_id?: parameters["rowFilter.projects.owner_id"];
+          whitelisted_urls?: parameters["rowFilter.projects.whitelisted_urls"];
         };
         body: {
           /** projects */
@@ -224,6 +227,8 @@ export interface definitions {
     name: string;
     /** Format: uuid */
     owner_id: string;
+    /** Format: ARRAY */
+    whitelisted_urls?: unknown[];
   };
   screenshots: {
     /**
@@ -291,6 +296,8 @@ export interface parameters {
   "rowFilter.projects.name": string;
   /** Format: uuid */
   "rowFilter.projects.owner_id": string;
+  /** Format: ARRAY */
+  "rowFilter.projects.whitelisted_urls": string;
   /** @description screenshots */
   "body.screenshots": definitions["screenshots"];
   /** Format: uuid */

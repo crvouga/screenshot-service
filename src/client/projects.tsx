@@ -5,6 +5,7 @@ export type IProject = {
   projectId: string;
   ownerId: string;
   name: string;
+  whitelistedUrls: string[];
 };
 
 const rowToProject = (row: definitions["projects"]): IProject => {
@@ -12,6 +13,9 @@ const rowToProject = (row: definitions["projects"]): IProject => {
     projectId: row.id,
     ownerId: row.owner_id,
     name: row.name,
+    whitelistedUrls: (row.whitelisted_urls ?? []).filter(
+      (url) => typeof url === "string"
+    ) as string[],
   };
 };
 
@@ -126,8 +130,13 @@ export const update = async ({
 > => {
   const response = await supabaseClient
     .from<definitions["projects"]>("projects")
-    .update({ name: updates.name })
-    .match({ id: projectId });
+    .update({
+      name: updates.name,
+      whitelisted_urls: updates.whitelistedUrls,
+    })
+    .match({
+      id: projectId,
+    });
 
   if (response.error) {
     return { type: "error", error: response.error.message };
