@@ -3,6 +3,7 @@ import cors from 'cors';
 import express, { ErrorRequestHandler, Router } from 'express';
 import morgan from 'morgan';
 import { useApi } from './server-api';
+import { useStaticFiles } from './server-static-files';
 
 export const createServer = async () => {
   const app = express();
@@ -12,6 +13,8 @@ export const createServer = async () => {
   app.use(cors());
 
   await useApi(app);
+
+  useStaticFiles(app);
 
   useErrorHandler(app);
 
