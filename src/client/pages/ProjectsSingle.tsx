@@ -65,9 +65,12 @@ const ProjectPage = ({ projectId }: { projectId: string }) => {
 
   if (result.type === "error") {
     return (
-      <ErrorPage
-        message={`Something went wrong when loading project. ${result.error}`}
-      />
+      <>
+        <ProjectSingleHeader title="..." />
+        <ErrorPage
+          message={`Something went wrong when loading project. ${result.error}`}
+        />
+      </>
     );
   }
 
