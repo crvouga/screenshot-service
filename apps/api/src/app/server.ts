@@ -1,9 +1,8 @@
+import { IApiErrorBody } from '@screenshot-service/api-interfaces';
 import cors from 'cors';
 import express, { ErrorRequestHandler, Router } from 'express';
 import morgan from 'morgan';
-import { IApiErrorBody } from '@screenshot-service/api-interfaces';
 import { useApi } from './server-api';
-import path from 'path';
 
 export const createServer = async () => {
   const app = express();
@@ -14,39 +13,9 @@ export const createServer = async () => {
 
   await useApi(app);
 
-  useStaticFiles(app);
-
   useErrorHandler(app);
 
   return app;
-};
-
-/**
- *
- *
- *
- * static files
- *
- *
- *
- */
-
-const clientBuildPath = path.join(
-  __dirname,
-  '..',
-  '..',
-  '..',
-  'dist',
-  'apps',
-  'client'
-);
-
-const useStaticFiles = (router: Router) => {
-  router.use(express.static(clientBuildPath));
-
-  router.get('*', (_req, res) => {
-    res.sendFile(path.join(clientBuildPath, 'index.html'));
-  });
 };
 
 /**
