@@ -1,9 +1,8 @@
-import express, { Application, ErrorRequestHandler } from "express";
-import morgan from "morgan";
-import path from "path";
-import { useAPI } from "./server-api";
 import cors from "cors";
+import express, { ErrorRequestHandler } from "express";
+import morgan from "morgan";
 import { IApiErrorBody } from "../shared/server-interface";
+import { useAPI } from "./server-api";
 
 export const createServer = async () => {
   const app = express();
@@ -14,17 +13,13 @@ export const createServer = async () => {
 
   await useAPI(app);
 
-  useServeClientApp(app);
-
   const errorHandler: ErrorRequestHandler = (err, _req, res, next) => {
     if (err) {
-      const errorString = String(
-        err?.toString?.() ?? "And I don't know why >:{"
-      );
+      const errorString = String(err?.toString?.() ?? "I don't know why >:{");
 
       const apiErrorBody: IApiErrorBody = [
         {
-          message: `Something broke! ${errorString}`,
+          message: `Something wen wrong. ${errorString}`,
         },
       ];
 
@@ -38,26 +33,4 @@ export const createServer = async () => {
   app.use(errorHandler);
 
   return app;
-};
-
-const CLIENT_BUILD_FOLDER_NAME = "dist";
-
-const useServeClientApp = (app: Application) => {
-  const JUMP_OUT_OF_SERVER_DIR = "..";
-  const JUMP_OUT_OF_SRC_DIR = "..";
-  const JUMP_OUT_OF_SERVER_BUILD_DIR = "..";
-
-  const CLIENT_BUILD_PATH = path.join(
-    __dirname,
-    JUMP_OUT_OF_SERVER_DIR,
-    JUMP_OUT_OF_SRC_DIR,
-    JUMP_OUT_OF_SERVER_BUILD_DIR,
-    CLIENT_BUILD_FOLDER_NAME
-  );
-
-  app.use(express.static(CLIENT_BUILD_PATH));
-
-  app.get("*", (_req, res) => {
-    res.sendFile(path.join(CLIENT_BUILD_PATH, "index.html"));
-  });
 };
