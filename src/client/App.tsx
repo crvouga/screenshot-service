@@ -1,11 +1,9 @@
 import { CameraAlt, Logout } from "@mui/icons-material";
 import {
   Box,
-  CircularProgress,
   Divider,
   Drawer,
   List,
-  ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
@@ -15,19 +13,19 @@ import {
 } from "@mui/material";
 import { Session } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
-import { GetScreenshotPage } from "./pages/GetScreenshot";
-import { LoginPage } from "./pages/Login";
-import { supabaseClient } from "./supabase";
 import {
   Link,
-  Outlet,
   Navigate,
-  Routes,
+  Outlet,
   Route,
+  Routes,
   useLocation,
 } from "react-router-dom";
-import { LogoutPage } from "./pages/Logout";
+import { GetScreenshotPage } from "./pages/GetScreenshot";
 import { LoadingPage } from "./pages/Loading";
+import { LoginPage } from "./pages/Login";
+import { LogoutPage } from "./pages/Logout";
+import { supabaseClient } from "./supabase";
 
 const pathnames = {
   "/": "/",
@@ -35,6 +33,27 @@ const pathnames = {
 };
 
 export const App = () => {
+  const theme = useTheme();
+
+  return (
+    <Box
+      sx={{
+        maxWidth: "lg",
+        position: "fixed",
+        width: "100%",
+        height: "100%",
+        left: "50%",
+        transform: "translateX(-50%)",
+        border: `1px solid ${theme.palette.divider}`,
+        display: "flex",
+      }}
+    >
+      <LoadingAuth />
+    </Box>
+  );
+};
+
+const LoadingAuth = () => {
   const authState = useAuthState();
 
   const theme = useTheme();
