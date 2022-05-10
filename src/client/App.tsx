@@ -27,6 +27,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { LogoutPage } from "./pages/Logout";
+import { LoadingPage } from "./pages/Loading";
 
 const pathnames = {
   "/": "/",
@@ -156,22 +157,6 @@ const SideNav = () => {
       >
         {drawer}
       </Box>
-    </Box>
-  );
-};
-
-const LoadingPage = () => {
-  return (
-    <Box
-      sx={{
-        position: "fixed",
-        width: "100%",
-        height: "100%",
-        display: "grid",
-        placeItems: "center",
-      }}
-    >
-      <Typography variant="h1">📸</Typography>
     </Box>
   );
 };
