@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { useQuery } from "react-query";
 import { Link } from "react-router-dom";
-import { useAuthUser } from "../auth";
+import { useAuthUser } from "../authentication";
 import { Header } from "../Header";
 import * as Projects from "../projects";
 import { routes } from "../routes";

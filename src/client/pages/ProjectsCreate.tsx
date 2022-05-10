@@ -11,7 +11,7 @@ import { useSnackbar } from "notistack";
 import { useState } from "react";
 import { useMutation } from "react-query";
 import { useNavigate } from "react-router-dom";
-import { useAuthUser } from "../auth";
+import { useAuthUser } from "../authentication";
 import { Header } from "../Header";
 import * as Projects from "../projects";
 import { routes, Link } from "../routes";

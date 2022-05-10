@@ -1,6 +1,6 @@
 import { Box, Container } from "@mui/material";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { AuthUserContext, useAuthState } from "./auth";
+import { AuthUserContext, useAuthState } from "./authentication";
 import { HomePage } from "./pages/Home";
 import { BrandedLoadingPage } from "./pages/Loading";
 import { LoginPage } from "./pages/Login";
