@@ -64,10 +64,12 @@ export const useAPI = async (app: Application) => {
       return;
     }
 
-    const image = result.image;
+    const image = result.screenshot;
+
+    const statusCode = result.source === "FromPuppeteer" ? 201 : 200;
 
     res
-      .writeHead(200, {
+      .writeHead(statusCode, {
         "Content-Type": image.type,
         "Content-Length": image.data.length,
       })

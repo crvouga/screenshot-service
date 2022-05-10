@@ -1,10 +1,30 @@
 import { IImageType } from "../../shared/screenshot-data";
 import { supabaseClient } from "../supabase";
 import { definitions } from "../supabase-types";
-import {
-  IGetScreenshotResult,
-  IPutScreenshotResult,
-} from "./screenshot-data-access-interface";
+import { IScreenshot } from "./types";
+/**
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+
+type IGetResult =
+  | { type: "success"; screenshot: IScreenshot }
+  | { type: "error"; errors: [{ message: string }] };
+
+type IPutResult =
+  | { type: "success" }
+  | { type: "error"; errors: [{ message: string }] };
+
+/**
+ *
+ *
+ *
+ *
+ */
 
 const BUCKET_NAME = "screenshots";
 
@@ -25,51 +45,40 @@ export const put = async (
     filename: string;
   },
   screenshot: Buffer | string
-): Promise<IPutScreenshotResult> => {
-  try {
-    const uploadResponse = await supabaseClient.storage
-      .from(BUCKET_NAME)
-      .upload(filename, screenshot, { upsert: true });
+): Promise<IPutResult> => {
+  const uploadResponse = await supabaseClient.storage
+    .from(BUCKET_NAME)
+    .upload(filename, screenshot, { upsert: true });
 
-    if (uploadResponse.error) {
-      return {
-        type: "error",
-        errors: [
-          {
-            message: uploadResponse.error.message,
-          },
-        ],
-      };
-    }
-
-    const row = await getElseInsertRow({ filename });
-
-    await updateRow({
-      filename: row.filename,
-      updatedAtMs: Date.now(),
-    });
-
-    return {
-      type: "success",
-      image: {
-        updatedAtMs: row.updatedAtMs,
-      },
-    };
-  } catch (error) {
-    const message = String(
-      (error as any)?.toString?.() ??
-        "supabase threw an error while uploading file"
-    );
-
+  if (uploadResponse.error) {
     return {
       type: "error",
       errors: [
         {
-          message,
+          message: uploadResponse.error.message,
         },
       ],
     };
   }
+
+  const getResult = await getElseInsertRow({ filename });
+
+  if (getResult.type === "error") {
+    return { type: "error", errors: [{ message: getResult.error }] };
+  }
+
+  const updateResult = await updateRow({
+    filename: getResult.filename,
+    updatedAtMs: Date.now(),
+  });
+
+  if (updateResult.type === "error") {
+    return { type: "error", errors: [{ message: updateResult.error }] };
+  }
+
+  return {
+    type: "success",
+  };
 };
 
 /**
@@ -88,66 +97,54 @@ export const get = async ({
 }: {
   filename: string;
   imageType: IImageType;
-}): Promise<IGetScreenshotResult> => {
-  try {
-    const downloadResponse = await supabaseClient.storage
-      .from(BUCKET_NAME)
-      .download(filename);
+}): Promise<IGetResult> => {
+  const downloadResponse = await supabaseClient.storage
+    .from(BUCKET_NAME)
+    .download(filename);
 
-    if (downloadResponse.error) {
-      return {
-        type: "error",
-        errors: [
-          {
-            message: `Supbase couldn't download screenshot. ${downloadResponse.error.message}`,
-          },
-        ],
-      };
-    }
-
-    if (!downloadResponse.data) {
-      return {
-        type: "error",
-        errors: [
-          {
-            message:
-              "supabase did not return any data when downloading screenshot",
-          },
-        ],
-      };
-    }
-
-    const blob = downloadResponse.data;
-
-    const arrayBuffer = await blob.arrayBuffer();
-
-    const buffer = Buffer.from(arrayBuffer);
-
-    const row = await getElseInsertRow({ filename });
-
-    return {
-      type: "success",
-      image: {
-        type: imageType,
-        data: buffer,
-        updatedAtMs: row.updatedAtMs,
-      },
-    };
-  } catch (error) {
-    const message = String(
-      (error as any)?.toString?.() ??
-        "failed to download screenshot file from firebase"
-    );
-
+  if (downloadResponse.error) {
     return {
       type: "error",
       errors: [
         {
-          message,
+          message: `Supbase couldn't download screenshot. ${downloadResponse.error.message}`,
         },
       ],
     };
   }
+
+  if (!downloadResponse.data) {
+    return {
+      type: "error",
+      errors: [
+        {
+          message:
+            "supabase did not return any data when downloading screenshot",
+        },
+      ],
+    };
+  }
+
+  const blob = downloadResponse.data;
+
+  const arrayBuffer = await blob.arrayBuffer();
+
+  const buffer = Buffer.from(arrayBuffer);
+
+  const getResult = await getElseInsertRow({ filename });
+
+  if (getResult.type === "error") {
+    return { type: "error", errors: [{ message: getResult.error }] };
+  }
+
+  return {
+    type: "success",
+    screenshot: {
+      type: imageType,
+      data: buffer,
+      updatedAtMs: getResult.updatedAtMs,
+    },
+  };
 };
 
 /**
@@ -188,7 +185,11 @@ const getRow = async ({
   return null;
 };
 
-const insertRow = async ({ filename }: { filename: string }): Promise<void> => {
+const insertRow = async ({
+  filename,
+}: {
+  filename: string;
+}): Promise<{ type: "success" } | { type: "error"; error: string }> => {
   const result = await supabaseClient
     .from<definitions["screenshots"]>("screenshots")
     .insert({
@@ -196,8 +197,9 @@ const insertRow = async ({ filename }: { filename: string }): Promise<void> => {
     });
 
   if (result.error) {
-    console.error("insert row error", result.error);
+    return { type: "error", error: String(result.error) };
   }
+  return { type: "success" };
 };
 
 const updateRow = async ({
@@ -206,11 +208,7 @@ const updateRow = async ({
 }: {
   filename: string;
   updatedAtMs: number;
-}): Promise<void> => {
-  console.log("UPDATE ROW ", {
-    updated_at: new Date(updatedAtMs).toISOString(),
-    updatedAtMs,
-  });
+}): Promise<{ type: "success" } | { type: "error"; error: string }> => {
   const result = await supabaseClient
     .from<definitions["screenshots"]>("screenshots")
     .update({
@@ -219,24 +217,29 @@ const updateRow = async ({
     .eq("filename", filename);
 
   if (result.error) {
-    console.error("update row error", result.error);
+    return { type: "error", error: String(result.error) };
   }
+  return { type: "success" };
 };
 
 const getElseInsertRow = async ({
   filename,
 }: {
   filename: string;
-}): Promise<{
-  id: string;
-  filename: string;
-  createdAtMs: number;
-  updatedAtMs: number;
-}> => {
+}): Promise<
+  | {
+      type: "success";
+      id: string;
+      filename: string;
+      createdAtMs: number;
+      updatedAtMs: number;
+    }
+  | { type: "error"; error: string }
+> => {
   const got = await getRow({ filename });
 
   if (got) {
-    return got;
+    return { type: "success", ...got };
   }
 
   await insertRow({ filename });
@@ -244,10 +247,11 @@ const getElseInsertRow = async ({
   const gotAfterCreated = await getRow({ filename });
 
   if (gotAfterCreated) {
-    return gotAfterCreated;
+    return { type: "success", ...gotAfterCreated };
   }
 
-  throw new Error(
-    `Supabase is not working. Gettting a screenshot record after just creating one does not return any data.`
-  );
+  return {
+    type: "error",
+    error: `Supabase is not working. Gettting a screenshot record after just creating one does not return any data.`,
+  };
 };

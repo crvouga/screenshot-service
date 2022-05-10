@@ -4,7 +4,11 @@ import {
   ITargetUrl,
   ITimeoutMs,
 } from "../../shared/screenshot-data";
-import { IGetScreenshotResult } from "./screenshot-data-access-interface";
+import { IScreenshot } from "./types";
+
+type GetResult =
+  | { type: "success"; screenshot: IScreenshot }
+  | { type: "error"; errors: [{ message: string }] };
 
 export const get = async (
   browser: puppeteer.Browser,
@@ -17,7 +21,7 @@ export const get = async (
     timeoutMs: ITimeoutMs;
     imageType: IImageType;
   }
-): Promise<IGetScreenshotResult> => {
+): Promise<GetResult> => {
   const page = await browser.newPage();
 
   try {
@@ -44,7 +48,7 @@ export const get = async (
 
     return {
       type: "success",
-      image: {
+      screenshot: {
         data: screenshot,
         type: imageType,
         updatedAtMs: Date.now(),
