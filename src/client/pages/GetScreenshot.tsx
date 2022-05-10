@@ -1,24 +1,27 @@
 import BrokenImageIcon from "@mui/icons-material/BrokenImage";
+import ClearIcon from "@mui/icons-material/Clear";
+import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import DownloadIcon from "@mui/icons-material/Download";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import { LoadingButton } from "@mui/lab";
 import {
   Alert,
   AlertTitle,
-  AppBar,
   Box,
   Button,
   Container,
   Divider,
+  InputAdornment,
   Paper,
   PaperProps,
   Skeleton,
+  TextField,
+  TextFieldProps,
   ToggleButton,
   ToggleButtonGroup,
-  Toolbar,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation } from "react-query";
 import { castTargetUrl } from "../../shared/screenshot-data";
 import {
@@ -26,7 +29,6 @@ import {
   IGetScreenshotQueryParams,
   toGetScreenshotEndpoint,
 } from "../../shared/server-interface";
-import { TextFieldInput } from "../components/TextField";
 
 export const GetScreenshotPage = () => {
   const [targetUrl, setTargetUrl] = useState("");
@@ -50,14 +52,6 @@ export const GetScreenshotPage = () => {
 
   return (
     <>
-      <AppBar position="sticky">
-        <Toolbar>
-          <Typography variant="h6" align="center">
-            Screenshot Service
-          </Typography>
-        </Toolbar>
-      </AppBar>
-
       <Container maxWidth="sm" sx={{ marginTop: 2, overflowX: "hidden" }}>
         <Typography gutterBottom color="text.secondary">
           targetUrl
@@ -312,5 +306,82 @@ export const fetchScreenshot = async (
 const useFetchScreenshotMutation = () => {
   return useMutation<IData, IApiErrorBody, IVariables, IContext>(
     fetchScreenshot
+  );
+};
+
+//
+//
+//
+// TextFieldInput
+//
+//
+//
+
+const TextFieldInput = ({
+  value,
+  onChange,
+  ...props
+}: {
+  value: string;
+  onChange: (url: string) => void;
+} & Omit<TextFieldProps, "onChange">) => {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const handlePasteClipBoard = async () => {
+    if (inputRef.current) {
+      const url = await navigator.clipboard.readText();
+
+      inputRef.current.value = url;
+
+      onChange(url);
+    }
+  };
+
+  const handleClear = () => {
+    if (inputRef.current) {
+      inputRef.current.value = "";
+      onChange("");
+    }
+  };
+
+  return (
+    <TextField
+      fullWidth
+      inputRef={inputRef}
+      value={value}
+      onChange={(event) => {
+        const value = event.target.value;
+        onChange(value);
+      }}
+      InputProps={{
+        endAdornment: (
+          <>
+            <InputAdornment
+              position="end"
+              sx={{
+                cursor: "pointer",
+              }}
+              onClick={() => {
+                handlePasteClipBoard();
+              }}
+            >
+              <ContentPasteIcon />
+            </InputAdornment>
+            <InputAdornment
+              position="end"
+              sx={{
+                cursor: "pointer",
+              }}
+              onClick={() => {
+                handleClear();
+              }}
+            >
+              <ClearIcon />
+            </InputAdornment>
+          </>
+        ),
+      }}
+      {...props}
+    />
   );
 };

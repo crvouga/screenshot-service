@@ -13,8 +13,6 @@ export const LoginPage = () => {
     setState({ type: "Loading" });
 
     await supabaseClient.auth.signIn({ provider: "google" });
-
-    setState({ type: "Idle" });
   };
 
   return (
