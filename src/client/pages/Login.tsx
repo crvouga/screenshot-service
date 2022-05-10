@@ -31,7 +31,7 @@ export const LoginPage = () => {
           📸
         </Typography>
         <Typography variant="h3" align="center" sx={{ marginBottom: 4 }}>
-          Screenshot Service
+          screenshot service
         </Typography>
 
         <LoadingButton
@@ -42,7 +42,7 @@ export const LoginPage = () => {
           onClick={loginWithGoogle}
           loading={state.type === "Loading"}
         >
-          Continue with Google
+          continue with google
         </LoadingButton>
       </Container>
     </Box>

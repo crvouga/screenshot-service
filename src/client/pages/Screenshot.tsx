@@ -19,6 +19,7 @@ import {
   TextFieldProps,
   ToggleButton,
   ToggleButtonGroup,
+  Toolbar,
   Typography,
 } from "@mui/material";
 import { useRef, useState } from "react";
@@ -30,7 +31,7 @@ import {
   toGetScreenshotEndpoint,
 } from "../../shared/server-interface";
 
-export const GetScreenshotPage = () => {
+export const ScreenshotPage = () => {
   const [targetUrl, setTargetUrl] = useState("");
   const [imageType, setImageType] = useState<"png" | "jpeg">("jpeg");
   const [timeoutMs, setTimeoutMs] = useState("1000");
@@ -52,7 +53,11 @@ export const GetScreenshotPage = () => {
 
   return (
     <>
-      <Container maxWidth="sm" sx={{ marginTop: 2, overflowX: "hidden" }}>
+      <Container maxWidth="sm" sx={{ overflowX: "hidden" }}>
+        <Toolbar disableGutters>
+          <Typography variant="h4">try it out</Typography>
+        </Toolbar>
+
         <Typography gutterBottom color="text.secondary">
           targetUrl
         </Typography>

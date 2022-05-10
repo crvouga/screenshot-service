@@ -1,4 +1,4 @@
-import { CameraAlt, Logout } from "@mui/icons-material";
+import { Web, CameraAlt, Logout } from "@mui/icons-material";
 import {
   Box,
   Divider,
@@ -21,15 +21,19 @@ import {
   Routes,
   useLocation,
 } from "react-router-dom";
-import { GetScreenshotPage } from "./pages/GetScreenshot";
+import { AuthUserContext } from "./Auth";
+import { ScreenshotPage } from "./pages/Screenshot";
 import { LoadingPage } from "./pages/Loading";
 import { LoginPage } from "./pages/Login";
 import { LogoutPage } from "./pages/Logout";
+import { ProjectsPage } from "./pages/Projects";
 import { supabaseClient } from "./supabase";
 
 const pathnames = {
   "/": "/",
+  "/screenshot": "/screenshot",
   "/logout": "/logout",
+  "/projects": "/projects",
 };
 
 export const App = () => {
@@ -72,26 +76,29 @@ const LoadingAuth = () => {
 
     case "LoggedIn":
       return (
-        <Box
-          sx={{
-            maxWidth: "lg",
-            position: "fixed",
-            width: "100%",
-            height: "100%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            border: `1px solid ${theme.palette.divider}`,
-            display: "flex",
-          }}
-        >
-          <Routes>
-            <Route path="/" element={<Main />}>
-              <Route path={pathnames["/"]} element={<GetScreenshotPage />} />
-            </Route>
-            <Route path={pathnames["/logout"]} element={<LogoutPage />} />
-            <Route path="*" element={<Navigate to={pathnames["/"]} />} />
-          </Routes>
-        </Box>
+        <AuthUserContext userId={authState.userId}>
+          <Box
+            sx={{
+              maxWidth: "lg",
+              position: "fixed",
+              width: "100%",
+              height: "100%",
+              left: "50%",
+              transform: "translateX(-50%)",
+              border: `1px solid ${theme.palette.divider}`,
+              display: "flex",
+            }}
+          >
+            <Routes>
+              <Route path="/" element={<Main />}>
+                <Route path="/screenshot" element={<ScreenshotPage />} />
+                <Route path="/projects" element={<ProjectsPage />} />
+              </Route>
+              <Route path="/logout" element={<LogoutPage />} />
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </Box>
+        </AuthUserContext>
       );
   }
 };
@@ -123,23 +130,44 @@ const SideNav = () => {
   const drawer = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <Toolbar>
-        <Typography>📸 Screenshot Service</Typography>
+        <Typography variant="h2" sx={{ marginRight: 2 }}>
+          📸
+        </Typography>
+        <Box>
+          <Typography>screenshot</Typography>
+          <Typography>service</Typography>
+        </Box>
       </Toolbar>
       <Divider />
       <List>
-        <ListItemButton selected={location.pathname === pathnames["/"]}>
-          <ListItemIcon>
-            <CameraAlt />
-          </ListItemIcon>
-          <ListItemText primary="Try it out" />
-        </ListItemButton>
+        <Link to={pathnames["/projects"]}>
+          <ListItemButton
+            selected={location.pathname === pathnames["/projects"]}
+          >
+            <ListItemIcon>
+              <Web />
+            </ListItemIcon>
+            <ListItemText primary="projects" />
+          </ListItemButton>
+        </Link>
+
+        <Link to={pathnames["/screenshot"]}>
+          <ListItemButton
+            selected={location.pathname === pathnames["/screenshot"]}
+          >
+            <ListItemIcon>
+              <CameraAlt />
+            </ListItemIcon>
+            <ListItemText primary="try it out" />
+          </ListItemButton>
+        </Link>
 
         <Link to={pathnames["/logout"]}>
           <ListItemButton selected={location.pathname === pathnames["/logout"]}>
             <ListItemIcon>
               <Logout />
             </ListItemIcon>
-            <ListItemText primary="Logout" />
+            <ListItemText primary="logout" />
           </ListItemButton>
         </Link>
       </List>

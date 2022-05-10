@@ -15,10 +15,10 @@ export const LogoutPage = () => {
 
   return (
     <Dialog open onClose={onCancel}>
-      <DialogTitle>Logout of Screenshot Service?</DialogTitle>
+      <DialogTitle>logout of screenshot service?</DialogTitle>
       <DialogActions>
-        <Button onClick={onCancel}>Cancel</Button>
-        <Button onClick={onLogout}>Logout</Button>
+        <Button onClick={onCancel}>cancel</Button>
+        <Button onClick={onLogout}>logout</Button>
       </DialogActions>
     </Dialog>
   );

@@ -12,6 +12,102 @@ export interface paths {
       };
     };
   };
+  "/projects": {
+    get: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.projects.id"];
+          created_at?: parameters["rowFilter.projects.created_at"];
+          name?: parameters["rowFilter.projects.name"];
+          owner_id?: parameters["rowFilter.projects.owner_id"];
+          /** Filtering Columns */
+          select?: parameters["select"];
+          /** Ordering */
+          order?: parameters["order"];
+          /** Limiting and Pagination */
+          offset?: parameters["offset"];
+          /** Limiting and Pagination */
+          limit?: parameters["limit"];
+        };
+        header: {
+          /** Limiting and Pagination */
+          Range?: parameters["range"];
+          /** Limiting and Pagination */
+          "Range-Unit"?: parameters["rangeUnit"];
+          /** Preference */
+          Prefer?: parameters["preferCount"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: {
+          schema: definitions["projects"][];
+        };
+        /** Partial Content */
+        206: unknown;
+      };
+    };
+    post: {
+      parameters: {
+        body: {
+          /** projects */
+          projects?: definitions["projects"];
+        };
+        query: {
+          /** Filtering Columns */
+          select?: parameters["select"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** Created */
+        201: unknown;
+      };
+    };
+    delete: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.projects.id"];
+          created_at?: parameters["rowFilter.projects.created_at"];
+          name?: parameters["rowFilter.projects.name"];
+          owner_id?: parameters["rowFilter.projects.owner_id"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+    patch: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.projects.id"];
+          created_at?: parameters["rowFilter.projects.created_at"];
+          name?: parameters["rowFilter.projects.name"];
+          owner_id?: parameters["rowFilter.projects.owner_id"];
+        };
+        body: {
+          /** projects */
+          projects?: definitions["projects"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+  };
   "/screenshots": {
     get: {
       parameters: {
@@ -111,6 +207,24 @@ export interface paths {
 }
 
 export interface definitions {
+  projects: {
+    /**
+     * Format: uuid
+     * @description Note:
+     * This is a Primary Key.<pk/>
+     * @default extensions.uuid_generate_v4()
+     */
+    id: string;
+    /**
+     * Format: timestamp with time zone
+     * @default now()
+     */
+    created_at?: string;
+    /** Format: text */
+    name: string;
+    /** Format: uuid */
+    owner_id: string;
+  };
   screenshots: {
     /**
      * Format: uuid
@@ -167,6 +281,16 @@ export interface parameters {
   offset: string;
   /** @description Limiting and Pagination */
   limit: string;
+  /** @description projects */
+  "body.projects": definitions["projects"];
+  /** Format: uuid */
+  "rowFilter.projects.id": string;
+  /** Format: timestamp with time zone */
+  "rowFilter.projects.created_at": string;
+  /** Format: text */
+  "rowFilter.projects.name": string;
+  /** Format: uuid */
+  "rowFilter.projects.owner_id": string;
   /** @description screenshots */
   "body.screenshots": definitions["screenshots"];
   /** Format: uuid */
