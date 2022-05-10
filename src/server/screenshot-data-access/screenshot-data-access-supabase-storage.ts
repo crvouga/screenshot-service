@@ -1,6 +1,6 @@
 import { IImageType } from "../../shared/screenshot-data";
 import { supabaseClient } from "../supabase";
-import { definitions } from "../supabase-types";
+import { definitions } from "../../shared/supabase-types";
 import { IScreenshot } from "./types";
 /**
  *
