@@ -19,6 +19,7 @@ import {
 import { useQuery } from "react-query";
 import { Link } from "react-router-dom";
 import { useAuthUser } from "../auth";
+import { Header } from "../Header";
 import * as Projects from "../projects";
 import { routes } from "../routes";
 
@@ -33,24 +34,24 @@ export const ProjectsPage = () => {
   const theme = useTheme();
 
   return (
-    <Container maxWidth="sm">
-      <Toolbar disableGutters sx={{ alignItems: "center" }}>
-        <Typography variant="h4" sx={{ flex: 1 }}>
-          projects
-        </Typography>
+    <>
+      <Header breadcrumbs={[<Typography>projects</Typography>]} />
+
+      <Box sx={{ display: "flex", width: "100%", marginY: 2 }}>
+        <Box sx={{ flex: 1 }} />
         <Link to={routes["/projects/create"].make()}>
-          <Button size="small" startIcon={<Create />} variant="contained">
+          <Button startIcon={<Create />} variant="contained">
             Create New
           </Button>
         </Link>
-      </Toolbar>
+      </Box>
 
       {query.status === "loading" && (
         <>
           <Box
             sx={{
               width: "100%",
-              padding: 4,
+              padding: 8,
               display: "grid",
               placeItems: "center",
             }}
@@ -101,6 +102,6 @@ export const ProjectsPage = () => {
           )}
         </>
       )}
-    </Container>
+    </>
   );
 };

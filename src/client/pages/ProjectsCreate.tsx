@@ -12,6 +12,7 @@ import { useState } from "react";
 import { useMutation } from "react-query";
 import { useNavigate } from "react-router-dom";
 import { useAuthUser } from "../auth";
+import { Header } from "../Header";
 import * as Projects from "../projects";
 import { routes, Link } from "../routes";
 
@@ -47,13 +48,13 @@ export const ProjectsCreatePage = () => {
   };
 
   return (
-    <Container maxWidth="sm">
-      <Toolbar disableGutters sx={{ marginBottom: 2 }}>
-        <Breadcrumbs>
-          <Link to={routes["/projects"].make()}>projects</Link>
-          <Typography color="text.primary">create</Typography>
-        </Breadcrumbs>
-      </Toolbar>
+    <>
+      <Header
+        breadcrumbs={[
+          <Link to={routes["/projects"].make()}>projects</Link>,
+          <Typography color="text.primary">create</Typography>,
+        ]}
+      />
 
       <TextField
         value={projectName}
@@ -72,6 +73,6 @@ export const ProjectsCreatePage = () => {
       >
         Create Project
       </LoadingButton>
-    </Container>
+    </>
   );
 };

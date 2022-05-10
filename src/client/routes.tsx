@@ -27,6 +27,10 @@ export const routes = {
     pattern: "/projects/:id",
     make: (id: string) => `/projects/${id}`,
   },
+  "/projects/:id/try": {
+    pattern: "/projects/:id/try",
+    make: (id: string) => `/projects/${id}/try`,
+  },
 };
 
 export const isMatch = (

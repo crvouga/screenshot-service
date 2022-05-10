@@ -9,7 +9,6 @@ import {
   AlertTitle,
   Box,
   Button,
-  Container,
   Divider,
   InputAdornment,
   Paper,
@@ -31,7 +30,7 @@ import {
   toGetScreenshotEndpoint,
 } from "../../shared/server-interface";
 
-export const ScreenshotPage = () => {
+export const ProjectSingleTryPage = () => {
   const [targetUrl, setTargetUrl] = useState("");
   const [imageType, setImageType] = useState<"png" | "jpeg">("jpeg");
   const [timeoutMs, setTimeoutMs] = useState("1000");
@@ -53,108 +52,102 @@ export const ScreenshotPage = () => {
 
   return (
     <>
-      <Container maxWidth="sm" sx={{ overflowX: "hidden" }}>
-        <Toolbar disableGutters>
-          <Typography variant="h4">try it out</Typography>
-        </Toolbar>
+      <Typography gutterBottom color="text.secondary">
+        targetUrl
+      </Typography>
 
-        <Typography gutterBottom color="text.secondary">
-          targetUrl
-        </Typography>
+      <TextFieldInput
+        type="url"
+        value={targetUrl}
+        onChange={setTargetUrl}
+        helperText={targetUrlHelperText}
+        id="targetUrl"
+        placeholder="https://www.example.com/"
+        sx={{ marginBottom: 2 }}
+      />
 
-        <TextFieldInput
-          type="url"
-          value={targetUrl}
-          onChange={setTargetUrl}
-          helperText={targetUrlHelperText}
-          id="targetUrl"
-          placeholder="https://www.example.com/"
-          sx={{ marginBottom: 2 }}
-        />
+      <Typography gutterBottom color="text.secondary">
+        imageType
+      </Typography>
 
-        <Typography gutterBottom color="text.secondary">
-          imageType
-        </Typography>
+      <ToggleButtonGroup
+        value={imageType}
+        onChange={(_event, value) => {
+          if (value === "png" || value === "jpeg") {
+            setImageType(value);
+          }
+        }}
+        exclusive
+        sx={{
+          marginBottom: 2,
+        }}
+      >
+        <ToggleButton value="png">PNG</ToggleButton>
+        <ToggleButton value="jpeg">JPEG</ToggleButton>
+      </ToggleButtonGroup>
 
-        <ToggleButtonGroup
-          value={imageType}
-          onChange={(_event, value) => {
-            if (value === "png" || value === "jpeg") {
-              setImageType(value);
-            }
-          }}
-          exclusive
-          sx={{
-            marginBottom: 2,
-          }}
-        >
-          <ToggleButton value="png">PNG</ToggleButton>
-          <ToggleButton value="jpeg">JPEG</ToggleButton>
-        </ToggleButtonGroup>
+      <Typography gutterBottom color="text.secondary">
+        timeoutMs
+      </Typography>
 
-        <Typography gutterBottom color="text.secondary">
-          timeoutMs
-        </Typography>
+      <TextFieldInput
+        id="timeoutMs"
+        placeholder="3000"
+        type="number"
+        value={timeoutMs}
+        onChange={setTimeoutMs}
+        sx={{ marginBottom: 2 }}
+      />
 
-        <TextFieldInput
-          id="timeoutMs"
-          placeholder="3000"
-          type="number"
-          value={timeoutMs}
-          onChange={setTimeoutMs}
-          sx={{ marginBottom: 2 }}
-        />
+      <Typography gutterBottom color="text.secondary">
+        maxAgeMs
+      </Typography>
 
-        <Typography gutterBottom color="text.secondary">
-          maxAgeMs
-        </Typography>
+      <TextFieldInput
+        id="maxAgeMs"
+        type="number"
+        placeholder="Infinity"
+        value={maxAgeMs}
+        onChange={setMaxAgeMs}
+        sx={{ marginBottom: 2 }}
+      />
 
-        <TextFieldInput
-          id="maxAgeMs"
-          type="number"
-          placeholder="Infinity"
-          value={maxAgeMs}
-          onChange={setMaxAgeMs}
-          sx={{ marginBottom: 2 }}
-        />
+      {error.length > 0 && (
+        <Box sx={{ marginY: 2 }}>
+          {error.map((error) => (
+            <Alert
+              key={error.message}
+              severity="error"
+              sx={{ marginBottom: 2 }}
+            >
+              <AlertTitle>Server Error</AlertTitle>
+              {error.message}
+            </Alert>
+          ))}
+        </Box>
+      )}
 
-        {error.length > 0 && (
-          <Box sx={{ marginY: 2 }}>
-            {error.map((error) => (
-              <Alert
-                key={error.message}
-                severity="error"
-                sx={{ marginBottom: 2 }}
-              >
-                <AlertTitle>Server Error</AlertTitle>
-                {error.message}
-              </Alert>
-            ))}
-          </Box>
-        )}
-
-        <LoadingButton
-          startIcon={<PhotoCameraIcon />}
-          fullWidth
-          size="large"
-          variant="contained"
-          sx={{
-            marginTop: 2,
-            marginBottom: 4,
-          }}
-          onClick={() => {
-            fetchScreenshotMutation.mutate({
-              targetUrl,
-              timeoutMs,
-              imageType,
-              maxAgeMs,
-            });
-          }}
-          loading={fetchScreenshotMutation.status === "loading"}
-        >
-          Take Screenshot
-        </LoadingButton>
-      </Container>
+      <LoadingButton
+        startIcon={<PhotoCameraIcon />}
+        fullWidth
+        size="large"
+        variant="contained"
+        sx={{
+          marginTop: 2,
+          marginBottom: 4,
+        }}
+        onClick={() => {
+          fetchScreenshotMutation.mutate({
+            targetUrl,
+            timeoutMs,
+            imageType,
+            maxAgeMs,
+          });
+        }}
+        loading={fetchScreenshotMutation.status === "loading"}
+      >
+        Take Screenshot
+      </LoadingButton>
 
       <Divider
         sx={{
@@ -162,36 +155,29 @@ export const ScreenshotPage = () => {
         }}
       />
 
-      <Container
-        maxWidth="sm"
-        sx={{
-          marginBottom: 4,
-        }}
-      >
-        <Screenshot
-          state={fetchScreenshotMutation.status}
-          alt={`screenshot of ${targetUrl}`}
-          src={fetchScreenshotMutation.data?.src}
-        />
+      <Screenshot
+        state={fetchScreenshotMutation.status}
+        alt={`screenshot of ${targetUrl}`}
+        src={fetchScreenshotMutation.data?.src}
+      />
 
-        {fetchScreenshotMutation.status === "success" &&
-          fetchScreenshotMutation.data.src && (
-            <>
-              <Button
-                sx={{ marginTop: 4 }}
-                fullWidth
-                size="large"
-                variant="contained"
-                startIcon={<DownloadIcon />}
-                title={targetUrl}
-                href={fetchScreenshotMutation.data.src}
-                download={fetchScreenshotMutation.data.src}
-              >
-                Download Screenshot
-              </Button>
-            </>
-          )}
-      </Container>
+      {fetchScreenshotMutation.status === "success" &&
+        fetchScreenshotMutation.data.src && (
+          <>
+            <Button
+              sx={{ marginTop: 4 }}
+              fullWidth
+              size="large"
+              variant="contained"
+              startIcon={<DownloadIcon />}
+              title={targetUrl}
+              href={fetchScreenshotMutation.data.src}
+              download={fetchScreenshotMutation.data.src}
+            >
+              Download Screenshot
+            </Button>
+          </>
+        )}
     </>
   );
 };
