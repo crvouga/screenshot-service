@@ -9,18 +9,7 @@ export const App = () => {
 
   switch (authState.type) {
     case "Loading":
-      return (
-        <Box
-          sx={{
-            width: "100%",
-            height: "100%",
-            display: "grid",
-            placeItems: "center",
-          }}
-        >
-          <CircularProgress />
-        </Box>
-      );
+      return <LoadingPage />;
 
     case "LoggedIn":
       return <GetScreenshotPage />;
@@ -29,6 +18,31 @@ export const App = () => {
       return <LoginPage />;
   }
 };
+
+const LoadingPage = () => {
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        height: "100%",
+        display: "grid",
+        placeItems: "center",
+      }}
+    >
+      <CircularProgress />
+    </Box>
+  );
+};
+
+//
+//
+//
+//
+// Auth
+//
+//
+//
+//
 
 type IAuthState =
   | { type: "Loading" }
