@@ -19,9 +19,14 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { useMutation } from "react-query";
 import { castTargetUrl } from "../../shared/screenshot-data";
-import { useFetchScreenshotMutation } from "../screenshot-data-access";
-import { TextFieldInput } from "../TextField";
+import {
+  IApiErrorBody,
+  IGetScreenshotQueryParams,
+  toGetScreenshotEndpoint,
+} from "../../shared/server-interface";
+import { TextFieldInput } from "../components/TextField";
 
 export const GetScreenshotPage = () => {
   const [targetUrl, setTargetUrl] = useState("");
@@ -267,5 +272,45 @@ const Screenshot = ({
         </Box>
       )}
     </Paper>
+  );
+};
+
+//
+//
+//
+//
+//  Data Access
+//
+//
+//
+//
+
+type IData = { src: string };
+type IVariables = IGetScreenshotQueryParams;
+type IContext = unknown;
+
+export const fetchScreenshot = async (
+  params: IGetScreenshotQueryParams
+): Promise<IData> => {
+  const response = await fetch(toGetScreenshotEndpoint(params));
+
+  if (response.ok) {
+    const blob = await response.blob();
+
+    const src = URL.createObjectURL(blob);
+
+    return {
+      src,
+    };
+  }
+
+  const errors: IApiErrorBody = await response.json();
+
+  throw errors;
+};
+
+const useFetchScreenshotMutation = () => {
+  return useMutation<IData, IApiErrorBody, IVariables, IContext>(
+    fetchScreenshot
   );
 };
