@@ -30,8 +30,8 @@ ReactDOM.render(
           <CssBaseline />
           <SnackbarProvider
             anchorOrigin={{
-              vertical: "top",
-              horizontal: "right",
+              vertical: "bottom",
+              horizontal: "center",
             }}
           >
             <App />
