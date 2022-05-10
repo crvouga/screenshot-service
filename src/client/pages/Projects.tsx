@@ -1,124 +1,106 @@
-import { Create } from "@mui/icons-material";
+import { ChevronRight, Create } from "@mui/icons-material";
 import {
-  List,
   Box,
+  Button,
+  Card,
+  CardActionArea,
+  CardHeader,
   CircularProgress,
   Container,
-  ListItem,
-  ListItemText,
-  Typography,
+  Grid,
+  List,
   ListItemButton,
-  ListItemIcon,
-  useTheme,
+  ListItemSecondaryAction,
+  ListItemText,
   Toolbar,
-  Button,
+  Typography,
+  useTheme,
 } from "@mui/material";
 import { useQuery } from "react-query";
-import { definitions } from "../../shared/supabase-types";
-import { useAuthUser } from "../Auth";
-import { supabaseClient } from "../supabase";
+import { Link } from "react-router-dom";
+import { useAuthUser } from "../auth";
+import * as Projects from "../projects";
+import { routes } from "../routes";
 
 export const ProjectsPage = () => {
   const authUser = useAuthUser();
 
-  const query = useQuery(["projects", authUser.userId], () =>
-    fetchProjects({ ownerId: authUser.userId })
+  const query = useQuery(
+    Projects.queryKeys.getAll({ ownerId: authUser.userId }),
+    () => Projects.getAll({ ownerId: authUser.userId })
   );
 
   const theme = useTheme();
 
   return (
     <Container maxWidth="sm">
-      <Toolbar disableGutters>
-        <Typography variant="h4">projects</Typography>
+      <Toolbar disableGutters sx={{ alignItems: "center" }}>
+        <Typography variant="h4" sx={{ flex: 1 }}>
+          projects
+        </Typography>
+        <Link to={routes["/projects/create"].make()}>
+          <Button size="small" startIcon={<Create />} variant="contained">
+            Create New
+          </Button>
+        </Link>
       </Toolbar>
 
-      <List>
-        <Button startIcon={<Create />} fullWidth variant="outlined">
-          Create New
-        </Button>
+      {query.status === "loading" && (
+        <>
+          <Box
+            sx={{
+              width: "100%",
+              padding: 4,
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        </>
+      )}
 
-        {query.status === "loading" && (
-          <>
+      {query.status === "success" && query.data.type === "success" && (
+        <>
+          <Grid container>
+            {query.data.data.map((project) => (
+              <Grid
+                xs={6}
+                item
+                key={project.projectId}
+                sx={{ height: "100%", p: 1 }}
+              >
+                <Link to={routes["/projects/:id"].make(project.projectId)}>
+                  <CardActionArea>
+                    <Card sx={{ height: "100%" }}>
+                      <CardHeader
+                        title={project.name}
+                        action={<ChevronRight />}
+                      />
+                    </Card>
+                  </CardActionArea>
+                </Link>
+              </Grid>
+            ))}
+          </Grid>
+
+          {query.data.data.length === 0 && (
             <Box
               sx={{
                 width: "100%",
-                padding: 4,
-                display: "grid",
-                placeItems: "center",
+                p: 4,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              <CircularProgress />
+              <Typography color="text.secondary">
+                Didn't find any projects.
+              </Typography>
             </Box>
-          </>
-        )}
-
-        {query.status === "success" && query.data.type === "success" && (
-          <>
-            {query.data.data.map((project) => (
-              <ListItem key={project.projectId}>
-                <ListItemText primary={project.name} />
-              </ListItem>
-            ))}
-
-            {query.data.data.length === 0 && (
-              <Box
-                sx={{
-                  width: "100%",
-                  p: 4,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Typography color="text.secondary">
-                  Didn't find any projects.
-                </Typography>
-              </Box>
-            )}
-          </>
-        )}
-      </List>
+          )}
+        </>
+      )}
     </Container>
   );
-};
-
-//
-//
-//
-// Data Access
-//
-//
-//
-
-type IProject = {
-  projectId: string;
-  ownerId: string;
-  name: string;
-};
-
-const fetchProjects = async ({
-  ownerId,
-}: {
-  ownerId: string;
-}): Promise<
-  { type: "error"; error: string } | { type: "success"; data: IProject[] }
-> => {
-  const response = await supabaseClient
-    .from<definitions["projects"]>("projects")
-    .select("*")
-    .match({ owner_id: ownerId });
-
-  if (response.error) {
-    return { type: "error", error: response.error.message };
-  }
-
-  return {
-    type: "success",
-    data: response.data.map((row) => ({
-      projectId: row.id,
-      ownerId: row.owner_id,
-      name: row.name,
-    })),
-  };
 };

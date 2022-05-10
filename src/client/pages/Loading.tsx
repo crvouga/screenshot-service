@@ -1,4 +1,19 @@
-import { Box, Typography } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
+
+export const BrandedLoadingPage = () => {
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        height: "100%",
+        display: "grid",
+        placeItems: "center",
+      }}
+    >
+      <Typography variant="h1">📸</Typography>
+    </Box>
+  );
+};
 
 export const LoadingPage = () => {
   return (
@@ -10,7 +25,7 @@ export const LoadingPage = () => {
         placeItems: "center",
       }}
     >
-      <Typography variant="h1">📸</Typography>
+      <CircularProgress />
     </Box>
   );
 };

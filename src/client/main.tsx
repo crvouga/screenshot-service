@@ -9,6 +9,7 @@ import ReactDOM from "react-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { BrowserRouter } from "react-router-dom";
 import { App } from "./App";
+import { SnackbarProvider } from "notistack";
 
 const theme = responsiveFontSizes(
   createTheme({
@@ -27,7 +28,14 @@ ReactDOM.render(
       <QueryClientProvider client={new QueryClient()}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <App />
+          <SnackbarProvider
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+          >
+            <App />
+          </SnackbarProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </BrowserRouter>

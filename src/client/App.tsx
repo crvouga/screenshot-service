@@ -1,4 +1,4 @@
-import { Web, CameraAlt, Logout } from "@mui/icons-material";
+import { CameraAlt, Logout, Web } from "@mui/icons-material";
 import {
   Box,
   Divider,
@@ -11,8 +11,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { Session } from "@supabase/supabase-js";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Link,
   Navigate,
@@ -21,20 +20,16 @@ import {
   Routes,
   useLocation,
 } from "react-router-dom";
-import { AuthUserContext } from "./Auth";
-import { ScreenshotPage } from "./pages/Screenshot";
-import { LoadingPage } from "./pages/Loading";
+import { AuthUserContext, useAuthState } from "./auth";
+import { BrandedLoadingPage, LoadingPage } from "./pages/Loading";
 import { LoginPage } from "./pages/Login";
 import { LogoutPage } from "./pages/Logout";
+import { NotFoundPage } from "./pages/NotFound";
 import { ProjectsPage } from "./pages/Projects";
-import { supabaseClient } from "./supabase";
-
-const pathnames = {
-  "/": "/",
-  "/screenshot": "/screenshot",
-  "/logout": "/logout",
-  "/projects": "/projects",
-};
+import { ProjectsCreatePage } from "./pages/ProjectsCreate";
+import { ProjectsSinglePage } from "./pages/ProjectsSingle";
+import { ScreenshotPage } from "./pages/Screenshot";
+import { isMatch, routes } from "./routes";
 
 export const App = () => {
   const theme = useTheme();
@@ -64,7 +59,7 @@ const LoadingAuth = () => {
 
   switch (authState.type) {
     case "Loading":
-      return <LoadingPage />;
+      return <BrandedLoadingPage />;
 
     case "LoggedOut":
       return (
@@ -93,9 +88,20 @@ const LoadingAuth = () => {
               <Route path="/" element={<Main />}>
                 <Route path="/screenshot" element={<ScreenshotPage />} />
                 <Route path="/projects" element={<ProjectsPage />} />
+                <Route
+                  path="/projects/create"
+                  element={<ProjectsCreatePage />}
+                />
+                <Route
+                  path={routes["/projects/:id"].pattern}
+                  element={<ProjectsSinglePage />}
+                />
+                <Route
+                  path="*"
+                  element={<NotFoundPage message="page not found" />}
+                />
               </Route>
               <Route path="/logout" element={<LogoutPage />} />
-              <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </Box>
         </AuthUserContext>
@@ -140,9 +146,9 @@ const SideNav = () => {
       </Toolbar>
       <Divider />
       <List>
-        <Link to={pathnames["/projects"]}>
+        <Link to={routes["/projects"].make()}>
           <ListItemButton
-            selected={location.pathname === pathnames["/projects"]}
+            selected={isMatch(location.pathname, routes["/projects"])}
           >
             <ListItemIcon>
               <Web />
@@ -151,9 +157,9 @@ const SideNav = () => {
           </ListItemButton>
         </Link>
 
-        <Link to={pathnames["/screenshot"]}>
+        <Link to={routes["/screenshot"].make()}>
           <ListItemButton
-            selected={location.pathname === pathnames["/screenshot"]}
+            selected={isMatch(location.pathname, routes["/screenshot"])}
           >
             <ListItemIcon>
               <CameraAlt />
@@ -162,8 +168,10 @@ const SideNav = () => {
           </ListItemButton>
         </Link>
 
-        <Link to={pathnames["/logout"]}>
-          <ListItemButton selected={location.pathname === pathnames["/logout"]}>
+        <Link to={routes["/logout"].make()}>
+          <ListItemButton
+            selected={isMatch(location.pathname, routes["/logout"])}
+          >
             <ListItemIcon>
               <Logout />
             </ListItemIcon>
@@ -206,46 +214,4 @@ const SideNav = () => {
       </Box>
     </Box>
   );
-};
-
-//
-//
-//
-//
-// Auth
-//
-//
-//
-//
-
-type IAuthState =
-  | { type: "Loading" }
-  | { type: "LoggedIn"; userId: string }
-  | { type: "LoggedOut" };
-
-const toAuthState = (session: Session | null): IAuthState => {
-  const userId = session?.user?.id;
-
-  if (userId) {
-    return { type: "LoggedIn", userId: userId };
-  }
-
-  return { type: "LoggedOut" };
-};
-
-export const useAuthState = () => {
-  const [authState, setAuthState] = useState<IAuthState>({ type: "Loading" });
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setAuthState(toAuthState(supabaseClient.auth.session()));
-    }, 1000);
-
-    supabaseClient.auth.onAuthStateChange((event, session) => {
-      clearTimeout(timeout);
-      setAuthState(toAuthState(session));
-    });
-  }, []);
-
-  return authState;
 };
