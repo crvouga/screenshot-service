@@ -131,7 +131,7 @@ const SideNav = () => {
           <ListItemIcon>
             <CameraAlt />
           </ListItemIcon>
-          <ListItemText primary="Try out" />
+          <ListItemText primary="Try it out" />
         </ListItemButton>
 
         <Link to={pathnames["/logout"]}>

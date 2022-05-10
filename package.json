@@ -1,4 +1,7 @@
 {
+  "engines": {
+    "node": "v14.17.2"
+  },
   "name": "client",
   "version": "0.1.0",
   "private": true,
