@@ -50,6 +50,7 @@
     "heroku:local": "yarn && yarn heroku-postbuild && yarn heroku:env && heroku local",
     "heroku:env": "npx heroku config -s -a crvouga-screenshot-service > .env",
     "heroku:logs": "heroku logs --tail --app crvouga-screenshot-service",
+    "heroku:deploy": "git push heroku main",
     "heroku:start": "yarn server:start",
     "supabase:types": "npx openapi-typescript https://rcqvjrnexkyfcimdrnri.supabase.co/rest/v1/?apikey=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjcXZqcm5leGt5ZmNpbWRybnJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDYxNzg4NjQsImV4cCI6MTk2MTc1NDg2NH0.HQKhz7fmpwSGjuGIuGaVygvUQ8NuX2CAvHhDQJIIQxo --output src/shared/supabase-types.ts",
     "kill": "npx kill-port 8000 && npx kill-port 3000",
