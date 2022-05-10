@@ -6,15 +6,9 @@ import {
   CardActionArea,
   CardHeader,
   CircularProgress,
-  Container,
   Grid,
-  List,
-  ListItemButton,
-  ListItemSecondaryAction,
-  ListItemText,
   Toolbar,
   Typography,
-  useTheme,
 } from "@mui/material";
 import { useQuery } from "react-query";
 import { Link } from "react-router-dom";
@@ -31,20 +25,17 @@ export const ProjectsPage = () => {
     () => Projects.getAll({ ownerId: authUser.userId })
   );
 
-  const theme = useTheme();
-
   return (
     <>
       <Header breadcrumbs={[<Typography>projects</Typography>]} />
 
-      <Box sx={{ display: "flex", width: "100%", marginY: 2 }}>
-        <Box sx={{ flex: 1 }} />
+      <Toolbar>
         <Link to={routes["/projects/create"].make()}>
           <Button startIcon={<Create />} variant="contained">
             Create New
           </Button>
         </Link>
-      </Box>
+      </Toolbar>
 
       {query.status === "loading" && (
         <>

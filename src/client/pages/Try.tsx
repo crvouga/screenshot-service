@@ -5,6 +5,8 @@ import DownloadIcon from "@mui/icons-material/Download";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import { LoadingButton } from "@mui/lab";
 import {
+  Tabs,
+  Tab,
   Alert,
   AlertTitle,
   Box,
@@ -23,14 +25,17 @@ import {
 } from "@mui/material";
 import { useRef, useState } from "react";
 import { useMutation } from "react-query";
+import { useNavigate } from "react-router-dom";
 import { castTargetUrl } from "../../shared/screenshot-data";
 import {
   IApiErrorBody,
   IGetScreenshotQueryParams,
   toGetScreenshotEndpoint,
 } from "../../shared/server-interface";
+import { Header } from "../Header";
+import { routes } from "../routes";
 
-export const ProjectSingleTryPage = () => {
+export const TryPage = () => {
   const [targetUrl, setTargetUrl] = useState("");
   const [imageType, setImageType] = useState<"png" | "jpeg">("jpeg");
   const [timeoutMs, setTimeoutMs] = useState("1000");
@@ -52,6 +57,10 @@ export const ProjectSingleTryPage = () => {
 
   return (
     <>
+      <Header breadcrumbs={[<Typography>try it</Typography>]} />
+
+      <Box sx={{ p: 2 }} />
+
       <Typography gutterBottom color="text.secondary">
         targetUrl
       </Typography>

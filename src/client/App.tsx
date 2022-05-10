@@ -1,6 +1,7 @@
 import { Box, Container } from "@mui/material";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthUserContext, useAuthState } from "./auth";
+import { HomePage } from "./pages/Home";
 import { BrandedLoadingPage } from "./pages/Loading";
 import { LoginPage } from "./pages/Login";
 import { LogoutPage } from "./pages/Logout";
@@ -8,7 +9,7 @@ import { NotFoundPage } from "./pages/NotFound";
 import { ProjectsPage } from "./pages/Projects";
 import { ProjectsCreatePage } from "./pages/ProjectsCreate";
 import { ProjectSingleOverviewPage } from "./pages/ProjectSingleOverview";
-import { ProjectSingleTryPage } from "./pages/ProjectSingleTry";
+import { TryPage } from "./pages/Try";
 import { ProjectsSinglePage } from "./pages/ProjectsSingle";
 import { routes } from "./routes";
 
@@ -40,8 +41,15 @@ const LoadingAuth = () => {
       return (
         <AuthUserContext userId={authState.userId}>
           <Routes>
-            <Route path="/projects" element={<ProjectsPage />} />
-            <Route path="/projects/create" element={<ProjectsCreatePage />} />
+            <Route path={routes["/"].pattern} element={<HomePage />} />
+
+            <Route path={routes["/try"].pattern} element={<TryPage />} />
+
+            <Route
+              path={routes["/projects"].pattern}
+              element={<ProjectsPage />}
+            />
+
             <Route
               path={routes["/projects/:id"].pattern}
               element={<ProjectsSinglePage />}
@@ -50,15 +58,18 @@ const LoadingAuth = () => {
                 path={routes["/projects/:id"].pattern}
                 element={<ProjectSingleOverviewPage />}
               />
-              <Route
-                path={routes["/projects/:id/try"].pattern}
-                element={<ProjectSingleTryPage />}
-              />
             </Route>
+
+            <Route
+              path={routes["/projects/create"].pattern}
+              element={<ProjectsCreatePage />}
+            />
+
             <Route path="/logout" element={<LogoutPage />} />
+
             <Route
               path="*"
-              element={<NotFoundPage message="page not found" />}
+              element={<Navigate to={routes["/projects"].pattern} />}
             />
           </Routes>
         </AuthUserContext>

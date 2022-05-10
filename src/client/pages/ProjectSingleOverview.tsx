@@ -21,41 +21,150 @@ import { useNavigate } from "react-router-dom";
 import * as Projects from "../projects";
 import { routes } from "../routes";
 import { useProfileSingleOutletContext } from "./ProjectsSingle";
+import * as uuid from "uuid";
 
 export const ProjectSingleOverviewPage = () => {
   const { project } = useProfileSingleOutletContext();
 
   return (
     <>
-      <List>
-        <ListItemField label="project id" value={project.projectId} />
-      </List>
-
-      <ProjectNameSection project={project} />
+      <ProjectApiKeysSection project={project} />
 
       <ProjectUrlWhitelistSection project={project} />
+
+      <ProjectNameSection project={project} />
 
       <DeleteProjectSection projectId={project.projectId} />
     </>
   );
 };
 
-const ListItemField = ({ label, value }: { label: string; value: string }) => {
+//
+//
+//
+//
+// Project Url Whitelist
+//
+//
+//
+//
+
+const ProjectApiKeysSection = ({ project }: { project: Projects.IProject }) => {
+  const queryClient = useQueryClient();
+
+  const [apiKeys, setApiKeys] = useState(project.apiKeys);
+
+  const addMutation = useMutation(Projects.update);
+  const removeMutation = useMutation(Projects.update);
+
+  const snackbar = useSnackbar();
+
+  const onGenerate = async () => {
+    const nextApiKeys = [...apiKeys, uuid.v4()];
+
+    const result = await addMutation.mutateAsync({
+      projectId: project.projectId,
+      apiKeys: nextApiKeys,
+    });
+
+    switch (result.type) {
+      case "error":
+        snackbar.enqueueSnackbar("failed to update project name", {
+          variant: "error",
+        });
+        return;
+
+      case "success":
+        setApiKeys(nextApiKeys);
+
+        snackbar.enqueueSnackbar("project updated", {
+          variant: "success",
+        });
+
+        queryClient.invalidateQueries(Projects.queryFilter);
+
+        return;
+    }
+  };
+
+  const onRemove = async (params: { apiKey: string }) => {
+    const nextApiKeys = apiKeys.filter((apiKey) => apiKey !== params.apiKey);
+
+    const result = await removeMutation.mutateAsync({
+      projectId: project.projectId,
+      apiKeys: nextApiKeys,
+    });
+
+    switch (result.type) {
+      case "error":
+        snackbar.enqueueSnackbar("failed to update project name", {
+          variant: "error",
+        });
+        return;
+
+      case "success":
+        setApiKeys(nextApiKeys);
+
+        snackbar.enqueueSnackbar("project updated", {
+          variant: "success",
+        });
+
+        queryClient.invalidateQueries(Projects.queryFilter);
+
+        return;
+    }
+  };
+
   return (
-    <ListItem disablePadding>
-      <ListItemText
-        primaryTypographyProps={{
-          variant: "subtitle1",
-          color: "text.secondary",
-        }}
-        primary={label}
-        secondaryTypographyProps={{
-          variant: "h6",
-          color: "text.primary",
-        }}
-        secondary={value}
-      />
-    </ListItem>
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 2,
+        marginBottom: 4,
+      }}
+    >
+      <Typography variant="h6" sx={{ marginBottom: 2 }}>
+        api keys
+      </Typography>
+
+      <List>
+        {apiKeys.length === 0 && (
+          <Typography color="text.secondary" align="center" sx={{ p: 2 }}>
+            project has no api keys
+          </Typography>
+        )}
+        {apiKeys.map((apiKey) => (
+          <ListItem key={apiKey}>
+            <ListItemText primary={apiKey} />
+            <ListItemSecondaryAction>
+              <LoadingButton
+                disabled={removeMutation.isLoading}
+                loading={
+                  removeMutation.isLoading &&
+                  !removeMutation?.variables?.apiKeys?.includes(apiKey)
+                }
+                color="error"
+                onClick={() => {
+                  onRemove({ apiKey });
+                }}
+              >
+                remove
+              </LoadingButton>
+            </ListItemSecondaryAction>
+          </ListItem>
+        ))}
+      </List>
+
+      <Box sx={{ marginTop: 2, display: "flex", flexDirection: "row-reverse" }}>
+        <LoadingButton
+          variant="contained"
+          onClick={onGenerate}
+          loading={addMutation.status === "loading"}
+        >
+          generate
+        </LoadingButton>
+      </Box>
+    </Paper>
   );
 };
 
@@ -161,6 +270,11 @@ const ProjectUrlWhitelistSection = ({
       </Typography>
 
       <List>
+        {whitelistedUrls.length === 0 && (
+          <Typography color="text.secondary" align="center" sx={{ p: 2 }}>
+            project has no whitelisted urls
+          </Typography>
+        )}
         {whitelistedUrls.map((url) => (
           <ListItem key={url}>
             <ListItemText primary={url} />
@@ -192,7 +306,7 @@ const ProjectUrlWhitelistSection = ({
           sx={{ flex: 1 }}
         />
       </Box>
-      <Box sx={{ display: "flex", flexDirection: "row-reverse" }}>
+      <Box sx={{ marginTop: 2, display: "flex", flexDirection: "row-reverse" }}>
         <LoadingButton
           variant="contained"
           onClick={onAdd}

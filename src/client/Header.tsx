@@ -1,5 +1,6 @@
 import { Avatar, Box, Breadcrumbs, Toolbar, Typography } from "@mui/material";
 import { ReactNode } from "react";
+import { Link, routes } from "./routes";
 
 export const Header = ({ breadcrumbs }: { breadcrumbs: ReactNode[] }) => {
   return (
@@ -12,7 +13,9 @@ export const Header = ({ breadcrumbs }: { breadcrumbs: ReactNode[] }) => {
         }}
       >
         <Breadcrumbs>
-          <Typography variant="h4">📸</Typography>
+          <Link to={routes["/"].make()}>
+            <Typography variant="h4">📸</Typography>
+          </Link>
           {breadcrumbs}
         </Breadcrumbs>
       </Box>

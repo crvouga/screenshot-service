@@ -1,5 +1,4 @@
-import { HeadphonesRounded } from "@mui/icons-material";
-import { CircularProgress, Tab, Tabs, Box, Typography } from "@mui/material";
+import { Box, CircularProgress, Tab, Tabs, Typography } from "@mui/material";
 import { useQuery } from "react-query";
 import {
   Outlet,
@@ -10,9 +9,8 @@ import {
 } from "react-router-dom";
 import { Header } from "../Header";
 import * as Projects from "../projects";
-import { isMatch, Link, routes } from "../routes";
+import { Link, routes } from "../routes";
 import { ErrorPage } from "./Error";
-import { LoadingPage } from "./Loading";
 import { NotFoundPage } from "./NotFound";
 
 export type IOutletContext = { project: Projects.IProject };
@@ -78,11 +76,10 @@ const ProjectPage = ({ projectId }: { projectId: string }) => {
   const tabValues = {
     overview: "overview",
     tryIt: "tryIt",
+    logs: "logs",
   };
 
-  const tabValue = isMatch(location.pathname, routes["/projects/:id/try"])
-    ? tabValues.tryIt
-    : tabValues.overview;
+  const tabValue = tabValues.overview;
 
   const outletContext: IOutletContext = { project };
 
@@ -90,7 +87,7 @@ const ProjectPage = ({ projectId }: { projectId: string }) => {
     <>
       <ProjectSingleHeader title={project.name} />
 
-      <Tabs value={tabValue} variant="fullWidth">
+      <Tabs value={tabValue} sx={{ marginBottom: 4 }}>
         <Tab
           value={tabValues.overview}
           label="overview"
@@ -100,11 +97,19 @@ const ProjectPage = ({ projectId }: { projectId: string }) => {
         />
 
         <Tab
-          value={tabValues.tryIt}
-          label="try it"
-          onClick={() => {
-            navigate(routes["/projects/:id/try"].make(project.projectId));
-          }}
+          value={tabValues.logs}
+          label="screenshots"
+          // onClick={() => {
+          //   navigate(routes["/projects/:id/try"].make(project.projectId));
+          // }}
+        />
+
+        <Tab
+          value={tabValues.logs}
+          label="logs"
+          // onClick={() => {
+          //   navigate(routes["/projects/:id/try"].make(project.projectId));
+          // }}
         />
       </Tabs>
 

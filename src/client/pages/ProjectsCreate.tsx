@@ -61,7 +61,7 @@ export const ProjectsCreatePage = () => {
         onChange={(event) => setProjectName(event.currentTarget.value)}
         fullWidth
         label="Project Name"
-        sx={{ marginBottom: 4 }}
+        sx={{ marginTop: 2, marginBottom: 4 }}
       />
 
       <LoadingButton
