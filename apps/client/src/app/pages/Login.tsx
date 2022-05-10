@@ -12,7 +12,9 @@ export const LoginPage = () => {
   const loginWithGoogle = async () => {
     setState({ type: 'Loading' });
 
-    await supabaseClient.auth.signIn({ provider: 'google' });
+    const redirectTo = window.location.origin;
+
+    await supabaseClient.auth.signIn({ provider: 'google' }, { redirectTo });
   };
 
   return (
