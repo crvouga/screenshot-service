@@ -40,6 +40,8 @@ export const createServer = async () => {
   return app;
 };
 
+const CLIENT_BUILD_FOLDER_NAME = "dist";
+
 const useServeClientApp = (app: Application) => {
   const JUMP_OUT_OF_SERVER_DIR = "..";
   const JUMP_OUT_OF_SRC_DIR = "..";
@@ -50,7 +52,7 @@ const useServeClientApp = (app: Application) => {
     JUMP_OUT_OF_SERVER_DIR,
     JUMP_OUT_OF_SRC_DIR,
     JUMP_OUT_OF_SERVER_BUILD_DIR,
-    "build"
+    CLIENT_BUILD_FOLDER_NAME
   );
 
   app.use(express.static(CLIENT_BUILD_PATH));
