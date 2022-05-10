@@ -1,6 +1,7 @@
 import { Box, Container } from '@mui/material';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthUserContext, useAuthState } from './authentication';
+import { AccountPage } from './pages/Account';
 import { HomePage } from './pages/Home';
 import { BrandedLoadingPage } from './pages/Loading';
 import { LoginPage } from './pages/Login';
@@ -43,6 +44,11 @@ const LoadingAuth = () => {
             <Route path={routes['/'].pattern} element={<HomePage />} />
 
             <Route path={routes['/try'].pattern} element={<TryPage />} />
+
+            <Route
+              path={routes['/account'].pattern}
+              element={<AccountPage />}
+            />
 
             <Route
               path={routes['/projects'].pattern}

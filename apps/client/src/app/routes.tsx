@@ -1,35 +1,39 @@
-import { Link as MuiLink, LinkProps } from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
-import { matchPath } from "react-router-dom";
+import { Link as MuiLink, LinkProps } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
+import { matchPath } from 'react-router-dom';
 
 export const routes = {
-  "/": {
-    pattern: "/",
+  '/': {
+    pattern: '/',
     make: () => `/`,
   },
-  "/screenshot": {
-    pattern: "/screenshot",
+  '/screenshot': {
+    pattern: '/screenshot',
     make: () => `/screenshot`,
   },
-  "/logout": {
-    pattern: "/logout",
+  '/logout': {
+    pattern: '/logout',
     make: () => `/logout`,
   },
-  "/projects": {
-    pattern: "/projects",
+  '/projects': {
+    pattern: '/projects',
     make: () => `/projects`,
   },
-  "/projects/create": {
-    pattern: "/projects/create",
+  '/projects/create': {
+    pattern: '/projects/create',
     make: () => `/projects/create`,
   },
-  "/projects/:id": {
-    pattern: "/projects/:id",
+  '/projects/:id': {
+    pattern: '/projects/:id',
     make: (id: string) => `/projects/${id}`,
   },
-  "/try": {
-    pattern: "/try",
+  '/try': {
+    pattern: '/try',
     make: () => `/try`,
+  },
+  '/account': {
+    pattern: '/account',
+    make: () => `/account`,
   },
 };
 
