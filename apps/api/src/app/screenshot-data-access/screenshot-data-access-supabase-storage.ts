@@ -6,6 +6,8 @@ import {
   IImageType,
   ITargetUrl,
   ITimeoutMs,
+  BUCKET_NAME,
+  toFilename,
   resultToErrors,
 } from '@screenshot-service/shared';
 import { supabaseClient } from '../supabase';
@@ -35,8 +37,6 @@ type IPutResult =
  *
  */
 
-const BUCKET_NAME = 'screenshots';
-
 /**
  *
  *
@@ -46,16 +46,6 @@ const BUCKET_NAME = 'screenshots';
  *
  *
  */
-
-const toFilename = ({
-  imageType,
-  screenshotId,
-}: {
-  imageType: IImageType;
-  screenshotId: string;
-}) => {
-  return `${screenshotId}.${imageType}`;
-};
 
 export const put = async (
   {

@@ -31,6 +31,7 @@ export const getScreenshot = async (
     targetUrl: ITargetUrl;
   }
 ): Promise<IGetResult> => {
+  console.log('finding project');
   const projectResult = await Projects.getOneByApiKey({ apiKey });
 
   if (projectResult.type === 'error') {
@@ -43,8 +44,11 @@ export const getScreenshot = async (
       ],
     };
   }
+  console.log('found project', projectResult.project);
 
   const projectId = projectResult.project.projectId;
+
+  console.log('finding result in storage');
 
   const supabaseResult = await ScreenshotSupabaseStorage.get({
     timeoutMs,

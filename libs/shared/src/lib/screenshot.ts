@@ -231,3 +231,23 @@ export const castImageType = (
     errors,
   };
 };
+
+/**
+ *
+ *
+ *
+ *
+ *
+ */
+
+export const BUCKET_NAME = 'screenshots';
+
+export const toFilename = ({
+  imageType,
+  screenshotId,
+}: {
+  imageType: IImageType;
+  screenshotId: string;
+}) => {
+  return `${screenshotId}.${imageType}`;
+};
