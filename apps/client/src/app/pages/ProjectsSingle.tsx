@@ -2,13 +2,14 @@ import { Box, CircularProgress, Tab, Tabs, Typography } from '@mui/material';
 import { useQuery } from 'react-query';
 import {
   Outlet,
+  useLocation,
   useNavigate,
   useOutletContext,
   useParams,
 } from 'react-router-dom';
 import { Header } from '../Header';
 import * as Projects from '../projects';
-import { routes } from '../routes';
+import { isMatch, routes } from '../routes';
 import { ErrorPage } from './Error';
 import { NotFoundPage } from './NotFound';
 
@@ -35,6 +36,7 @@ const ProjectPage = ({ projectId }: { projectId: string }) => {
     Projects.getOne({ projectId })
   );
 
+  const location = useLocation();
   const navigate = useNavigate();
 
   if (!query.data) {
@@ -64,11 +66,15 @@ const ProjectPage = ({ projectId }: { projectId: string }) => {
   const { project } = result;
   const tabValues = {
     overview: 'overview',
-    tryIt: 'tryIt',
+    screenshots: 'screenshots',
     logs: 'logs',
   };
 
-  const tabValue = tabValues.overview;
+  const tabValue = isMatch(location.pathname, routes['/projects/:id'])
+    ? tabValues.overview
+    : isMatch(location.pathname, routes['/projects/:id/screenshots'])
+    ? tabValues.screenshots
+    : tabValues.overview;
 
   const outletContext: IOutletContext = { project };
 
@@ -86,11 +92,13 @@ const ProjectPage = ({ projectId }: { projectId: string }) => {
         />
 
         <Tab
-          value={tabValues.logs}
+          value={tabValues.screenshots}
           label="screenshots"
-          // onClick={() => {
-          //   navigate(routes["/projects/:id/try"].make(project.projectId));
-          // }}
+          onClick={() => {
+            navigate(
+              routes['/projects/:id/screenshots'].make(project.projectId)
+            );
+          }}
         />
 
         <Tab

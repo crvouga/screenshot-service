@@ -1,18 +1,17 @@
 import { CameraAlt, Close } from '@mui/icons-material';
 import {
-  Button,
   Box,
+  Button,
+  Divider,
   Drawer,
   Fab,
   Toolbar,
   useTheme,
-  AppBar,
-  Divider,
 } from '@mui/material';
-import { useQuery } from 'react-query';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthUserContext, useAuthState, useAuthUser } from './authentication';
 import { AccountPage } from './pages/Account';
+import { AccountCreatePage } from './pages/AccountCreate';
 import { BrandedLoadingPage } from './pages/Loading';
 import { LoginPage } from './pages/Login';
 import { LogoutPage } from './pages/Logout';
@@ -20,11 +19,10 @@ import { ProjectsPage } from './pages/Projects';
 import { ProjectsCreatePage } from './pages/ProjectsCreate';
 import { ProjectSingleOverviewPage } from './pages/ProjectSingleOverview';
 import { ProjectsSinglePage } from './pages/ProjectsSingle';
+import { ProjectSingleScreenshotsPage } from './pages/ProjectsSingleScreenshots';
 import { TryPage } from './pages/Try';
-import { Link, routes, useNavigate, useLocation } from './routes';
 import * as Profiles from './profiles';
-import { ErrorPage } from './pages/Error';
-import { AccountCreatePage } from './pages/AccountCreate';
+import { Link, routes, useLocation, useNavigate } from './routes';
 
 export const App = () => {
   return (
@@ -147,6 +145,10 @@ export const Loaded = () => {
             <Route
               path={routes['/projects/:id'].pattern}
               element={<ProjectSingleOverviewPage />}
+            />
+            <Route
+              path={routes['/projects/:id/screenshots'].pattern}
+              element={<ProjectSingleScreenshotsPage />}
             />
           </Route>
 
