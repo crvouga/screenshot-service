@@ -1,3 +1,4 @@
+import { fetchScreenshot, IApiErrorBody } from '@crvouga/screenshot-service';
 import BrokenImageIcon from '@mui/icons-material/BrokenImage';
 import ClearIcon from '@mui/icons-material/Clear';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
@@ -20,14 +21,14 @@ import {
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
-import {
-  castTargetUrl,
-  IApiErrorBody,
-  IGetScreenshotQueryParams,
-  toGetScreenshotEndpoint,
-} from '@screenshot-service/shared';
+import { castTargetUrl } from '@screenshot-service/shared';
 import { useRef, useState } from 'react';
-import { useMutation } from 'react-query';
+
+type IQueryState =
+  | { type: 'idle' }
+  | { type: 'loading' }
+  | { type: 'error'; errors: IApiErrorBody }
+  | { type: 'success'; src: string };
 
 export const TryPage = () => {
   const [targetUrl, setTargetUrl] = useState('');
@@ -42,12 +43,20 @@ export const TryPage = () => {
       ? castedTargetUrl.errors.map((error) => error.message).join(', ')
       : '';
 
-  const fetchScreenshotMutation = useFetchScreenshotMutation();
+  const [query, setQuery] = useState<IQueryState>({ type: 'idle' });
 
-  const error =
-    fetchScreenshotMutation.status === 'error'
-      ? fetchScreenshotMutation.error
-      : [];
+  const onFetch = async () => {
+    setQuery({ type: 'loading' });
+
+    const result = await fetchScreenshot(
+      { targetUrl, imageType, timeoutMs, maxAgeMs },
+      { baseUrl: 'http://localhost:8000' }
+    );
+
+    setQuery(result);
+  };
+
+  const error = query.type === 'error' ? query.errors : [];
 
   return (
     <>
@@ -132,18 +141,11 @@ export const TryPage = () => {
         size="large"
         variant="contained"
         sx={{
-          marginTop: 2,
-          marginBottom: 4,
+          mt: 2,
+          mb: 4,
         }}
-        onClick={() => {
-          fetchScreenshotMutation.mutate({
-            targetUrl,
-            timeoutMs,
-            imageType,
-            maxAgeMs,
-          });
-        }}
-        loading={fetchScreenshotMutation.status === 'loading'}
+        onClick={onFetch}
+        loading={query.type === 'loading'}
       >
         Take Screenshot
       </LoadingButton>
@@ -155,26 +157,28 @@ export const TryPage = () => {
       />
 
       <Screenshot
-        state={fetchScreenshotMutation.status}
+        state={query.type}
         alt={`screenshot of ${targetUrl}`}
-        src={fetchScreenshotMutation.data?.src}
+        src={query.type === 'success' ? query.src : undefined}
       />
 
-      {fetchScreenshotMutation.status === 'success' &&
-        fetchScreenshotMutation.data.src && (
-          <Button
-            sx={{ marginTop: 4 }}
-            fullWidth
-            size="large"
-            variant="contained"
-            startIcon={<DownloadIcon />}
-            title={targetUrl}
-            href={fetchScreenshotMutation.data.src}
-            download={fetchScreenshotMutation.data.src}
-          >
-            Download Screenshot
-          </Button>
-        )}
+      <Button
+        sx={{ mt: 4 }}
+        fullWidth
+        size="large"
+        variant="contained"
+        startIcon={<DownloadIcon />}
+        title={targetUrl}
+        disabled={query.type !== 'success'}
+        {...(query.type === 'success'
+          ? {
+              href: query.src,
+              download: query.src,
+            }
+          : {})}
+      >
+        Download Screenshot
+      </Button>
     </>
   );
 };
@@ -254,46 +258,6 @@ const Screenshot = ({
         </Box>
       )}
     </Paper>
-  );
-};
-
-//
-//
-//
-//
-//  Data Access
-//
-//
-//
-//
-
-type IData = { src: string };
-type IVariables = IGetScreenshotQueryParams;
-type IContext = unknown;
-
-export const fetchScreenshot = async (
-  params: IGetScreenshotQueryParams
-): Promise<IData> => {
-  const response = await fetch(toGetScreenshotEndpoint(params));
-
-  if (response.ok) {
-    const blob = await response.blob();
-
-    const src = URL.createObjectURL(blob);
-
-    return {
-      src,
-    };
-  }
-
-  const errors: IApiErrorBody = await response.json();
-
-  throw errors;
-};
-
-const useFetchScreenshotMutation = () => {
-  return useMutation<IData, IApiErrorBody, IVariables, IContext>(
-    fetchScreenshot
   );
 };
 
