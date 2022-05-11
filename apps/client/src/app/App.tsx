@@ -68,7 +68,7 @@ const LoadingProfile = () => {
 
   switch (query.status) {
     case 'error':
-      return <ErrorPage message="Failed to load profile" />;
+      return <BrandedLoadingPage />;
 
     case 'idle':
       return <BrandedLoadingPage />;
@@ -81,7 +81,7 @@ const LoadingProfile = () => {
 
       switch (result.type) {
         case 'error':
-          return <ErrorPage message="Failed to load profile" />;
+          return <BrandedLoadingPage />;
 
         case 'not-found':
           return (
