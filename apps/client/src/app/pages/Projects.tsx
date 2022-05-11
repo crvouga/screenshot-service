@@ -1,6 +1,7 @@
 import { ChevronRight, Create } from '@mui/icons-material';
 import {
   Box,
+  Container,
   Button,
   Card,
   CardActionArea,
@@ -29,19 +30,11 @@ export const ProjectsPage = () => {
     <>
       <Header breadcrumbs={[]} />
 
-      <Toolbar>
-        <Link to={routes['/projects/create'].make()}>
-          <Button startIcon={<Create />} variant="contained">
-            Create New
-          </Button>
-        </Link>
-      </Toolbar>
-
       {query.status === 'loading' && (
         <Box
           sx={{
             width: '100%',
-            padding: 8,
+            padding: 12,
             display: 'grid',
             placeItems: 'center',
           }}
@@ -52,42 +45,59 @@ export const ProjectsPage = () => {
 
       {query.status === 'success' && query.data.type === 'success' && (
         <>
-          <Grid container>
-            {query.data.data.map((project) => (
-              <Grid
-                xs={6}
-                item
-                key={project.projectId}
-                sx={{ height: '100%', p: 1 }}
-              >
-                <Link to={routes['/projects/:id'].make(project.projectId)}>
-                  <CardActionArea>
-                    <Card sx={{ height: '100%' }}>
-                      <CardHeader
-                        title={project.name}
-                        action={<ChevronRight />}
-                      />
-                    </Card>
-                  </CardActionArea>
-                </Link>
-              </Grid>
-            ))}
-          </Grid>
+          {query.data.data.length > 0 && (
+            <Container sx={{ mt: 2 }} maxWidth="sm">
+              <Link to={routes['/projects/create'].make()}>
+                <Button
+                  startIcon={<Create />}
+                  variant="contained"
+                  sx={{ mb: 2 }}
+                >
+                  Create New
+                </Button>
+              </Link>
+
+              {query.data.data.map((project) => (
+                <Box key={project.projectId} sx={{ mb: 2 }}>
+                  <Link to={routes['/projects/:id'].make(project.projectId)}>
+                    <CardActionArea>
+                      <Card
+                        sx={{ display: 'flex', p: 4, alignItems: 'center' }}
+                      >
+                        <Typography sx={{ flex: 1 }} variant="h5">
+                          {project.name}
+                        </Typography>
+                        <ChevronRight />
+                      </Card>
+                    </CardActionArea>
+                  </Link>
+                </Box>
+              ))}
+            </Container>
+          )}
 
           {query.data.data.length === 0 && (
-            <Box
-              sx={{
-                width: '100%',
-                p: 4,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Typography color="text.secondary">
-                Didn't find any projects.
-              </Typography>
-            </Box>
+            <Container maxWidth="sm">
+              <Card sx={{ width: '100%', my: 4 }}>
+                <Container maxWidth="xs" sx={{ py: 4 }}>
+                  <Typography variant="h2" align="center" sx={{ mb: 0 }}>
+                    📸
+                  </Typography>
+                  <Typography variant="h4" align="center" sx={{ mb: 4 }}>
+                    You don't have any projects.
+                  </Typography>
+                  <Link to={routes['/projects/create'].make()}>
+                    <Button
+                      fullWidth
+                      startIcon={<Create />}
+                      variant="contained"
+                    >
+                      Create New Project
+                    </Button>
+                  </Link>
+                </Container>
+              </Card>
+            </Container>
           )}
         </>
       )}
