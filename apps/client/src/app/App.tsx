@@ -1,5 +1,14 @@
 import { CameraAlt, Close } from '@mui/icons-material';
-import { Button, Box, Drawer, Fab, Toolbar, useTheme } from '@mui/material';
+import {
+  Button,
+  Box,
+  Drawer,
+  Fab,
+  Toolbar,
+  useTheme,
+  AppBar,
+  Divider,
+} from '@mui/material';
 import { useQuery } from 'react-query';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthUserContext, useAuthState, useAuthUser } from './authentication';
@@ -173,23 +182,41 @@ export const Loaded = () => {
 
       <Drawer
         open={location.state === 'try-drawer-opened'}
-        anchor="top"
+        anchor="right"
         keepMounted
         PaperProps={{
-          sx: { maxWidth: 'sm', paddingX: 2, marginX: 'auto' },
+          sx: {
+            width: '100%',
+            maxWidth: 'sm',
+            overflow: 'hidden',
+          },
         }}
         onClose={() => {
           navigate({ to: location.pathname, state: 'closed' });
         }}
       >
-        <Toolbar disableGutters>
+        <Toolbar>
           <Link to={location.pathname} state="closed">
             <Button sx={{ marginLeft: -1 }} startIcon={<Close />} size="large">
               Close
             </Button>
           </Link>
         </Toolbar>
-        <TryPage />
+
+        <Divider />
+
+        <Box
+          sx={{
+            width: '100%',
+            height: '100%',
+            overflowY: 'scroll',
+            paddingBottom: 4,
+            paddingX: 2,
+            paddingTop: 2,
+          }}
+        >
+          <TryPage />
+        </Box>
       </Drawer>
     </>
   );
