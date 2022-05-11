@@ -41,9 +41,7 @@ export const useApi = async (app: Application) => {
 
 const useGetScreenshot = async (browser: Browser, router: Router) => {
   router.get(GET_SCREENSHOT_ENDPOINT, async (req, res) => {
-    const clientUrl = req.headers.origin ?? req.headers.referer;
-
-    console.log({ clientUrl });
+    // const clientUrl = req.headers.origin ?? req.headers.referer;
 
     const queryParams: Partial<IGetScreenshotQueryParams> = req.query;
 

@@ -96,9 +96,6 @@ export const getScreenshotSrc = async ({
     .from(BUCKET_NAME)
     .getPublicUrl(filename);
 
-  console.log({ filename, BUCKET_NAME });
-  console.log(response);
-
   if (response.error) {
     return { type: 'error', error: response.error.message };
   }

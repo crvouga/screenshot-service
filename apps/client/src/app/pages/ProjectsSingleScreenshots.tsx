@@ -1,19 +1,20 @@
-import { IImageType } from '@screenshot-service/shared';
 import {
-  ListItemText,
+  Alert,
   Box,
   Card,
-  CardContent,
   CircularProgress,
   Container,
-  Grid,
   List,
   ListItem,
+  ListItemText,
+  Paper,
+  Skeleton,
   Typography,
 } from '@mui/material';
+import { IImageType } from '@screenshot-service/shared';
 import { useQuery } from 'react-query';
-import { useProfileSingleOutletContext } from './ProjectsSingle';
 import * as Screenshots from '../screenshots';
+import { useProfileSingleOutletContext } from './ProjectsSingle';
 
 export const ProjectSingleScreenshotsPage = () => {
   const { project } = useProfileSingleOutletContext();
@@ -82,29 +83,49 @@ const ScreenshotItem = ({
   screenshot: Screenshots.IScreenshot;
 }) => {
   return (
-    <Card sx={{ mb: 2 }}>
-      <ScreenshotImage
-        screenshotId={screenshot.screenshotId}
-        imageType={screenshot.imageType}
-      />
-      <List>
-        <ListItem>
-          <ListItemText primary={screenshot.imageType} />
-        </ListItem>
-        <ListItem>
-          <ListItemText
-            primaryTypographyProps={{
-              sx: { wordWrap: 'break-word' },
-            }}
-            primary={screenshot.targetUrl}
+    <Paper sx={{ mb: 2, display: 'flex' }}>
+      <Box sx={{ width: '33.33%', minWidth: '33.33%' }}>
+        <Box
+          sx={{
+            paddingTop: `${1 * 100}%`,
+            position: 'relative',
+          }}
+        >
+          <Screenshot
+            screenshotId={screenshot.screenshotId}
+            imageType={screenshot.imageType}
           />
-        </ListItem>
-      </List>
-    </Card>
+        </Box>
+      </Box>
+      <Box sx={{ p: 2 }}>
+        <Box
+          sx={{
+            textOverflow: 'clip',
+            overflow: 'hidden',
+            whitespace: 'noewrap',
+            wordWrap: 'break-word',
+          }}
+        >
+          <Typography variant="subtitle1" color="text.secondary">
+            targetUrl
+          </Typography>
+          <Typography
+            sx={{
+              textOverflow: 'clip',
+              overflow: 'hidden',
+              whitespace: 'noewrap',
+              wordWrap: 'break-word',
+            }}
+          >
+            {screenshot.targetUrl}
+          </Typography>
+        </Box>
+      </Box>
+    </Paper>
   );
 };
 
-const ScreenshotImage = ({
+const Screenshot = ({
   screenshotId,
   imageType,
 }: {
@@ -116,26 +137,65 @@ const ScreenshotImage = ({
     () => Screenshots.getScreenshotSrc({ screenshotId, imageType })
   );
 
-  switch (query.status) {
-    case 'error':
-      return <>"error"</>;
+  return (
+    <Box
+      sx={{
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '100%',
+      }}
+    >
+      {query.status === 'idle' && (
+        <Skeleton variant="rectangular" width="100%" height="100%" />
+      )}
 
-    case 'idle':
-      return <>"idle"</>;
+      {query.status === 'loading' && (
+        <Skeleton variant="rectangular" width="100%" height="100%" />
+      )}
 
-    case 'loading':
-      return <>"loading"</>;
+      {query.status === 'error' && (
+        <Alert
+          sx={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: '100%',
+          }}
+          severity="error"
+        >
+          Failed to load screenshot
+        </Alert>
+      )}
 
-    case 'success': {
-      const result = query.data;
+      {query.status === 'success' && (
+        <>
+          {query.data.type === 'error' && (
+            <Alert
+              sx={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                height: '100%',
+              }}
+              severity="error"
+            >
+              Failed to load screenshot
+            </Alert>
+          )}
 
-      switch (result.type) {
-        case 'error':
-          return <>"error"</>;
-
-        case 'success':
-          return <img src={result.src} alt="screenshot" />;
-      }
-    }
-  }
+          {query.data.type === 'success' && (
+            <img
+              alt="..."
+              width="100%"
+              height="100%"
+              src={query.data.src}
+              style={{ objectFit: 'cover' }}
+            />
+          )}
+        </>
+      )}
+    </Box>
+  );
 };
