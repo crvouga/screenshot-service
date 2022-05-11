@@ -1,5 +1,4 @@
-import { ChevronLeft, Logout } from '@mui/icons-material';
-import * as ProfileAvatar from '../profile-avatar';
+import { ChevronLeft } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import {
   Avatar,
@@ -9,7 +8,6 @@ import {
   Dialog,
   DialogActions,
   DialogTitle,
-  IconButton,
   Paper,
   TextField,
   Toolbar,
@@ -20,6 +18,7 @@ import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 import { useMutation, useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
+import * as ProfileAvatar from '../profile-avatar';
 import * as Profiles from '../profiles';
 import { Link, routes } from '../routes';
 
@@ -31,9 +30,13 @@ export const AccountPage = () => {
     <>
       <Toolbar>
         <Box sx={{ flex: 1 }}>
-          <IconButton onClick={() => navigate(-1)} edge="start">
-            <ChevronLeft />
-          </IconButton>
+          <Button
+            sx={{ marginLeft: -1 }}
+            onClick={() => navigate(-1)}
+            startIcon={<ChevronLeft />}
+          >
+            Back
+          </Button>
         </Box>
         <Typography noWrap sx={{ flex: 2 }} align="center" variant="h6">
           {profile.name}
@@ -46,16 +49,7 @@ export const AccountPage = () => {
 
         <AvatarSection />
 
-        <Link to={routes['/logout'].make()}>
-          <Button
-            sx={{ mb: 4 }}
-            fullWidth
-            variant="contained"
-            startIcon={<Logout />}
-          >
-            Logout
-          </Button>
-        </Link>
+        <LogoutSection />
 
         <DeleteSection />
       </Container>
@@ -294,6 +288,38 @@ const AvatarSection = () => {
         >
           save
         </LoadingButton>
+      </Box>
+    </Paper>
+  );
+};
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+const LogoutSection = () => {
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 2,
+        mb: 4,
+      }}
+    >
+      <Typography variant="h6" sx={{ marginBottom: 2 }}>
+        logout
+      </Typography>
+
+      <Box sx={{ display: 'flex', flexDirection: 'row-reverse' }}>
+        <Link to={routes['/logout'].make()}>
+          <Button variant="contained">Logout</Button>
+        </Link>
       </Box>
     </Paper>
   );
