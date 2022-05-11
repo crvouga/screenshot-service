@@ -97,31 +97,37 @@ const ScreenshotItem = ({
           />
         </Box>
       </Box>
-      <Box sx={{ p: 2 }}>
-        <Box
-          sx={{
-            textOverflow: 'clip',
-            overflow: 'hidden',
-            whitespace: 'noewrap',
-            wordWrap: 'break-word',
-          }}
-        >
-          <Typography variant="subtitle1" color="text.secondary">
-            targetUrl
-          </Typography>
-          <Typography
-            sx={{
-              textOverflow: 'clip',
-              overflow: 'hidden',
-              whitespace: 'noewrap',
-              wordWrap: 'break-word',
-            }}
-          >
-            {screenshot.targetUrl}
-          </Typography>
-        </Box>
+      <Box
+        sx={{
+          p: 2,
+          overflow: 'hidden',
+        }}
+      >
+        <Field label="target url" value={screenshot.targetUrl} />
+        <Field label="timeout ms" value={String(screenshot.timeoutMs)} />
+        <Field label="image type" value={screenshot.imageType} />
       </Box>
     </Paper>
+  );
+};
+
+const Field = ({ label, value }: { label: string; value: string }) => {
+  return (
+    <Box sx={{ mb: 1 }}>
+      <Typography variant="subtitle1" color="text.secondary">
+        {label}
+      </Typography>
+      <Typography
+        component="div"
+        sx={{
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {value}
+      </Typography>
+    </Box>
   );
 };
 
