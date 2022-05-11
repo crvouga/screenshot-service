@@ -1,7 +1,8 @@
-import { LoadingButton } from "@mui/lab";
+import { LoadingButton } from '@mui/lab';
 import {
   Box,
   Button,
+  Container,
   Dialog,
   DialogActions,
   DialogTitle,
@@ -13,21 +14,21 @@ import {
   TextField,
   Typography,
   useTheme,
-} from "@mui/material";
-import { useSnackbar } from "notistack";
-import { useState } from "react";
-import { useMutation, useQueryClient } from "react-query";
-import { useNavigate } from "react-router-dom";
-import * as Projects from "../projects";
-import { routes } from "../routes";
-import { useProfileSingleOutletContext } from "./ProjectsSingle";
-import * as uuid from "uuid";
+} from '@mui/material';
+import { useSnackbar } from 'notistack';
+import { useState } from 'react';
+import { useMutation, useQueryClient } from 'react-query';
+import { useNavigate } from 'react-router-dom';
+import * as Projects from '../projects';
+import { routes } from '../routes';
+import { useProfileSingleOutletContext } from './ProjectsSingle';
+import * as uuid from 'uuid';
 
 export const ProjectSingleOverviewPage = () => {
   const { project } = useProfileSingleOutletContext();
 
   return (
-    <>
+    <Container maxWidth="sm">
       <ProjectApiKeysSection project={project} />
 
       <ProjectUrlWhitelistSection project={project} />
@@ -35,7 +36,7 @@ export const ProjectSingleOverviewPage = () => {
       <ProjectNameSection project={project} />
 
       <DeleteProjectSection projectId={project.projectId} />
-    </>
+    </Container>
   );
 };
 
@@ -68,17 +69,17 @@ const ProjectApiKeysSection = ({ project }: { project: Projects.IProject }) => {
     });
 
     switch (result.type) {
-      case "error":
-        snackbar.enqueueSnackbar("failed to update project name", {
-          variant: "error",
+      case 'error':
+        snackbar.enqueueSnackbar('failed to update project name', {
+          variant: 'error',
         });
         return;
 
-      case "success":
+      case 'success':
         setApiKeys(nextApiKeys);
 
-        snackbar.enqueueSnackbar("project updated", {
-          variant: "success",
+        snackbar.enqueueSnackbar('project updated', {
+          variant: 'success',
         });
 
         queryClient.invalidateQueries(Projects.queryFilter);
@@ -96,17 +97,17 @@ const ProjectApiKeysSection = ({ project }: { project: Projects.IProject }) => {
     });
 
     switch (result.type) {
-      case "error":
-        snackbar.enqueueSnackbar("failed to update project name", {
-          variant: "error",
+      case 'error':
+        snackbar.enqueueSnackbar('failed to update project name', {
+          variant: 'error',
         });
         return;
 
-      case "success":
+      case 'success':
         setApiKeys(nextApiKeys);
 
-        snackbar.enqueueSnackbar("project updated", {
-          variant: "success",
+        snackbar.enqueueSnackbar('project updated', {
+          variant: 'success',
         });
 
         queryClient.invalidateQueries(Projects.queryFilter);
@@ -155,11 +156,11 @@ const ProjectApiKeysSection = ({ project }: { project: Projects.IProject }) => {
         ))}
       </List>
 
-      <Box sx={{ marginTop: 2, display: "flex", flexDirection: "row-reverse" }}>
+      <Box sx={{ marginTop: 2, display: 'flex', flexDirection: 'row-reverse' }}>
         <LoadingButton
           variant="contained"
           onClick={onGenerate}
-          loading={addMutation.status === "loading"}
+          loading={addMutation.status === 'loading'}
         >
           generate
         </LoadingButton>
@@ -189,7 +190,7 @@ const ProjectUrlWhitelistSection = ({
     project.whitelistedUrls
   );
 
-  const [url, setUrl] = useState("");
+  const [url, setUrl] = useState('');
   const isUrlValid = url.length > 0 && !whitelistedUrls.includes(url);
 
   const addMutation = useMutation(Projects.update);
@@ -204,19 +205,19 @@ const ProjectUrlWhitelistSection = ({
     });
 
     switch (result.type) {
-      case "error":
-        snackbar.enqueueSnackbar("failed to update project name", {
-          variant: "error",
+      case 'error':
+        snackbar.enqueueSnackbar('failed to update project name', {
+          variant: 'error',
         });
         return;
 
-      case "success":
-        setUrl("");
+      case 'success':
+        setUrl('');
 
         setWhitelistedUrls([...whitelistedUrls, url]);
 
-        snackbar.enqueueSnackbar("project updated", {
-          variant: "success",
+        snackbar.enqueueSnackbar('project updated', {
+          variant: 'success',
         });
 
         queryClient.invalidateQueries(Projects.queryFilter);
@@ -236,19 +237,19 @@ const ProjectUrlWhitelistSection = ({
     });
 
     switch (result.type) {
-      case "error":
-        snackbar.enqueueSnackbar("failed to update project name", {
-          variant: "error",
+      case 'error':
+        snackbar.enqueueSnackbar('failed to update project name', {
+          variant: 'error',
         });
         return;
 
-      case "success":
-        setUrl("");
+      case 'success':
+        setUrl('');
 
         setWhitelistedUrls(nextWhitelistedUrls);
 
-        snackbar.enqueueSnackbar("project updated", {
-          variant: "success",
+        snackbar.enqueueSnackbar('project updated', {
+          variant: 'success',
         });
 
         queryClient.invalidateQueries(Projects.queryFilter);
@@ -297,7 +298,7 @@ const ProjectUrlWhitelistSection = ({
         ))}
       </List>
 
-      <Box sx={{ marginBottom: 2, display: "flex" }}>
+      <Box sx={{ marginBottom: 2, display: 'flex' }}>
         <TextField
           label="url"
           value={url}
@@ -306,11 +307,11 @@ const ProjectUrlWhitelistSection = ({
           sx={{ flex: 1 }}
         />
       </Box>
-      <Box sx={{ marginTop: 2, display: "flex", flexDirection: "row-reverse" }}>
+      <Box sx={{ marginTop: 2, display: 'flex', flexDirection: 'row-reverse' }}>
         <LoadingButton
           variant="contained"
           onClick={onAdd}
-          loading={addMutation.status === "loading"}
+          loading={addMutation.status === 'loading'}
           disabled={!isUrlValid}
         >
           add
@@ -346,15 +347,15 @@ const ProjectNameSection = ({ project }: { project: Projects.IProject }) => {
     });
 
     switch (result.type) {
-      case "error":
-        snackbar.enqueueSnackbar("failed to update project name", {
-          variant: "error",
+      case 'error':
+        snackbar.enqueueSnackbar('failed to update project name', {
+          variant: 'error',
         });
         return;
 
-      case "success":
-        snackbar.enqueueSnackbar("project updated", {
-          variant: "success",
+      case 'success':
+        snackbar.enqueueSnackbar('project updated', {
+          variant: 'success',
         });
 
         queryClient.invalidateQueries(Projects.queryFilter);
@@ -381,12 +382,12 @@ const ProjectNameSection = ({ project }: { project: Projects.IProject }) => {
         fullWidth
         sx={{ marginBottom: 2 }}
       />
-      <Box sx={{ display: "flex", flexDirection: "row-reverse" }}>
+      <Box sx={{ display: 'flex', flexDirection: 'row-reverse' }}>
         <LoadingButton
           variant="contained"
           onClick={onSave}
           disabled={project.name === name}
-          loading={mutation.status === "loading"}
+          loading={mutation.status === 'loading'}
         >
           save
         </LoadingButton>
@@ -419,15 +420,15 @@ const DeleteProjectSection = ({ projectId }: { projectId: string }) => {
     const response = await mutation.mutateAsync({ projectId });
 
     switch (response.type) {
-      case "error":
-        snackbar.enqueueSnackbar("failed to delete project", {
-          variant: "error",
+      case 'error':
+        snackbar.enqueueSnackbar('failed to delete project', {
+          variant: 'error',
         });
         return;
 
-      case "success":
-        snackbar.enqueueSnackbar("project deleted", { variant: "success" });
-        navigate(routes["/projects"].make());
+      case 'success':
+        snackbar.enqueueSnackbar('project deleted', { variant: 'success' });
+        navigate(routes['/projects'].make());
     }
   };
   return (
@@ -441,7 +442,7 @@ const DeleteProjectSection = ({ projectId }: { projectId: string }) => {
       <Typography variant="h6" sx={{ marginBottom: 2 }}>
         delete project forever
       </Typography>
-      <Box sx={{ display: "flex", flexDirection: "row-reverse" }}>
+      <Box sx={{ display: 'flex', flexDirection: 'row-reverse' }}>
         <Button variant="contained" color="error" onClick={() => setOpen(true)}>
           delete
         </Button>
@@ -456,7 +457,7 @@ const DeleteProjectSection = ({ projectId }: { projectId: string }) => {
             variant="contained"
             onClick={onDelete}
             color="error"
-            loading={mutation.status === "loading"}
+            loading={mutation.status === 'loading'}
           >
             delete
           </LoadingButton>

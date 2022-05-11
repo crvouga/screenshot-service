@@ -1,4 +1,13 @@
-import { Avatar, Box, Breadcrumbs, Toolbar, Typography } from '@mui/material';
+import { CameraAlt } from '@mui/icons-material';
+import {
+  Avatar,
+  Box,
+  Breadcrumbs,
+  Button,
+  IconButton,
+  Toolbar,
+  Typography,
+} from '@mui/material';
 import { ReactNode } from 'react';
 import { Link, routes } from './routes';
 
@@ -19,7 +28,9 @@ export const Header = ({ breadcrumbs }: { breadcrumbs: ReactNode[] }) => {
           {breadcrumbs}
         </Breadcrumbs>
       </Box>
+
       <Box sx={{ flex: 1 }}></Box>
+
       <Link to={routes['/account'].make()}>
         <Avatar />
       </Link>

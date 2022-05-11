@@ -1,5 +1,9 @@
 import { Link as MuiLink, LinkProps } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import {
+  Link as RouterLink,
+  useLocation as useRouterLocation,
+  useNavigate as useRouterNavigate,
+} from 'react-router-dom';
 import { matchPath } from 'react-router-dom';
 
 export const routes = {
@@ -44,9 +48,47 @@ export const isMatch = (
   return Boolean(matchPath(route.pattern, pathname));
 };
 
-export const Link = ({ to, ...linkProps }: { to: string } & LinkProps) => {
+type ILocationState = 'closed' | 'try-drawer-opened';
+
+type ILocation = {
+  pathname: string;
+  state: ILocationState;
+};
+
+const toLocationState = (state: unknown): ILocationState => {
+  if (
+    typeof state === 'string' &&
+    (state === 'closed' || state === 'try-drawer-opened')
+  ) {
+    return state;
+  }
+
+  return 'closed';
+};
+
+export const useLocation = (): ILocation => {
+  const location = useRouterLocation();
+  return {
+    pathname: location.pathname,
+    state: toLocationState(location.state),
+  };
+};
+
+export const useNavigate = () => {
+  const navigate = useRouterNavigate();
+
+  return ({ state, to }: { state?: ILocationState; to: string }) => {
+    navigate(to, state ? { state } : {});
+  };
+};
+
+export const Link = ({
+  to,
+  state,
+  ...linkProps
+}: { state?: ILocationState; to: string } & LinkProps) => {
   return (
-    <RouterLink to={to}>
+    <RouterLink to={to} state={state}>
       <MuiLink {...linkProps} />
     </RouterLink>
   );

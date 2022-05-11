@@ -2,14 +2,13 @@ import { Box, CircularProgress, Tab, Tabs, Typography } from '@mui/material';
 import { useQuery } from 'react-query';
 import {
   Outlet,
-  useLocation,
   useNavigate,
   useOutletContext,
   useParams,
 } from 'react-router-dom';
 import { Header } from '../Header';
 import * as Projects from '../projects';
-import { Link, routes } from '../routes';
+import { routes } from '../routes';
 import { ErrorPage } from './Error';
 import { NotFoundPage } from './NotFound';
 
@@ -31,21 +30,11 @@ export const ProjectsSinglePage = () => {
   return <ProjectPage projectId={projectId} />;
 };
 
-const ProjectSingleHeader = ({ title }: { title: string }) => (
-  <Header
-    breadcrumbs={[
-      <Link to={routes['/projects'].make()}>projects</Link>,
-      <Typography color="text.primary">{title}</Typography>,
-    ]}
-  />
-);
-
 const ProjectPage = ({ projectId }: { projectId: string }) => {
   const query = useQuery(Projects.queryKeys.getOne({ projectId }), () =>
     Projects.getOne({ projectId })
   );
 
-  const location = useLocation();
   const navigate = useNavigate();
 
   if (!query.data) {
@@ -117,3 +106,9 @@ const ProjectPage = ({ projectId }: { projectId: string }) => {
     </>
   );
 };
+
+const ProjectSingleHeader = ({ title }: { title: string }) => (
+  <Header
+    breadcrumbs={[<Typography color="text.primary">{title}</Typography>]}
+  />
+);

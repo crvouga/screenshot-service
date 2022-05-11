@@ -1,4 +1,4 @@
-import { ChevronRight, Create } from "@mui/icons-material";
+import { ChevronRight, Create } from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -9,13 +9,13 @@ import {
   Grid,
   Toolbar,
   Typography,
-} from "@mui/material";
-import { useQuery } from "react-query";
-import { Link } from "react-router-dom";
-import { useAuthUser } from "../authentication";
-import { Header } from "../Header";
-import * as Projects from "../projects";
-import { routes } from "../routes";
+} from '@mui/material';
+import { useQuery } from 'react-query';
+import { Link } from 'react-router-dom';
+import { useAuthUser } from '../authentication';
+import { Header } from '../Header';
+import * as Projects from '../projects';
+import { routes } from '../routes';
 
 export const ProjectsPage = () => {
   const authUser = useAuthUser();
@@ -27,32 +27,30 @@ export const ProjectsPage = () => {
 
   return (
     <>
-      <Header breadcrumbs={[<Typography>projects</Typography>]} />
+      <Header breadcrumbs={[]} />
 
       <Toolbar>
-        <Link to={routes["/projects/create"].make()}>
+        <Link to={routes['/projects/create'].make()}>
           <Button startIcon={<Create />} variant="contained">
             Create New
           </Button>
         </Link>
       </Toolbar>
 
-      {query.status === "loading" && (
-        <>
-          <Box
-            sx={{
-              width: "100%",
-              padding: 8,
-              display: "grid",
-              placeItems: "center",
-            }}
-          >
-            <CircularProgress />
-          </Box>
-        </>
+      {query.status === 'loading' && (
+        <Box
+          sx={{
+            width: '100%',
+            padding: 8,
+            display: 'grid',
+            placeItems: 'center',
+          }}
+        >
+          <CircularProgress />
+        </Box>
       )}
 
-      {query.status === "success" && query.data.type === "success" && (
+      {query.status === 'success' && query.data.type === 'success' && (
         <>
           <Grid container>
             {query.data.data.map((project) => (
@@ -60,11 +58,11 @@ export const ProjectsPage = () => {
                 xs={6}
                 item
                 key={project.projectId}
-                sx={{ height: "100%", p: 1 }}
+                sx={{ height: '100%', p: 1 }}
               >
-                <Link to={routes["/projects/:id"].make(project.projectId)}>
+                <Link to={routes['/projects/:id'].make(project.projectId)}>
                   <CardActionArea>
-                    <Card sx={{ height: "100%" }}>
+                    <Card sx={{ height: '100%' }}>
                       <CardHeader
                         title={project.name}
                         action={<ChevronRight />}
@@ -79,11 +77,11 @@ export const ProjectsPage = () => {
           {query.data.data.length === 0 && (
             <Box
               sx={{
-                width: "100%",
+                width: '100%',
                 p: 4,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               <Typography color="text.secondary">

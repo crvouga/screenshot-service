@@ -1,23 +1,25 @@
-import { CssBaseline } from "@mui/material";
+import { CssBaseline } from '@mui/material';
 import {
   createTheme,
   responsiveFontSizes,
   ThemeProvider,
-} from "@mui/material/styles";
-import React from "react";
-import ReactDOM from "react-dom";
-import { QueryClient, QueryClientProvider } from "react-query";
-import { BrowserRouter } from "react-router-dom";
-import { App } from "./App";
-import { SnackbarProvider } from "notistack";
+} from '@mui/material/styles';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { BrowserRouter } from 'react-router-dom';
+import { App } from './App';
+import { SnackbarProvider } from 'notistack';
+import { blue, deepPurple } from '@mui/material/colors';
 
 const theme = responsiveFontSizes(
   createTheme({
     palette: {
-      mode: "dark",
+      mode: 'dark',
+      primary: deepPurple,
     },
     typography: {
-      fontFamily: "monospace",
+      fontFamily: 'Consolas, monospace',
     },
   })
 );
@@ -29,9 +31,10 @@ ReactDOM.render(
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <SnackbarProvider
+            maxSnack={1}
             anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "center",
+              vertical: 'bottom',
+              horizontal: 'center',
             }}
           >
             <App />
@@ -40,5 +43,5 @@ ReactDOM.render(
       </QueryClientProvider>
     </BrowserRouter>
   </React.StrictMode>,
-  document.getElementById("root")
+  document.getElementById('root')
 );

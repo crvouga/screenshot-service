@@ -32,7 +32,7 @@ export const LoginPage = () => {
         <Typography variant="h1" align="center">
           📸
         </Typography>
-        <Typography variant="h3" align="center" sx={{ marginBottom: 4 }}>
+        <Typography variant="h5" align="center" sx={{ marginBottom: 4 }}>
           screenshot service
         </Typography>
 

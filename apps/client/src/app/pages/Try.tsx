@@ -9,6 +9,7 @@ import {
   AlertTitle,
   Box,
   Button,
+  Container,
   Divider,
   InputAdornment,
   Paper,
@@ -52,10 +53,6 @@ export const TryPage = () => {
 
   return (
     <>
-      <Header breadcrumbs={[<Typography>try it</Typography>]} />
-
-      <Box sx={{ p: 2 }} />
-
       <Typography gutterBottom color="text.secondary">
         targetUrl
       </Typography>
@@ -167,20 +164,18 @@ export const TryPage = () => {
 
       {fetchScreenshotMutation.status === 'success' &&
         fetchScreenshotMutation.data.src && (
-          <>
-            <Button
-              sx={{ marginTop: 4 }}
-              fullWidth
-              size="large"
-              variant="contained"
-              startIcon={<DownloadIcon />}
-              title={targetUrl}
-              href={fetchScreenshotMutation.data.src}
-              download={fetchScreenshotMutation.data.src}
-            >
-              Download Screenshot
-            </Button>
-          </>
+          <Button
+            sx={{ marginTop: 4 }}
+            fullWidth
+            size="large"
+            variant="contained"
+            startIcon={<DownloadIcon />}
+            title={targetUrl}
+            href={fetchScreenshotMutation.data.src}
+            download={fetchScreenshotMutation.data.src}
+          >
+            Download Screenshot
+          </Button>
         )}
     </>
   );
