@@ -1,9 +1,14 @@
-import puppeteer from 'puppeteer';
 import { IImageType, ITargetUrl, ITimeoutMs } from '@screenshot-service/shared';
-import { IScreenshot } from './types';
+import puppeteer from 'puppeteer';
+import { IScreenshotData } from './types';
 
 type GetResult =
-  | { type: 'success'; screenshot: IScreenshot }
+  | {
+      type: 'success';
+      updatedAtMs: number;
+      data: IScreenshotData;
+      imageType: IImageType;
+    }
   | { type: 'error'; errors: [{ message: string }] };
 
 export const get = async (
@@ -27,11 +32,11 @@ export const get = async (
 
     await setTimeoutPromise(timeoutMs);
 
-    const screenshot = await page.screenshot({
+    const screenshotData = await page.screenshot({
       type: imageType,
     });
 
-    if (typeof screenshot !== 'string' && !screenshot) {
+    if (typeof screenshotData !== 'string' && !screenshotData) {
       return {
         type: 'error',
         errors: [
@@ -44,16 +49,12 @@ export const get = async (
 
     return {
       type: 'success',
-      screenshot: {
-        data: screenshot,
-        type: imageType,
-        updatedAtMs: Date.now(),
-      },
+      updatedAtMs: Date.now(),
+      imageType: imageType,
+      data: screenshotData,
     };
   } catch (error) {
-    const message = String(
-      (error as any)?.toString?.() ?? 'puppeteer threw an error'
-    );
+    const message = String(error?.toString?.() ?? 'puppeteer threw an error');
 
     return {
       type: 'error',

@@ -1,47 +1,56 @@
+import { IImageType, ITargetUrl, ITimeoutMs } from '@screenshot-service/shared';
 import puppeteer from 'puppeteer';
-import {
-  encode,
-  IImageType,
-  IMaxAgeMs,
-  ITargetUrl,
-  ITimeoutMs,
-} from '@screenshot-service/shared';
+import * as Projects from '../projects';
 import * as ScreenshotPuppeteer from './screenshot-data-access-puppeteer';
 import * as ScreenshotSupabaseStorage from './screenshot-data-access-supabase-storage';
-import { IScreenshot } from './types';
+import { IScreenshotData } from './types';
 
 type IGetResult =
   | {
       type: 'success';
       source: 'FromCache' | 'FromPuppeteer';
-      screenshot: IScreenshot;
+      data: IScreenshotData;
+      imageType: IImageType;
     }
-  | { type: 'error'; errors: { message: string }[] };
+  | {
+      type: 'error';
+      errors: { message: string }[];
+    };
 
-export const get = async (
+export const getScreenshot = async (
   browser: puppeteer.Browser,
   {
+    apiKey,
     timeoutMs,
     targetUrl,
     imageType,
   }: {
+    apiKey: string;
     imageType: IImageType;
     timeoutMs: ITimeoutMs;
     targetUrl: ITargetUrl;
-    maxAgeMs: IMaxAgeMs;
   }
 ): Promise<IGetResult> => {
-  const screenshotId = encode({
-    timeoutMs,
-    imageType,
-    targetUrl,
-  });
+  const projectResult = await Projects.getOneByApiKey({ apiKey });
 
-  const filename = `${screenshotId}.${imageType}`;
+  if (projectResult.type === 'error') {
+    return {
+      type: 'error',
+      errors: [
+        {
+          message: `Failed to find a project associated with the provided api key: ${apiKey}`,
+        },
+      ],
+    };
+  }
+
+  const projectId = projectResult.project.projectId;
 
   const supabaseResult = await ScreenshotSupabaseStorage.get({
-    filename,
+    timeoutMs,
+    targetUrl,
     imageType,
+    projectId,
   });
 
   if (supabaseResult.type === 'error') {
@@ -59,25 +68,23 @@ export const get = async (
     }
 
     await ScreenshotSupabaseStorage.put(
-      { filename },
-      puppeteerResult.screenshot.data
+      { imageType, timeoutMs, targetUrl, projectId },
+      puppeteerResult.data
     );
 
     return {
       type: 'success',
       source: 'FromPuppeteer',
-      screenshot: puppeteerResult.screenshot,
+      data: puppeteerResult.data,
+      imageType: imageType,
     };
   }
-
-  const screenshotAgeMs = Date.now() - supabaseResult.screenshot.updatedAtMs;
-
-  console.log({ screenshotAgeMs: formatMs(screenshotAgeMs) });
 
   return {
     type: 'success',
     source: 'FromCache',
-    screenshot: supabaseResult.screenshot,
+    data: supabaseResult.data,
+    imageType: imageType,
   };
 };
 
@@ -96,7 +103,7 @@ const formatMinutes = (minutes: number) => `${minutes} min`;
 const formatSeconds = (seconds: number) => `${seconds} sec`;
 //
 
-const formatMs = (ms: number) =>
+export const formatMs = (ms: number) =>
   [
     formatHours(toHours(ms)),
     formatMinutes(toMinutes(ms)),

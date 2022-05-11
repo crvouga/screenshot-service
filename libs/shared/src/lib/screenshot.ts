@@ -163,7 +163,7 @@ export type IMaxAgeMs = number & { type: 'IMaxAgeMs' };
 
 export const castMaxAgeMs = (
   maxAgeMs: unknown,
-  name: string = 'maxAgeMs'
+  name = 'maxAgeMs'
 ): ICastResult<IMaxAgeMs> => {
   const maxAgeMsElseDefault = maxAgeMs || Infinity;
 
@@ -215,7 +215,7 @@ export type IImageType = 'jpeg' | 'png';
 
 export const castImageType = (
   imageType: unknown,
-  name: string = 'imageType'
+  name = 'imageType'
 ): ICastResult<IImageType> => {
   const errors = validateImageType(imageType, { name });
 
@@ -230,29 +230,4 @@ export const castImageType = (
     type: 'error',
     errors,
   };
-};
-
-/**
- *
- *
- *
- *
- *
- */
-
-const _seperator = ' ';
-
-export const encode = ({
-  imageType,
-  timeoutMs,
-  targetUrl,
-}: {
-  imageType: IImageType;
-  timeoutMs: ITimeoutMs;
-  targetUrl: ITargetUrl;
-}): string => {
-  return [
-    'screenshot',
-    toBase64([targetUrl, timeoutMs, imageType].join(_seperator)),
-  ].join('-');
 };

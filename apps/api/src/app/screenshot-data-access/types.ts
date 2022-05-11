@@ -1,7 +1,11 @@
-import { IImageType } from '@screenshot-service/shared';
+import { IImageType, ITargetUrl, ITimeoutMs } from '@screenshot-service/shared';
 
 export type IScreenshot = {
-  type: IImageType;
-  data: Buffer | string;
-  updatedAtMs: number;
+  screenshotId: string;
+  imageType: IImageType;
+  timeoutMs: ITimeoutMs;
+  targetUrl: ITargetUrl;
+  projectId: string;
 };
+
+export type IScreenshotData = Buffer | string;

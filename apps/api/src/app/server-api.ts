@@ -14,15 +14,13 @@ import {
 import { Application, ErrorRequestHandler, Router } from 'express';
 import { Browser } from 'puppeteer';
 import env from './dotenv';
-import * as Screenshot from './screenshot-data-access/screenshot-data-access';
+import { getScreenshot } from './screenshot-data-access/screenshot-data-access';
 import * as ScreenshotPuppeteer from './screenshot-data-access/screenshot-data-access-puppeteer';
 
 export const useApi = async (app: Application) => {
   const browser = await ScreenshotPuppeteer.createPuppeteerBrowser();
 
   const router = Router();
-
-  useSecurity(router);
 
   useGetScreenshot(browser, router);
 
@@ -43,37 +41,42 @@ export const useApi = async (app: Application) => {
 
 const useGetScreenshot = async (browser: Browser, router: Router) => {
   router.get(GET_SCREENSHOT_ENDPOINT, async (req, res) => {
-    const queryParams: IGetScreenshotQueryParams = req.query;
+    const clientUrl = req.headers.origin ?? req.headers.referer;
+
+    console.log({ clientUrl });
+
+    const queryParams: Partial<IGetScreenshotQueryParams> = req.query;
 
     const timeoutMsResult = castTimeoutMs(queryParams.timeoutMs);
     const targetUrlResult = castTargetUrl(queryParams.targetUrl);
     const imageTypeResult = castImageType(queryParams.imageType);
-    const maxAgeMsResult = castMaxAgeMs(queryParams.maxAgeMs);
+    const apiKeyResult =
+      typeof queryParams.apiKey === 'string'
+        ? { type: 'success', data: queryParams.apiKey }
+        : { type: 'error' };
 
     if (
       !(
         timeoutMsResult.type === 'success' &&
         targetUrlResult.type === 'success' &&
-        imageTypeResult.type === 'success' &&
-        maxAgeMsResult.type === 'success'
+        imageTypeResult.type === 'success'
       )
     ) {
       const apiErrorBody: IApiErrorBody = [
         ...resultToErrors(timeoutMsResult),
         ...resultToErrors(targetUrlResult),
         ...resultToErrors(imageTypeResult),
-        ...resultToErrors(maxAgeMsResult),
       ];
 
       res.status(400).json(apiErrorBody);
       return;
     }
 
-    const result = await Screenshot.get(browser, {
+    const result = await getScreenshot(browser, {
       imageType: imageTypeResult.data,
       timeoutMs: timeoutMsResult.data,
       targetUrl: targetUrlResult.data,
-      maxAgeMs: maxAgeMsResult.data,
+      apiKey: apiKeyResult.data,
     });
 
     if (result.type === 'error') {
@@ -83,16 +86,14 @@ const useGetScreenshot = async (browser: Browser, router: Router) => {
       return;
     }
 
-    const image = result.screenshot;
-
     const statusCode = result.source === 'FromPuppeteer' ? 201 : 200;
 
     res
       .writeHead(statusCode, {
-        'Content-Type': image.type,
-        'Content-Length': image.data.length,
+        'Content-Type': result.imageType,
+        'Content-Length': result.data.length,
       })
-      .end(image.data);
+      .end(result.data);
   });
 };
 

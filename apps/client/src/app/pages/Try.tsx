@@ -34,7 +34,7 @@ export const TryPage = () => {
   const [targetUrl, setTargetUrl] = useState('');
   const [imageType, setImageType] = useState<'png' | 'jpeg'>('jpeg');
   const [timeoutMs, setTimeoutMs] = useState('1000');
-  const [maxAgeMs, setMaxAgeMs] = useState<string>('');
+  const [apiKey, setApiKey] = useState('');
 
   const castedTargetUrl = castTargetUrl(targetUrl);
 
@@ -49,7 +49,7 @@ export const TryPage = () => {
     setQuery({ type: 'loading' });
 
     const result = await fetchScreenshot(
-      { targetUrl, imageType, timeoutMs, maxAgeMs },
+      { targetUrl, imageType, timeoutMs, apiKey },
       { baseUrl: 'http://localhost:8000' }
     );
 
@@ -60,6 +60,17 @@ export const TryPage = () => {
 
   return (
     <>
+      <Typography gutterBottom color="text.secondary">
+        apiKey
+      </Typography>
+
+      <TextFieldInput
+        id="apiKey"
+        value={apiKey}
+        onChange={setApiKey}
+        sx={{ marginBottom: 2 }}
+      />
+
       <Typography gutterBottom color="text.secondary">
         targetUrl
       </Typography>
@@ -104,19 +115,6 @@ export const TryPage = () => {
         type="number"
         value={timeoutMs}
         onChange={setTimeoutMs}
-        sx={{ marginBottom: 2 }}
-      />
-
-      <Typography gutterBottom color="text.secondary">
-        maxAgeMs
-      </Typography>
-
-      <TextFieldInput
-        id="maxAgeMs"
-        type="number"
-        placeholder="Infinity"
-        value={maxAgeMs}
-        onChange={setMaxAgeMs}
         sx={{ marginBottom: 2 }}
       />
 

@@ -11,10 +11,10 @@ export type IConfig = {
 };
 
 export type IGetScreenshotQueryParams = {
-  timeoutMs?: string;
-  imageType?: string;
-  targetUrl?: string;
-  maxAgeMs?: string;
+  apiKey: string;
+  timeoutMs: string;
+  imageType: string;
+  targetUrl: string;
 };
 
 export const toGetScreenshotEndpoint = (
