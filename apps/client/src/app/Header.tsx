@@ -1,4 +1,4 @@
-import { CameraAlt } from '@mui/icons-material';
+import { NavigateNext, CameraAlt } from '@mui/icons-material';
 import {
   Avatar,
   Box,
@@ -23,10 +23,8 @@ export const Header = ({ breadcrumbs }: { breadcrumbs: ReactNode[] }) => {
           justifyContent: 'center',
         }}
       >
-        <Breadcrumbs>
-          <Link to={routes['/'].make()}>
-            <Typography variant="h4">📸</Typography>
-          </Link>
+        <Breadcrumbs separator={<NavigateNext />}>
+          <Link to={routes['/'].make()}>📸</Link>
           {breadcrumbs}
         </Breadcrumbs>
       </Box>
