@@ -85,6 +85,7 @@ export const useNavigate = () => {
 export const Link = ({
   to,
   state,
+
   ...linkProps
 }: { state?: ILocationState; to: string } & LinkProps) => {
   return (

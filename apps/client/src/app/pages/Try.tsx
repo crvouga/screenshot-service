@@ -9,7 +9,6 @@ import {
   AlertTitle,
   Box,
   Button,
-  Container,
   Divider,
   InputAdornment,
   Paper,
@@ -29,7 +28,6 @@ import {
 } from '@screenshot-service/api-interfaces';
 import { useRef, useState } from 'react';
 import { useMutation } from 'react-query';
-import { Header } from '../Header';
 
 export const TryPage = () => {
   const [targetUrl, setTargetUrl] = useState('');

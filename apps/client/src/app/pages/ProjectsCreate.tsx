@@ -44,10 +44,7 @@ export const ProjectsCreatePage = () => {
   return (
     <>
       <Header
-        breadcrumbs={[
-          <Link to={routes['/projects'].make()}>projects</Link>,
-          <Typography color="text.primary">create</Typography>,
-        ]}
+        breadcrumbs={[<Typography color="text.primary">create</Typography>]}
       />
       <Container maxWidth="sm">
         <TextField

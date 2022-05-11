@@ -1,25 +1,29 @@
-import { Session } from "@supabase/supabase-js";
-import constate from "constate";
-import { useEffect, useState } from "react";
-import { supabaseClient } from "./supabase";
+import { Session } from '@supabase/supabase-js';
+import constate from 'constate';
+import { useEffect, useState } from 'react';
+import { supabaseClient } from './supabase';
 
 type IAuthState =
-  | { type: "Loading" }
-  | { type: "LoggedIn"; userId: string }
-  | { type: "LoggedOut" };
+  | { type: 'Loading' }
+  | { type: 'LoggedIn'; userId: string; defaultName: string }
+  | { type: 'LoggedOut' };
 
 const toAuthState = (session: Session | null): IAuthState => {
   const userId = session?.user?.id;
+  const defaultName =
+    session?.user?.user_metadata?.['name'] ??
+    session?.user?.user_metadata?.['full_name'] ??
+    '';
 
   if (userId) {
-    return { type: "LoggedIn", userId: userId };
+    return { type: 'LoggedIn', userId: userId, defaultName: defaultName };
   }
 
-  return { type: "LoggedOut" };
+  return { type: 'LoggedOut' };
 };
 
 export const useAuthState = () => {
-  const [authState, setAuthState] = useState<IAuthState>({ type: "Loading" });
+  const [authState, setAuthState] = useState<IAuthState>({ type: 'Loading' });
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -36,9 +40,10 @@ export const useAuthState = () => {
 };
 
 export const [AuthUserContext, useAuthUser] = constate(
-  ({ userId }: { userId: string }) => {
+  ({ userId, defaultName }: { userId: string; defaultName: string }) => {
     return {
       userId,
+      defaultName,
     };
   }
 );
