@@ -1,12 +1,14 @@
 import {
   API_ENDPOINT,
+  GET_SCREENSHOT_ENDPOINT,
+  IApiErrorBody,
+  IGetScreenshotQueryParams,
+} from '@crvouga/screenshot-service';
+import {
   castImageType,
   castMaxAgeMs,
   castTargetUrl,
   castTimeoutMs,
-  GET_SCREENSHOT_ENDPOINT,
-  IApiErrorBody,
-  IGetScreenshotQueryParams,
   resultToErrors,
 } from '@screenshot-service/shared';
 import { Application, ErrorRequestHandler, Router } from 'express';

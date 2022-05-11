@@ -1,4 +1,4 @@
-import { IApiErrorBody } from '@screenshot-service/shared';
+import { IApiErrorBody } from '@crvouga/screenshot-service';
 import cors from 'cors';
 import express, { ErrorRequestHandler, Router } from 'express';
 import morgan from 'morgan';

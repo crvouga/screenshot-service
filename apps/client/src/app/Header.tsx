@@ -1,13 +1,5 @@
-import { NavigateNext, CameraAlt } from '@mui/icons-material';
-import {
-  Avatar,
-  Box,
-  Breadcrumbs,
-  Button,
-  IconButton,
-  Toolbar,
-  Typography,
-} from '@mui/material';
+import { NavigateNext } from '@mui/icons-material';
+import { Avatar, Box, Breadcrumbs, Toolbar } from '@mui/material';
 import { ReactNode } from 'react';
 import { useProfile } from './profiles';
 import { Link, routes } from './routes';
