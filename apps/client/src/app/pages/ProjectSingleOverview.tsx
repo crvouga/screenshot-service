@@ -79,7 +79,7 @@ const ProjectApiKeysSection = ({ project }: { project: Projects.IProject }) => {
         setApiKeys(nextApiKeys);
 
         snackbar.enqueueSnackbar('project updated', {
-          variant: 'success',
+          variant: 'default',
         });
 
         queryClient.invalidateQueries(Projects.queryFilter);
@@ -107,7 +107,7 @@ const ProjectApiKeysSection = ({ project }: { project: Projects.IProject }) => {
         setApiKeys(nextApiKeys);
 
         snackbar.enqueueSnackbar('project updated', {
-          variant: 'success',
+          variant: 'default',
         });
 
         queryClient.invalidateQueries(Projects.queryFilter);
@@ -217,7 +217,7 @@ const ProjectUrlWhitelistSection = ({
         setWhitelistedUrls([...whitelistedUrls, url]);
 
         snackbar.enqueueSnackbar('project updated', {
-          variant: 'success',
+          variant: 'default',
         });
 
         queryClient.invalidateQueries(Projects.queryFilter);
@@ -249,7 +249,7 @@ const ProjectUrlWhitelistSection = ({
         setWhitelistedUrls(nextWhitelistedUrls);
 
         snackbar.enqueueSnackbar('project updated', {
-          variant: 'success',
+          variant: 'default',
         });
 
         queryClient.invalidateQueries(Projects.queryFilter);
@@ -355,7 +355,7 @@ const ProjectNameSection = ({ project }: { project: Projects.IProject }) => {
 
       case 'success':
         snackbar.enqueueSnackbar('project updated', {
-          variant: 'success',
+          variant: 'default',
         });
 
         queryClient.invalidateQueries(Projects.queryFilter);
@@ -427,7 +427,7 @@ const DeleteProjectSection = ({ projectId }: { projectId: string }) => {
         return;
 
       case 'success':
-        snackbar.enqueueSnackbar('project deleted', { variant: 'success' });
+        snackbar.enqueueSnackbar('project deleted', { variant: 'default' });
         navigate(routes['/projects'].make());
     }
   };

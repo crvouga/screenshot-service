@@ -1,7 +1,8 @@
 import { ChevronLeft, Logout } from '@mui/icons-material';
+import * as ProfileAvatar from '../profile-avatar';
 import { LoadingButton } from '@mui/lab';
 import {
-  useTheme,
+  Avatar,
   Box,
   Button,
   Container,
@@ -9,8 +10,11 @@ import {
   DialogActions,
   DialogTitle,
   IconButton,
+  Paper,
+  TextField,
   Toolbar,
   Typography,
+  useTheme,
 } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
@@ -21,6 +25,8 @@ import { Link, routes } from '../routes';
 
 export const AccountPage = () => {
   const navigate = useNavigate();
+  const { profile } = Profiles.useProfile();
+
   return (
     <>
       <Toolbar>
@@ -29,16 +35,20 @@ export const AccountPage = () => {
             <ChevronLeft />
           </IconButton>
         </Box>
-        <Typography sx={{ flex: 2 }} align="center" variant="h6">
-          Account
+        <Typography noWrap sx={{ flex: 2 }} align="center" variant="h6">
+          {profile.name}
         </Typography>
         <Box sx={{ flex: 1 }}></Box>
       </Toolbar>
 
       <Container maxWidth="sm">
+        <NameSection />
+
+        <AvatarSection />
+
         <Link to={routes['/logout'].make()}>
           <Button
-            sx={{ mt: 2 }}
+            sx={{ mb: 4 }}
             fullWidth
             variant="contained"
             startIcon={<Logout />}
@@ -57,7 +67,7 @@ export const AccountPage = () => {
 //
 //
 //
-// Delete Section
+//
 //
 //
 //
@@ -66,7 +76,6 @@ export const AccountPage = () => {
 const DeleteSection = () => {
   const { profile } = Profiles.useProfile();
   const theme = useTheme();
-  const navigate = useNavigate();
   const mutation = useMutation(Profiles.remove);
   const snackbar = useSnackbar();
   const [open, setOpen] = useState(false);
@@ -88,7 +97,7 @@ const DeleteSection = () => {
         return;
 
       case 'success':
-        snackbar.enqueueSnackbar('profile deleted', { variant: 'success' });
+        snackbar.enqueueSnackbar('profile deleted', { variant: 'default' });
         queryClient.invalidateQueries(Profiles.queryFilter);
         queryClient.invalidateQueries(Profiles.queryKeys.getOne(profile));
         return;
@@ -100,7 +109,7 @@ const DeleteSection = () => {
         p: 2,
         borderRadius: 2,
         border: `1px ${theme.palette.error.main} solid`,
-        marginTop: 4,
+        mb: 4,
       }}
     >
       <Typography variant="h6" sx={{ marginBottom: 2 }}>
@@ -129,5 +138,163 @@ const DeleteSection = () => {
         </DialogActions>
       </Dialog>
     </Box>
+  );
+};
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+const NameSection = () => {
+  const { profile } = Profiles.useProfile();
+
+  const mutation = useMutation(Profiles.update);
+  const snackbar = useSnackbar();
+
+  const [name, setName] = useState(profile.name);
+
+  const queryClient = useQueryClient();
+
+  const onSave = async () => {
+    const response = await mutation.mutateAsync({
+      userId: profile.userId,
+      name: name,
+    });
+
+    switch (response.type) {
+      case 'error':
+        snackbar.enqueueSnackbar('failed to delete profile', {
+          variant: 'error',
+        });
+        return;
+
+      case 'success':
+        snackbar.enqueueSnackbar('profile updated');
+        queryClient.invalidateQueries(Profiles.queryFilter);
+        queryClient.invalidateQueries(Profiles.queryKeys.getOne(profile));
+        return;
+    }
+  };
+
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 2,
+        mb: 4,
+      }}
+    >
+      <Typography variant="h6" sx={{ marginBottom: 2 }}>
+        name
+      </Typography>
+
+      <TextField
+        fullWidth
+        sx={{ mb: 2 }}
+        onChange={(e) => setName(e.currentTarget.value)}
+        label="name"
+        value={name}
+      />
+
+      <Box sx={{ display: 'flex', flexDirection: 'row-reverse' }}>
+        <LoadingButton
+          variant="contained"
+          onClick={onSave}
+          disabled={name === profile.name}
+          loading={mutation.isLoading}
+        >
+          save
+        </LoadingButton>
+      </Box>
+    </Paper>
+  );
+};
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+const AvatarSection = () => {
+  const { profile } = Profiles.useProfile();
+
+  const mutation = useMutation(Profiles.update);
+  const snackbar = useSnackbar();
+  const parsed = ProfileAvatar.parseUrl(profile.avatarUrl);
+
+  const [seed, setSeed] = useState(parsed.seed);
+
+  const avatarUrl = ProfileAvatar.toUrl({ seed, style: parsed.style });
+
+  const queryClient = useQueryClient();
+
+  const onSave = async () => {
+    const response = await mutation.mutateAsync({
+      userId: profile.userId,
+      avatarUrl: avatarUrl,
+    });
+
+    switch (response.type) {
+      case 'error':
+        snackbar.enqueueSnackbar('failed to delete profile', {
+          variant: 'error',
+        });
+        return;
+
+      case 'success':
+        snackbar.enqueueSnackbar('profile updated');
+        queryClient.invalidateQueries(Profiles.queryFilter);
+        queryClient.invalidateQueries(Profiles.queryKeys.getOne(profile));
+        return;
+    }
+  };
+
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 2,
+        mb: 4,
+      }}
+    >
+      <Typography variant="h6" sx={{ marginBottom: 2 }}>
+        avatar
+      </Typography>
+
+      <Avatar
+        src={avatarUrl}
+        sx={{ width: 150, height: 150, marginX: 'auto', mb: 4 }}
+      />
+
+      <TextField
+        fullWidth
+        sx={{ mb: 2 }}
+        onChange={(e) => setSeed(ProfileAvatar.toSeed(e.currentTarget.value))}
+        label="avatar seed"
+        value={seed}
+      />
+
+      <Box sx={{ display: 'flex', flexDirection: 'row-reverse' }}>
+        <LoadingButton
+          variant="contained"
+          onClick={onSave}
+          disabled={profile.avatarUrl === avatarUrl}
+          loading={mutation.isLoading}
+        >
+          save
+        </LoadingButton>
+      </Box>
+    </Paper>
   );
 };

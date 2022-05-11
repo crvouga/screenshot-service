@@ -51,7 +51,7 @@ export const AccountCreatePage = () => {
         return;
       case 'success':
         snackbar.enqueueSnackbar('profile created', {
-          variant: 'success',
+          variant: 'default',
         });
         queryClient.invalidateQueries(Profiles.queryFilter);
         queryClient.invalidateQueries(

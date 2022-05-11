@@ -35,7 +35,7 @@ export const ProjectsCreatePage = () => {
         return;
 
       case 'success':
-        snackbar.enqueueSnackbar('project created', { variant: 'success' });
+        snackbar.enqueueSnackbar('project created', { variant: 'default' });
         navigate(routes['/projects/:id'].make(result.projectId));
         return;
     }
