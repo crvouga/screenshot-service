@@ -14,7 +14,8 @@
     "heroku:env": "npx heroku config -s -a crvouga-screenshot-service > .env",
     "heroku:logs": "heroku logs --tail --app crvouga-screenshot-service",
     "heroku:preview": "npm install && npm run heroku:env && npm run heroku-postbuild && heroku local",
-    "heroku:start": "node dist/apps/api/main.js"
+    "heroku:start": "node dist/apps/api/main.js",
+    "deploy": "npm run heroku:deploy"
   },
   "private": true,
   "dependencies": {
