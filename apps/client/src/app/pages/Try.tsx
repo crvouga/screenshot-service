@@ -25,7 +25,7 @@ import {
   IApiErrorBody,
   IGetScreenshotQueryParams,
   toGetScreenshotEndpoint,
-} from '@screenshot-service/api-interfaces';
+} from '@screenshot-service/shared';
 import { useRef, useState } from 'react';
 import { useMutation } from 'react-query';
 

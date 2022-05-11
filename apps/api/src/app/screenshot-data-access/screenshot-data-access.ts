@@ -5,7 +5,7 @@ import {
   IMaxAgeMs,
   ITargetUrl,
   ITimeoutMs,
-} from '@screenshot-service/api-interfaces';
+} from '@screenshot-service/shared';
 import * as ScreenshotPuppeteer from './screenshot-data-access-puppeteer';
 import * as ScreenshotSupabaseStorage from './screenshot-data-access-supabase-storage';
 import { IScreenshot } from './types';

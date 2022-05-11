@@ -1,9 +1,5 @@
 import puppeteer from 'puppeteer';
-import {
-  IImageType,
-  ITargetUrl,
-  ITimeoutMs,
-} from '@screenshot-service/api-interfaces';
+import { IImageType, ITargetUrl, ITimeoutMs } from '@screenshot-service/shared';
 import { IScreenshot } from './types';
 
 type GetResult =

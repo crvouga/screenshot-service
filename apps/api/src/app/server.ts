@@ -1,4 +1,4 @@
-import { IApiErrorBody } from '@screenshot-service/api-interfaces';
+import { IApiErrorBody } from '@screenshot-service/shared';
 import cors from 'cors';
 import express, { ErrorRequestHandler, Router } from 'express';
 import morgan from 'morgan';

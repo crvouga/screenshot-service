@@ -1,4 +1,4 @@
-import { IImageType } from '@screenshot-service/api-interfaces';
+import { IImageType } from '@screenshot-service/shared';
 
 export type IScreenshot = {
   type: IImageType;

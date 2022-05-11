@@ -8,7 +8,7 @@ import {
   IApiErrorBody,
   IGetScreenshotQueryParams,
   resultToErrors,
-} from '@screenshot-service/api-interfaces';
+} from '@screenshot-service/shared';
 import { Application, ErrorRequestHandler, Router } from 'express';
 import { Browser } from 'puppeteer';
 import env from './dotenv';

@@ -1,5 +1,5 @@
 import { supabaseClient } from '../supabase';
-import { IImageType, definitions } from '@screenshot-service/api-interfaces';
+import { IImageType, definitions } from '@screenshot-service/shared';
 import { IScreenshot } from './types';
 /**
  *

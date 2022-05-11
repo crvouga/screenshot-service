@@ -1,4 +1,4 @@
-import { definitions } from '@screenshot-service/api-interfaces';
+import { definitions } from '@screenshot-service/shared';
 import { supabaseClient } from './supabase';
 
 export type IProject = {

@@ -15,7 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@screenshot-service/api-interfaces": ["libs/api-interfaces/src/index.ts"]
+      "@screenshot-service/shared": ["libs/shared/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

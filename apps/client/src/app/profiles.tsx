@@ -1,4 +1,4 @@
-import { definitions } from '@screenshot-service/api-interfaces';
+import { definitions } from '@screenshot-service/shared';
 import constate from 'constate';
 import { useQuery } from 'react-query';
 import { supabaseClient } from './supabase';
