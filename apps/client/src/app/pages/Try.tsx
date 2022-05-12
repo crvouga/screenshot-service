@@ -1,7 +1,6 @@
 import { fetchScreenshot, IApiErrorBody } from '@crvouga/screenshot-service';
+import { Cancel } from '@mui/icons-material';
 import BrokenImageIcon from '@mui/icons-material/BrokenImage';
-import ClearIcon from '@mui/icons-material/Clear';
-import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import DownloadIcon from '@mui/icons-material/Download';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { LoadingButton } from '@mui/lab';
@@ -11,22 +10,22 @@ import {
   Box,
   Button,
   Divider,
-  InputAdornment,
   Paper,
   PaperProps,
   Skeleton,
-  TextField,
-  TextFieldProps,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
 import { castTargetUrl } from '@screenshot-service/shared';
-import { useRef, useState } from 'react';
+import { useSnackbar } from 'notistack';
+import { abort } from 'process';
+import { useState } from 'react';
+import { TextFieldInput } from '../../lib/TextFieldInput';
 
 type IQueryState =
   | { type: 'idle' }
-  | { type: 'loading' }
+  | { type: 'loading'; abortController: AbortController }
   | { type: 'error'; errors: IApiErrorBody }
   | { type: 'success'; src: string };
 
@@ -46,14 +45,38 @@ export const TryPage = () => {
   const [query, setQuery] = useState<IQueryState>({ type: 'idle' });
 
   const onFetch = async () => {
-    setQuery({ type: 'loading' });
+    const abortController = new AbortController();
+
+    setQuery({ type: 'loading', abortController });
 
     const result = await fetchScreenshot(
-      { targetUrl, imageType, timeoutMs, apiKey },
-      { baseUrl: 'http://localhost:8000' }
+      {
+        targetUrl,
+        imageType,
+        timeoutMs,
+        apiKey,
+      },
+      {
+        baseUrl: 'http://localhost:8000',
+        signal: abortController.signal,
+      }
     );
 
     setQuery(result);
+  };
+
+  const snackbar = useSnackbar();
+
+  const onCancel = () => {
+    if (query.type === 'loading') {
+      try {
+        // this throws an error
+        // query.abortController.abort();
+      } finally {
+        setQuery({ type: 'idle' });
+        snackbar.enqueueSnackbar('cancelled screenshot request');
+      }
+    }
   };
 
   const error = query.type === 'error' ? query.errors : [];
@@ -67,6 +90,7 @@ export const TryPage = () => {
       <TextFieldInput
         id="apiKey"
         value={apiKey}
+        placeholder="api key a project"
         onChange={setApiKey}
         sx={{ marginBottom: 2 }}
       />
@@ -140,12 +164,26 @@ export const TryPage = () => {
         variant="contained"
         sx={{
           mt: 2,
-          mb: 4,
         }}
         onClick={onFetch}
         loading={query.type === 'loading'}
       >
-        Take Screenshot
+        take screenshot
+      </LoadingButton>
+
+      <LoadingButton
+        startIcon={<Cancel />}
+        fullWidth
+        size="large"
+        variant="contained"
+        disabled={query.type !== 'loading'}
+        sx={{
+          mt: 2,
+          mb: 4,
+        }}
+        onClick={onCancel}
+      >
+        cancel
       </LoadingButton>
 
       <Divider
@@ -256,82 +294,5 @@ const Screenshot = ({
         </Box>
       )}
     </Paper>
-  );
-};
-
-//
-//
-//
-// TextFieldInput
-//
-//
-//
-
-const TextFieldInput = ({
-  value,
-  onChange,
-  ...props
-}: {
-  value: string;
-  onChange: (url: string) => void;
-} & Omit<TextFieldProps, 'onChange'>) => {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
-  const handlePasteClipBoard = async () => {
-    if (inputRef.current) {
-      const url = await navigator.clipboard.readText();
-
-      inputRef.current.value = url;
-
-      onChange(url);
-    }
-  };
-
-  const handleClear = () => {
-    if (inputRef.current) {
-      inputRef.current.value = '';
-      onChange('');
-    }
-  };
-
-  return (
-    <TextField
-      fullWidth
-      inputRef={inputRef}
-      value={value}
-      onChange={(event) => {
-        const value = event.target.value;
-        onChange(value);
-      }}
-      InputProps={{
-        endAdornment: (
-          <>
-            <InputAdornment
-              position="end"
-              sx={{
-                cursor: 'pointer',
-              }}
-              onClick={() => {
-                handlePasteClipBoard();
-              }}
-            >
-              <ContentPasteIcon />
-            </InputAdornment>
-            <InputAdornment
-              position="end"
-              sx={{
-                cursor: 'pointer',
-              }}
-              onClick={() => {
-                handleClear();
-              }}
-            >
-              <ClearIcon />
-            </InputAdornment>
-          </>
-        ),
-      }}
-      {...props}
-    />
   );
 };

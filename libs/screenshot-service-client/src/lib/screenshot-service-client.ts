@@ -8,6 +8,7 @@ export const API_ENDPOINT = '/api';
 
 export type IConfig = {
   baseUrl: string;
+  signal?: AbortSignal;
 };
 
 export type IGetScreenshotQueryParams = {
@@ -38,7 +39,9 @@ export const fetchScreenshot = async (
   params: IGetScreenshotQueryParams,
   config: IConfig
 ): Promise<IResult> => {
-  const response = await fetch(toGetScreenshotEndpoint(params, config));
+  const response = await fetch(toGetScreenshotEndpoint(params, config), {
+    signal: config.signal,
+  });
 
   if (response.ok) {
     const blob = await response.blob();

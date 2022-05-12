@@ -11,7 +11,7 @@ import {
 import constate from 'constate';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useAppEventListener } from './event-emitter';
-import useLocalStorage from './use-local-storage';
+import useLocalStorage from '../lib/use-local-storage';
 
 /**
  *
