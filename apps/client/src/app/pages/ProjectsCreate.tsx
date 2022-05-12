@@ -52,13 +52,13 @@ export const ProjectsCreatePage = () => {
           onChange={(event) => setProjectName(event.currentTarget.value)}
           fullWidth
           label="Project Name"
-          sx={{ marginTop: 2, marginBottom: 4 }}
+          sx={{ mt: 2, mb: 4 }}
         />
 
         <LoadingButton
           startIcon={<Create />}
           fullWidth
-          variant="outlined"
+          variant="contained"
           onClick={onCreate}
           loading={mutation.status === 'loading'}
         >
