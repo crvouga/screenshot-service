@@ -11,10 +11,6 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-  List,
-  ListItem,
-  ListItemSecondaryAction,
-  ListItemText,
   Paper,
   TextField,
   Tooltip,
@@ -72,24 +68,22 @@ const ProjectApiKeysSection = ({ project }: { project: Projects.IProject }) => {
         api keys
       </Typography>
 
-      <Box>
-        {apiKeys.length === 0 && (
-          <Alert severity="warning">
-            <AlertTitle>no api keys</AlertTitle>
-            you going need to generate an api key to use in your projects
-          </Alert>
-        )}
+      {apiKeys.length === 0 && (
+        <Alert severity="warning">
+          <AlertTitle>no api keys</AlertTitle>
+          you're going need to generate an api key to use this project
+        </Alert>
+      )}
 
-        {apiKeys.map((apiKey) => (
-          <ApiKeyField
-            projectId={project.projectId}
-            key={apiKey}
-            apiKey={apiKey}
-            apiKeys={apiKeys}
-            setApiKeys={setApiKeys}
-          />
-        ))}
-      </Box>
+      {apiKeys.map((apiKey) => (
+        <ApiKeyField
+          projectId={project.projectId}
+          key={apiKey}
+          apiKey={apiKey}
+          apiKeys={apiKeys}
+          setApiKeys={setApiKeys}
+        />
+      ))}
 
       <Box sx={{ mt: 2, display: 'flex', flexDirection: 'row-reverse' }}>
         <ApiKeyGenerateButton
@@ -217,7 +211,7 @@ const ApiKeyField = ({
         <DialogContent>
           <Alert severity="error">
             <AlertTitle>danger!</AlertTitle>
-            deleting an api key will break projects using this key
+            deleting this api key will break projects using it
           </Alert>
         </DialogContent>
         <DialogActions>
@@ -253,23 +247,68 @@ const ProjectUrlWhitelistSection = ({
 }: {
   project: Projects.IProject;
 }) => {
-  const queryClient = useQueryClient();
-
   const [whitelistedUrls, setWhitelistedUrls] = useState(
     project.whitelistedUrls
   );
 
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 2,
+        marginBottom: 4,
+      }}
+    >
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        whitelisted urls
+      </Typography>
+
+      {whitelistedUrls.length === 0 && (
+        <Alert severity="warning">
+          <AlertTitle>no whitelisted urls</AlertTitle>
+          you're going to need to add a url to the white list to be able to use
+          this project
+        </Alert>
+      )}
+
+      {whitelistedUrls.map((url) => (
+        <WhitelistedUrlField
+          key={url}
+          projectId={project.projectId}
+          whitelistedUrl={url}
+          whitelistedUrls={whitelistedUrls}
+          setWhitelistedUrls={setWhitelistedUrls}
+        />
+      ))}
+
+      <AddToWhitelistInput
+        projectId={project.projectId}
+        whitelistedUrls={whitelistedUrls}
+        setWhitelistedUrls={setWhitelistedUrls}
+      />
+    </Paper>
+  );
+};
+
+const AddToWhitelistInput = ({
+  projectId,
+  whitelistedUrls,
+  setWhitelistedUrls,
+}: {
+  projectId: string;
+  whitelistedUrls: string[];
+  setWhitelistedUrls: (urls: string[]) => void;
+}) => {
+  const queryClient = useQueryClient();
+  const mutation = useMutation(Projects.update);
+  const snackbar = useSnackbar();
   const [url, setUrl] = useState('');
+
   const isUrlValid = url.length > 0 && !whitelistedUrls.includes(url);
 
-  const addMutation = useMutation(Projects.update);
-  const removeMutation = useMutation(Projects.update);
-
-  const snackbar = useSnackbar();
-
   const onAdd = async () => {
-    const result = await addMutation.mutateAsync({
-      projectId: project.projectId,
+    const result = await mutation.mutateAsync({
+      projectId: projectId,
       whitelistedUrls: [...whitelistedUrls, url],
     });
 
@@ -295,79 +334,9 @@ const ProjectUrlWhitelistSection = ({
     }
   };
 
-  const onRemove = async (params: { url: string }) => {
-    const nextWhitelistedUrls = whitelistedUrls.filter(
-      (url) => url !== params.url
-    );
-
-    const result = await removeMutation.mutateAsync({
-      projectId: project.projectId,
-      whitelistedUrls: nextWhitelistedUrls,
-    });
-
-    switch (result.type) {
-      case 'error':
-        snackbar.enqueueSnackbar('failed to update project name', {
-          variant: 'error',
-        });
-        return;
-
-      case 'success':
-        setUrl('');
-
-        setWhitelistedUrls(nextWhitelistedUrls);
-
-        snackbar.enqueueSnackbar('project updated', {
-          variant: 'default',
-        });
-
-        queryClient.invalidateQueries(Projects.queryFilter);
-
-        return;
-    }
-  };
-
   return (
-    <Paper
-      variant="outlined"
-      sx={{
-        p: 2,
-        marginBottom: 4,
-      }}
-    >
-      <Typography variant="h6" sx={{ marginBottom: 2 }}>
-        whitelisted urls
-      </Typography>
-
-      <List>
-        {whitelistedUrls.length === 0 && (
-          <Typography color="text.secondary" align="center" sx={{ p: 2 }}>
-            project has no whitelisted urls
-          </Typography>
-        )}
-        {whitelistedUrls.map((url) => (
-          <ListItem key={url}>
-            <ListItemText primary={url} />
-            <ListItemSecondaryAction>
-              <LoadingButton
-                disabled={removeMutation.isLoading}
-                loading={
-                  removeMutation.isLoading &&
-                  !removeMutation?.variables?.whitelistedUrls?.includes(url)
-                }
-                color="error"
-                onClick={() => {
-                  onRemove({ url });
-                }}
-              >
-                remove
-              </LoadingButton>
-            </ListItemSecondaryAction>
-          </ListItem>
-        ))}
-      </List>
-
-      <Box sx={{ marginBottom: 2, display: 'flex' }}>
+    <>
+      <Box sx={{ mb: 2, mt: 3, display: 'flex' }}>
         <TextField
           label="url"
           value={url}
@@ -380,13 +349,98 @@ const ProjectUrlWhitelistSection = ({
         <LoadingButton
           variant="contained"
           onClick={onAdd}
-          loading={addMutation.status === 'loading'}
+          loading={mutation.status === 'loading'}
           disabled={!isUrlValid}
         >
           add
         </LoadingButton>
       </Box>
-    </Paper>
+    </>
+  );
+};
+
+const WhitelistedUrlField = ({
+  projectId,
+  whitelistedUrls,
+  setWhitelistedUrls,
+  whitelistedUrl,
+}: {
+  projectId: string;
+  whitelistedUrl: string;
+  whitelistedUrls: string[];
+  setWhitelistedUrls: (urls: string[]) => void;
+}) => {
+  const queryClient = useQueryClient();
+  const snackbar = useSnackbar();
+  const [open, setOpen] = useState(false);
+  const mutation = useMutation(Projects.update);
+
+  const onRemove = async () => {
+    const nextWhitelistedUrls = whitelistedUrls.filter(
+      (url) => url !== whitelistedUrl
+    );
+
+    const result = await mutation.mutateAsync({
+      projectId: projectId,
+      whitelistedUrls: nextWhitelistedUrls,
+    });
+
+    switch (result.type) {
+      case 'error':
+        snackbar.enqueueSnackbar(
+          result.error ?? 'failed to remove url from whitelist',
+          {
+            variant: 'error',
+          }
+        );
+        return;
+
+      case 'success':
+        setWhitelistedUrls(nextWhitelistedUrls);
+
+        snackbar.enqueueSnackbar('removed url from whitelist', {
+          variant: 'default',
+        });
+
+        queryClient.invalidateQueries(Projects.queryFilter);
+
+        return;
+    }
+  };
+
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+      <CopyToClipboardField text={whitelistedUrl} />
+
+      <Tooltip title="delete forever">
+        <IconButton onClick={() => setOpen(true)}>
+          <DeleteForever />
+        </IconButton>
+      </Tooltip>
+
+      <Dialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>remove whitelisted url?</DialogTitle>
+        <DialogContent>
+          <Alert severity="error">
+            <AlertTitle>danger!</AlertTitle>
+            removing from whitelist will block projects located at this url
+          </Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button color="inherit" onClick={() => setOpen(false)}>
+            cancel
+          </Button>
+          <LoadingButton
+            variant="contained"
+            color="error"
+            loading={mutation.isLoading}
+            onClick={onRemove}
+          >
+            remove
+          </LoadingButton>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 
