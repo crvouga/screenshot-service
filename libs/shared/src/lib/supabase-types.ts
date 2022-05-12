@@ -20,6 +20,7 @@ export interface paths {
           created_at?: parameters["rowFilter.profiles.created_at"];
           avatar_seed?: parameters["rowFilter.profiles.avatar_seed"];
           name?: parameters["rowFilter.profiles.name"];
+          theme_mode?: parameters["rowFilter.profiles.theme_mode"];
           /** Filtering Columns */
           select?: parameters["select"];
           /** Ordering */
@@ -74,6 +75,7 @@ export interface paths {
           created_at?: parameters["rowFilter.profiles.created_at"];
           avatar_seed?: parameters["rowFilter.profiles.avatar_seed"];
           name?: parameters["rowFilter.profiles.name"];
+          theme_mode?: parameters["rowFilter.profiles.theme_mode"];
         };
         header: {
           /** Preference */
@@ -92,6 +94,7 @@ export interface paths {
           created_at?: parameters["rowFilter.profiles.created_at"];
           avatar_seed?: parameters["rowFilter.profiles.avatar_seed"];
           name?: parameters["rowFilter.profiles.name"];
+          theme_mode?: parameters["rowFilter.profiles.theme_mode"];
         };
         body: {
           /** profiles */
@@ -334,6 +337,11 @@ export interface definitions {
     avatar_seed: string;
     /** Format: text */
     name: string;
+    /**
+     * Format: public.theme_mode
+     * @enum {string}
+     */
+    theme_mode: "light" | "dark";
   };
   projects: {
     /**
@@ -433,6 +441,8 @@ export interface parameters {
   "rowFilter.profiles.avatar_seed": string;
   /** Format: text */
   "rowFilter.profiles.name": string;
+  /** Format: public.theme_mode */
+  "rowFilter.profiles.theme_mode": string;
   /** @description projects */
   "body.projects": definitions["projects"];
   /** Format: uuid */

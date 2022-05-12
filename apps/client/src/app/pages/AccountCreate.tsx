@@ -5,17 +5,24 @@ import {
   Button,
   Container,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Toolbar,
   Typography,
 } from '@mui/material';
 import { Box } from '@mui/system';
 import { useSnackbar } from 'notistack';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from 'react-query';
 import { useAuthUser } from '../authentication';
 import * as ProfileAvatar from '../profile-avatar';
 import * as Profiles from '../profiles';
 import { Link, routes } from '../routes';
+import {
+  IThemeMode,
+  ThemeModeToggleButtonGroup,
+  useThemeModeContext,
+} from '../theme';
 
 export const AccountCreatePage = () => {
   const authUser = useAuthUser();
@@ -24,6 +31,12 @@ export const AccountCreatePage = () => {
   const [avatarSeed, setAvatarSeed] = useState<ProfileAvatar.Seed>(
     ProfileAvatar.toSeed(authUser.defaultName)
   );
+  const [themeMode, setThemeMode] = useState<IThemeMode>('dark');
+  const themeModeContext = useThemeModeContext();
+
+  useEffect(() => {
+    themeModeContext.setThemeMode(themeMode);
+  }, [themeModeContext, themeMode]);
 
   const avatarUrl = ProfileAvatar.toUrl({
     seed: avatarSeed,
@@ -40,6 +53,7 @@ export const AccountCreatePage = () => {
       userId: authUser.userId,
       name: name,
       avatarSeed: avatarSeed,
+      themeMode: themeMode,
     });
 
     switch (result.type) {
@@ -82,12 +96,26 @@ export const AccountCreatePage = () => {
           sx={{ marginX: 'auto', width: 150, height: 150, mb: 4 }}
         />
 
+        <Typography
+          color="text.secondary"
+          variant="subtitle2"
+          sx={{ mb: 1 / 2 }}
+        >
+          theme mode
+        </Typography>
+
+        <ThemeModeToggleButtonGroup
+          themeMode={themeMode}
+          onThemeModeChanged={setThemeMode}
+          sx={{ mb: 4 }}
+        />
+
         <TextField
           value={avatarSeed}
           onChange={(e) =>
             setAvatarSeed(ProfileAvatar.toSeed(e.currentTarget.value))
           }
-          label="Avatar Seed"
+          label="avatar seed"
           fullWidth
           sx={{ mb: 4 }}
         />
@@ -95,7 +123,7 @@ export const AccountCreatePage = () => {
         <TextField
           value={name}
           onChange={(e) => setName(e.currentTarget.value)}
-          label="Name"
+          label="name"
           fullWidth
           sx={{ mb: 4 }}
         />

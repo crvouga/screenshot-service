@@ -1,61 +1,34 @@
-import { CssBaseline } from '@mui/material';
-import {
-  createTheme,
-  responsiveFontSizes,
-  ThemeProvider,
-} from '@mui/material/styles';
 import { SnackbarProvider } from 'notistack';
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { App } from './app/App';
-
-const theme = responsiveFontSizes(
-  createTheme({
-    palette: {
-      mode: 'dark',
-    },
-    typography: {
-      fontFamily: "'Nunito', sans-serif",
-    },
-    components: {
-      MuiButton: {
-        styleOverrides: {
-          root: {
-            borderRadius: 24,
-          },
-        },
-      },
-    },
-  })
-);
-
-const Root = () => {
-  return (
-    <StrictMode>
-      <BrowserRouter>
-        <QueryClientProvider client={new QueryClient()}>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <SnackbarProvider
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'center',
-              }}
-            >
-              <App />
-            </SnackbarProvider>
-          </ThemeProvider>
-        </QueryClientProvider>
-      </BrowserRouter>
-    </StrictMode>
-  );
-};
+import { ThemeContext, ThemeModeContext } from './app/theme';
 
 const rootElement = document.getElementById('root');
 
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
-  root.render(<Root />);
+  root.render(
+    <StrictMode>
+      <BrowserRouter>
+        <QueryClientProvider client={new QueryClient()}>
+          <ThemeModeContext>
+            <ThemeContext>
+              <SnackbarProvider
+                maxSnack={1}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center',
+                }}
+              >
+                <App />
+              </SnackbarProvider>
+            </ThemeContext>
+          </ThemeModeContext>
+        </QueryClientProvider>
+      </BrowserRouter>
+    </StrictMode>
+  );
 }

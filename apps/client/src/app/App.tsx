@@ -178,7 +178,7 @@ export const Loaded = () => {
           }}
         >
           <CameraAlt sx={{ mr: 1 }} />
-          Try
+          take screenshots
         </Fab>
       </Link>
 

@@ -1,6 +1,8 @@
 import { ChevronLeft } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import {
+  ToggleButtonGroup,
+  ToggleButton,
   Avatar,
   Box,
   Button,
@@ -13,18 +15,26 @@ import {
   Toolbar,
   Typography,
   useTheme,
+  CircularProgress,
+  LinearProgress,
+  Fade,
 } from '@mui/material';
 import { useSnackbar } from 'notistack';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 import * as ProfileAvatar from '../profile-avatar';
 import * as Profiles from '../profiles';
 import { Link, routes } from '../routes';
+import {
+  IThemeMode,
+  ThemeModeToggleButtonGroup,
+  useThemeModeContext,
+} from '../theme';
 
 export const AccountPage = () => {
   const navigate = useNavigate();
-  const { profile } = Profiles.useProfile();
+  const { profile } = Profiles.useProfileContext();
 
   return (
     <>
@@ -45,9 +55,11 @@ export const AccountPage = () => {
       </Toolbar>
 
       <Container maxWidth="sm">
-        <NameSection />
-
         <AvatarSection />
+
+        <ThemeSection />
+
+        <NameSection />
 
         <LogoutSection />
 
@@ -68,7 +80,7 @@ export const AccountPage = () => {
 //
 
 const DeleteSection = () => {
-  const { profile } = Profiles.useProfile();
+  const { profile } = Profiles.useProfileContext();
   const theme = useTheme();
   const mutation = useMutation(Profiles.remove);
   const snackbar = useSnackbar();
@@ -91,7 +103,7 @@ const DeleteSection = () => {
         return;
 
       case 'success':
-        snackbar.enqueueSnackbar('profile deleted', { variant: 'default' });
+        snackbar.enqueueSnackbar('deleted profile', { variant: 'default' });
         queryClient.invalidateQueries(Profiles.queryFilter);
         queryClient.invalidateQueries(Profiles.queryKeys.getOne(profile));
         return;
@@ -146,7 +158,7 @@ const DeleteSection = () => {
 //
 
 const NameSection = () => {
-  const { profile } = Profiles.useProfile();
+  const { profile } = Profiles.useProfileContext();
 
   const mutation = useMutation(Profiles.update);
   const snackbar = useSnackbar();
@@ -163,13 +175,13 @@ const NameSection = () => {
 
     switch (response.type) {
       case 'error':
-        snackbar.enqueueSnackbar('failed to delete profile', {
+        snackbar.enqueueSnackbar('failed to change name', {
           variant: 'error',
         });
         return;
 
       case 'success':
-        snackbar.enqueueSnackbar('profile updated');
+        snackbar.enqueueSnackbar('changed name');
         queryClient.invalidateQueries(Profiles.queryFilter);
         queryClient.invalidateQueries(Profiles.queryKeys.getOne(profile));
         return;
@@ -221,7 +233,7 @@ const NameSection = () => {
 //
 
 const AvatarSection = () => {
-  const { profile } = Profiles.useProfile();
+  const { profile } = Profiles.useProfileContext();
 
   const mutation = useMutation(Profiles.update);
   const snackbar = useSnackbar();
@@ -240,13 +252,13 @@ const AvatarSection = () => {
 
     switch (response.type) {
       case 'error':
-        snackbar.enqueueSnackbar('failed to delete profile', {
+        snackbar.enqueueSnackbar('failed to change avatar', {
           variant: 'error',
         });
         return;
 
       case 'success':
-        snackbar.enqueueSnackbar('profile updated');
+        snackbar.enqueueSnackbar('changed avatar');
         queryClient.invalidateQueries(Profiles.queryFilter);
         queryClient.invalidateQueries(Profiles.queryKeys.getOne(profile));
         return;
@@ -319,6 +331,74 @@ const LogoutSection = () => {
         <Link to={routes['/logout'].make()}>
           <Button variant="contained">Logout</Button>
         </Link>
+      </Box>
+    </Paper>
+  );
+};
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+const ThemeSection = () => {
+  const snackbar = useSnackbar();
+  const { themeMode, setThemeMode } = useThemeModeContext();
+  const { profile } = Profiles.useProfileContext();
+  const mutation = useMutation(Profiles.update);
+  const queryClient = useQueryClient();
+
+  const onThemeModeChanged = async (nextThemeMode: IThemeMode) => {
+    const result = await mutation.mutateAsync({
+      userId: profile.userId,
+      themeMode: nextThemeMode,
+    });
+
+    switch (result.type) {
+      case 'error':
+        setThemeMode(profile.themeMode);
+        snackbar.enqueueSnackbar('failed to change theme', {
+          variant: 'error',
+        });
+        return;
+
+      case 'success':
+        snackbar.enqueueSnackbar('changed theme');
+        queryClient.invalidateQueries(Profiles.queryFilter);
+        queryClient.invalidateQueries(Profiles.queryKeys.getOne(profile));
+        setThemeMode(nextThemeMode);
+
+        return;
+    }
+  };
+
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        mb: 4,
+      }}
+    >
+      <Fade in={mutation.isLoading}>
+        <LinearProgress />
+      </Fade>
+
+      <Box sx={{ p: 2 }}>
+        <Typography sx={{ mb: 2 }} variant="h6">
+          theme
+        </Typography>
+
+        <ThemeModeToggleButtonGroup
+          disabled={mutation.isLoading}
+          themeMode={themeMode}
+          onThemeModeChanged={onThemeModeChanged}
+          sx={{ mb: 2 }}
+        />
       </Box>
     </Paper>
   );

@@ -1,12 +1,16 @@
 import { definitions } from '@screenshot-service/shared';
 import constate from 'constate';
+import { useEffect } from 'react';
 import { useQuery } from 'react-query';
+import { appEventEmitter } from './event-emitter';
 import { supabaseClient } from './supabase';
+import { IThemeMode } from './theme';
 
 export type IProfile = {
   userId: string;
   avatarSeed: string;
   name: string;
+  themeMode: IThemeMode;
 };
 
 const rowToProfile = (row: definitions['profiles']): IProfile => {
@@ -14,6 +18,7 @@ const rowToProfile = (row: definitions['profiles']): IProfile => {
     userId: row.id,
     name: row.name,
     avatarSeed: row.avatar_seed,
+    themeMode: row.theme_mode,
   };
 };
 
@@ -78,16 +83,23 @@ export const create = async ({
   userId,
   name,
   avatarSeed,
+  themeMode,
 }: {
   userId: string;
   name: string;
   avatarSeed: string;
+  themeMode: IThemeMode;
 }): Promise<
   { type: 'error'; error: string } | { type: 'success'; userId: string }
 > => {
   const response = await supabaseClient
     .from<definitions['profiles']>('profiles')
-    .insert({ id: userId, name, avatar_seed: avatarSeed })
+    .insert({
+      id: userId,
+      name,
+      avatar_seed: avatarSeed,
+      theme_mode: themeMode,
+    })
     .single();
 
   if (response.error) {
@@ -111,6 +123,7 @@ export const update = async ({
     .update({
       name: updates.name,
       avatar_seed: updates.avatarSeed,
+      theme_mode: updates.themeMode,
     })
     .match({
       id: userId,
@@ -140,8 +153,12 @@ export const useProfileQuery = ({ userId }: { userId: string }) => {
   return useQuery(queryKeys.getOne({ userId }), () => getOne({ userId }));
 };
 
-export const [ProfileContext, useProfile] = constate(
+export const [ProfileContext, useProfileContext] = constate(
   ({ profile }: { profile: IProfile }) => {
+    useEffect(() => {
+      appEventEmitter.emit('Profile', { profile });
+    }, [profile]);
+
     return {
       profile,
     };

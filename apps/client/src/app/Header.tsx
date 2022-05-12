@@ -1,12 +1,12 @@
 import { CameraAlt, NavigateNext } from '@mui/icons-material';
 import { Avatar, Box, Breadcrumbs, Toolbar } from '@mui/material';
 import { ReactNode } from 'react';
-import { useProfile } from './profiles';
+import { useProfileContext } from './profiles';
 import { Link, routes } from './routes';
 import * as ProfileAvatar from './profile-avatar';
 
 export const Header = ({ breadcrumbs }: { breadcrumbs: ReactNode[] }) => {
-  const { profile } = useProfile();
+  const { profile } = useProfileContext();
   return (
     <Toolbar>
       <Box

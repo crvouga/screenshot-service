@@ -1,4 +1,4 @@
-import { ChevronRight, Create } from '@mui/icons-material';
+import { CameraAlt, ChevronRight, Create } from '@mui/icons-material';
 import {
   Box,
   Container,
@@ -79,20 +79,21 @@ export const ProjectsPage = () => {
           {query.data.data.length === 0 && (
             <Container maxWidth="sm">
               <Card sx={{ width: '100%', my: 4 }}>
-                <Container maxWidth="xs" sx={{ py: 4 }}>
-                  <Typography variant="h2" align="center" sx={{ mb: 0 }}>
-                    📸
-                  </Typography>
-                  <Typography variant="h4" align="center" sx={{ mb: 4 }}>
+                <Container maxWidth="xs" sx={{ py: 4, textAlign: 'center' }}>
+                  <CameraAlt sx={{ width: 64, height: 64 }} />
+
+                  <Typography variant="h4" align="center" sx={{ mb: 3 }}>
                     You don't have any projects.
                   </Typography>
+
                   <Link to={routes['/projects/create'].make()}>
                     <Button
                       fullWidth
                       startIcon={<Create />}
                       variant="contained"
+                      size="large"
                     >
-                      Create New Project
+                      create a project
                     </Button>
                   </Link>
                 </Container>
