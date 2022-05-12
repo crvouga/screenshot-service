@@ -17,7 +17,16 @@ const theme = responsiveFontSizes(
       mode: 'dark',
     },
     typography: {
-      fontFamily: 'monospace',
+      fontFamily: "'Nunito', sans-serif",
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: 24,
+          },
+        },
+      },
     },
   })
 );

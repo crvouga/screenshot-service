@@ -17,11 +17,11 @@ export type Style =
   // | 'big-ears-neutral'
   // | 'big-smile'
   // | 'croodles'
-  // | 'croodles-neutral'
-  // | 'gridy'
-  // 'identicon';
-  // | 'initials'
-  'jdenticon';
+  'croodles-neutral';
+// | 'gridy'
+// 'identicon';
+// | 'initials'
+// 'jdenticon';
 // | 'micah'
 // | 'miniavs'
 // | 'open-peeps'
@@ -38,11 +38,11 @@ export const STYLES: { [style in Style]: Style } = {
   // 'big-ears-neutral': 'big-ears-neutral',
   // 'big-smile': 'big-smile',
   // croodles: 'croodles',
-  // 'croodles-neutral': 'croodles-neutral',
+  'croodles-neutral': 'croodles-neutral',
   // gridy: 'gridy',
   // identicon: 'identicon',
   // initials: 'initials',
-  jdenticon: 'jdenticon',
+  // jdenticon: 'jdenticon',
   // micah: 'micah',
   // miniavs: 'miniavs',
   // 'open-peeps': 'open-peeps',
@@ -67,7 +67,7 @@ export const toStyle = (style: string): Style => {
     return style as Style;
   }
 
-  return STYLES.jdenticon;
+  return STYLES['croodles-neutral'];
 };
 
 export type Seed = string & { type: 'Seed' };
@@ -79,12 +79,12 @@ export const toSeed = (seedString: string) => {
 const BASE_URL = `https://avatars.dicebear.com/api`;
 const FILE_TYPE = 'png';
 
-export const toUrl = ({ seed, style }: { style: Style; seed: Seed }) => {
-  const url = new URL(`${BASE_URL}/${style}/${seed}.${FILE_TYPE}`);
+export const toUrl = ({ seed }: { seed: Seed }) => {
+  const url = new URL(
+    `${BASE_URL}/${STYLES['croodles-neutral']}/${seed}.${FILE_TYPE}`
+  );
 
-  // if (style === 'croodles' || style === 'croodles-neutral') {
-  //   url.searchParams.append('backgroundColor', 'white');
-  // }
+  url.searchParams.append('backgroundColor', 'white');
 
   return url.toString();
 };
@@ -109,12 +109,12 @@ export const parseUrl = (
       };
     }
     return {
-      style: STYLES.jdenticon,
+      style: STYLES['croodles-neutral'],
       seed: toSeed(''),
     };
   } catch (error) {
     return {
-      style: STYLES.jdenticon,
+      style: STYLES['croodles-neutral'],
       seed: toSeed(''),
     };
   }

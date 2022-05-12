@@ -1,4 +1,4 @@
-import { Google } from '@mui/icons-material';
+import { CameraAlt, Google } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import { Box, Container, Typography } from '@mui/material';
 import { useState } from 'react';
@@ -28,11 +28,10 @@ export const LoginPage = () => {
         alignItems: 'center',
       }}
     >
-      <Container maxWidth="sm">
-        <Typography variant="h1" align="center">
-          📸
-        </Typography>
-        <Typography variant="h5" align="center" sx={{ marginBottom: 4 }}>
+      <Container maxWidth="xs" sx={{ textAlign: 'center' }}>
+        <CameraAlt sx={{ width: 64, height: 64, marginBottom: -1 }} />
+
+        <Typography variant="h4" align="center" sx={{ marginBottom: 3 }}>
           screenshot service
         </Typography>
 

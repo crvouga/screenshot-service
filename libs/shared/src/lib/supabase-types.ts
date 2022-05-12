@@ -18,7 +18,7 @@ export interface paths {
         query: {
           id?: parameters["rowFilter.profiles.id"];
           created_at?: parameters["rowFilter.profiles.created_at"];
-          avatar_url?: parameters["rowFilter.profiles.avatar_url"];
+          avatar_seed?: parameters["rowFilter.profiles.avatar_seed"];
           name?: parameters["rowFilter.profiles.name"];
           /** Filtering Columns */
           select?: parameters["select"];
@@ -72,7 +72,7 @@ export interface paths {
         query: {
           id?: parameters["rowFilter.profiles.id"];
           created_at?: parameters["rowFilter.profiles.created_at"];
-          avatar_url?: parameters["rowFilter.profiles.avatar_url"];
+          avatar_seed?: parameters["rowFilter.profiles.avatar_seed"];
           name?: parameters["rowFilter.profiles.name"];
         };
         header: {
@@ -90,7 +90,7 @@ export interface paths {
         query: {
           id?: parameters["rowFilter.profiles.id"];
           created_at?: parameters["rowFilter.profiles.created_at"];
-          avatar_url?: parameters["rowFilter.profiles.avatar_url"];
+          avatar_seed?: parameters["rowFilter.profiles.avatar_seed"];
           name?: parameters["rowFilter.profiles.name"];
         };
         body: {
@@ -331,7 +331,7 @@ export interface definitions {
      */
     created_at: string;
     /** Format: text */
-    avatar_url: string;
+    avatar_seed: string;
     /** Format: text */
     name: string;
   };
@@ -430,7 +430,7 @@ export interface parameters {
   /** Format: timestamp with time zone */
   "rowFilter.profiles.created_at": string;
   /** Format: text */
-  "rowFilter.profiles.avatar_url": string;
+  "rowFilter.profiles.avatar_seed": string;
   /** Format: text */
   "rowFilter.profiles.name": string;
   /** @description projects */

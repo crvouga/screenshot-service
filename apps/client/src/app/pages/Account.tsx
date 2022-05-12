@@ -225,18 +225,17 @@ const AvatarSection = () => {
 
   const mutation = useMutation(Profiles.update);
   const snackbar = useSnackbar();
-  const parsed = ProfileAvatar.parseUrl(profile.avatarUrl);
 
-  const [seed, setSeed] = useState(parsed.seed);
+  const [seed, setSeed] = useState(ProfileAvatar.toSeed(profile.avatarSeed));
 
-  const avatarUrl = ProfileAvatar.toUrl({ seed, style: parsed.style });
+  const avatarUrl = ProfileAvatar.toUrl({ seed });
 
   const queryClient = useQueryClient();
 
   const onSave = async () => {
     const response = await mutation.mutateAsync({
       userId: profile.userId,
-      avatarUrl: avatarUrl,
+      avatarSeed: seed,
     });
 
     switch (response.type) {
@@ -283,7 +282,7 @@ const AvatarSection = () => {
         <LoadingButton
           variant="contained"
           onClick={onSave}
-          disabled={profile.avatarUrl === avatarUrl}
+          disabled={profile.avatarSeed === seed}
           loading={mutation.isLoading}
         >
           save

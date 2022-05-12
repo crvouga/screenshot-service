@@ -1,16 +1,17 @@
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { CameraAlt } from '@mui/icons-material';
+import { Box, CircularProgress } from '@mui/material';
 
 export const BrandedLoadingPage = () => {
   return (
     <Box
       sx={{
-        width: "100%",
-        height: "100%",
-        display: "grid",
-        placeItems: "center",
+        width: '100%',
+        height: '100%',
+        display: 'grid',
+        placeItems: 'center',
       }}
     >
-      <Typography variant="h1">📸</Typography>
+      <CameraAlt sx={{ width: 72, height: 72 }} />
     </Box>
   );
 };
@@ -19,10 +20,10 @@ export const LoadingPage = () => {
   return (
     <Box
       sx={{
-        width: "100%",
-        height: "100%",
-        display: "grid",
-        placeItems: "center",
+        width: '100%',
+        height: '100%',
+        display: 'grid',
+        placeItems: 'center',
       }}
     >
       <CircularProgress />

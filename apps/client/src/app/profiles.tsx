@@ -5,7 +5,7 @@ import { supabaseClient } from './supabase';
 
 export type IProfile = {
   userId: string;
-  avatarUrl: string;
+  avatarSeed: string;
   name: string;
 };
 
@@ -13,7 +13,7 @@ const rowToProfile = (row: definitions['profiles']): IProfile => {
   return {
     userId: row.id,
     name: row.name,
-    avatarUrl: row.avatar_url,
+    avatarSeed: row.avatar_seed,
   };
 };
 
@@ -77,17 +77,17 @@ export const remove = async ({
 export const create = async ({
   userId,
   name,
-  avatarUrl,
+  avatarSeed,
 }: {
   userId: string;
   name: string;
-  avatarUrl: string;
+  avatarSeed: string;
 }): Promise<
   { type: 'error'; error: string } | { type: 'success'; userId: string }
 > => {
   const response = await supabaseClient
     .from<definitions['profiles']>('profiles')
-    .insert({ id: userId, name, avatar_url: avatarUrl })
+    .insert({ id: userId, name, avatar_seed: avatarSeed })
     .single();
 
   if (response.error) {
@@ -110,7 +110,7 @@ export const update = async ({
     .from<definitions['profiles']>('profiles')
     .update({
       name: updates.name,
-      avatar_url: updates.avatarUrl,
+      avatar_seed: updates.avatarSeed,
     })
     .match({
       id: userId,

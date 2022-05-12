@@ -27,7 +27,6 @@ export const AccountCreatePage = () => {
 
   const avatarUrl = ProfileAvatar.toUrl({
     seed: avatarSeed,
-    style: 'jdenticon',
   });
 
   const mutation = useMutation(Profiles.create);
@@ -40,7 +39,7 @@ export const AccountCreatePage = () => {
     const result = await mutation.mutateAsync({
       userId: authUser.userId,
       name: name,
-      avatarUrl: avatarUrl,
+      avatarSeed: avatarSeed,
     });
 
     switch (result.type) {
@@ -66,13 +65,11 @@ export const AccountCreatePage = () => {
       <Toolbar>
         <Box sx={{ flex: 1 }}>
           <Link to={routes['/logout'].make()}>
-            <Button sx={{ marginLeft: -2 }} startIcon={<ChevronLeft />}>
-              Logout
-            </Button>
+            <Button size="small">Logout</Button>
           </Link>
         </Box>
 
-        <Typography sx={{ flex: 3 }} variant="h6" align="center">
+        <Typography sx={{ flex: 2 }} variant="h6" align="center">
           create profile
         </Typography>
 
