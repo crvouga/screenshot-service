@@ -1,12 +1,21 @@
 import { ContentCopy, Done } from '@mui/icons-material';
-import { SxProps, Tooltip, TooltipProps } from '@mui/material';
+import {
+  alpha,
+  Box,
+  BoxProps,
+  SxProps,
+  Tooltip,
+  TooltipProps,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 
-type IStatus = 'idle' | 'copied';
+type ICopyStatus = 'idle' | 'copied';
 
 export const useCopyToClipboard = () => {
-  const [status, setStatus] = useState<IStatus>('idle');
+  const [status, setStatus] = useState<ICopyStatus>('idle');
 
   const snackbar = useSnackbar();
 
@@ -31,7 +40,7 @@ export const useCopyToClipboard = () => {
 export const CopyToClipboardTooltip = ({
   status,
   children,
-}: { status: IStatus } & Omit<TooltipProps, 'title'>) => {
+}: { status: ICopyStatus } & Omit<TooltipProps, 'title'>) => {
   return (
     <Tooltip title={status === 'copied' ? 'copied' : 'copy to clipboard'}>
       {children}
@@ -42,7 +51,7 @@ export const CopyToClipboardTooltip = ({
 export const toCopyToClipboardCursorSx = ({
   status,
 }: {
-  status: IStatus;
+  status: ICopyStatus;
 }): SxProps => {
   switch (status) {
     case 'copied':
@@ -57,7 +66,7 @@ export const toCopyToClipboardCursorSx = ({
   }
 };
 
-export const CopyToClipboardIcon = ({ status }: { status: IStatus }) => {
+export const CopyToClipboardIcon = ({ status }: { status: ICopyStatus }) => {
   switch (status) {
     case 'copied':
       return <Done />;
@@ -66,3 +75,67 @@ export const CopyToClipboardIcon = ({ status }: { status: IStatus }) => {
       return <ContentCopy />;
   }
 };
+
+export const CopyToClipboardField = ({
+  text,
+  ...props
+}: { text: string } & BoxProps) => {
+  const copyToClipboard = useCopyToClipboard();
+  const theme = useTheme();
+  return (
+    <CopyToClipboardTooltip {...copyToClipboard}>
+      <Box
+        sx={{
+          ...toCopyToClipboardCursorSx(copyToClipboard),
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          border: `1.5px solid ${theme.palette.grey[800]}`,
+          borderRadius: 1,
+          paddingX: 2,
+          paddingY: 1,
+          '&:hover': {
+            borderColor: theme.palette.primary.main,
+            backgroundColor: alpha(theme.palette.primary.dark, 0.2),
+          },
+          ...props,
+        }}
+        onClick={() => {
+          copyToClipboard.copy(text);
+        }}
+      >
+        <Typography sx={{ flex: 1 }}>{text}</Typography>
+        <CopyToClipboardIcon {...copyToClipboard} />
+      </Box>
+    </CopyToClipboardTooltip>
+  );
+};
+
+/**
+ *
+ *
+ *
+ *
+ *
+ */
+
+// type IPasteStatus = 'idle' | 'pasted';
+
+// export const usePasteClipboard = () => {
+//   const [status, setStatus] = useState<IPasteStatus>('idle');
+
+//   const paste = async () => {
+//     if (inputRef.current) {
+//       const url = await navigator.clipboard.readText();
+
+//       inputRef.current.value = url;
+
+//       onChange(url);
+//     }
+//   };
+
+//   return {
+//     status,
+//     paste,
+//   };
+// };

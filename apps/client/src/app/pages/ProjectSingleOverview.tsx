@@ -3,7 +3,6 @@ import { LoadingButton } from '@mui/lab';
 import {
   Alert,
   AlertTitle,
-  alpha,
   Box,
   Button,
   Container,
@@ -27,12 +26,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 import * as uuid from 'uuid';
-import {
-  CopyToClipboardIcon,
-  CopyToClipboardTooltip,
-  toCopyToClipboardCursorSx,
-  useCopyToClipboard,
-} from '../../lib/Clipboard';
+import { CopyToClipboardField } from '../../lib/Clipboard';
 import * as Projects from '../projects';
 import { routes } from '../routes';
 import { useProfileSingleOutletContext } from './ProjectsSingle';
@@ -171,11 +165,9 @@ const ApiKeyField = ({
   apiKeys: string[];
   setApiKeys: (apiKeys: string[]) => void;
 }) => {
-  const theme = useTheme();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const snackbar = useSnackbar();
-  const copyToClipboard = useCopyToClipboard();
   const mutation = useMutation(Projects.update);
 
   const onRemove = async (params: { apiKey: string }) => {
@@ -210,31 +202,7 @@ const ApiKeyField = ({
     <>
       <Box sx={{ mb: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <CopyToClipboardTooltip {...copyToClipboard}>
-            <Box
-              sx={{
-                ...toCopyToClipboardCursorSx(copyToClipboard),
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                border: `1.5px solid ${theme.palette.grey[800]}`,
-                borderRadius: 1,
-                paddingX: 2,
-                paddingY: 1,
-                mr: 1,
-                '&:hover': {
-                  borderColor: theme.palette.primary.main,
-                  backgroundColor: alpha(theme.palette.primary.dark, 0.2),
-                },
-              }}
-              onClick={() => {
-                copyToClipboard.copy(apiKey);
-              }}
-            >
-              <Typography sx={{ flex: 1 }}>{apiKey}</Typography>
-              <CopyToClipboardIcon {...copyToClipboard} />
-            </Box>
-          </CopyToClipboardTooltip>
+          <CopyToClipboardField text={apiKey} sx={{ mr: 1 }} />
 
           <Tooltip title="delete forever">
             <IconButton onClick={() => setOpen(true)}>

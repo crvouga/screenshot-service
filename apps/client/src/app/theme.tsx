@@ -136,7 +136,7 @@ export const ThemeContext = ({ children }: { children: ReactNode }) => {
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
+      <CssBaseline enableColorScheme />
       {children}
     </ThemeProvider>
   );

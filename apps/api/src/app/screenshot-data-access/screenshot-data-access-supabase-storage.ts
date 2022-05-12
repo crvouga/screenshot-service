@@ -144,7 +144,7 @@ export const get = async ({
       type: 'error',
       errors: [
         {
-          message: `Supbase couldn't download screenshot. ${downloadResponse.error.message}`,
+          message: `Supabase couldn't download screenshot. ${downloadResponse.error.message}`,
         },
       ],
     };
@@ -156,7 +156,7 @@ export const get = async ({
       errors: [
         {
           message:
-            'supabase did not return any data when downloading screenshot',
+            'Supabase did not return any data when downloading screenshot',
         },
       ],
     };

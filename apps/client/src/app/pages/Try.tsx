@@ -19,7 +19,6 @@ import {
 } from '@mui/material';
 import { castTargetUrl } from '@screenshot-service/shared';
 import { useSnackbar } from 'notistack';
-import { abort } from 'process';
 import { useState } from 'react';
 import { TextFieldInput } from '../../lib/TextFieldInput';
 
