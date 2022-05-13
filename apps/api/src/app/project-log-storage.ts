@@ -14,6 +14,4 @@ export const append: IAppend = async (log) => {
       request_id: log.requestId,
       log_level: log.logLevel,
     });
-
-  console.log('appened', log, repsonse.error);
 };
