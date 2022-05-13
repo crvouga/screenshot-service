@@ -1,6 +1,6 @@
 import { CameraAlt, NavigateNext } from '@mui/icons-material';
 import { Avatar, Box, Breadcrumbs, Toolbar } from '@mui/material';
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { useProfileContext } from './profiles';
 import { Link, routes } from './routes';
 import * as ProfileAvatar from './profile-avatar';
@@ -24,7 +24,7 @@ export const Header = ({ breadcrumbs }: { breadcrumbs: ReactNode[] }) => {
           >
             <CameraAlt />
           </Link>
-          {breadcrumbs}
+          {React.Children.map(breadcrumbs, (x) => x)}
         </Breadcrumbs>
       </Box>
 
