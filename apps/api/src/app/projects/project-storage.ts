@@ -1,12 +1,6 @@
 import { definitions } from '@screenshot-service/shared';
-import { supabaseClient } from './supabase';
-
-export type IProject = {
-  projectId: string;
-  ownerId: string;
-  name: string;
-  whitelistedUrls: string[];
-};
+import { supabaseClient } from '../supabase';
+import { IProject } from './types';
 
 const rowToProject = (row: definitions['projects']): IProject => {
   return {
@@ -17,21 +11,6 @@ const rowToProject = (row: definitions['projects']): IProject => {
       (url) => typeof url === 'string'
     ) as string[],
   };
-};
-
-export const queryFilter = 'projects';
-
-export const queryKeys = {
-  getOne: ({ projectId }: { projectId: string }) => [
-    queryFilter,
-    'getOne',
-    projectId,
-  ],
-  getAll: ({ ownerId }: { ownerId: string }) => [
-    queryFilter,
-    'getAll',
-    ownerId,
-  ],
 };
 
 export const getOneById = async ({

@@ -6,25 +6,23 @@ import {
 } from '@crvouga/screenshot-service';
 import {
   castImageType,
-  castMaxAgeMs,
   castTargetUrl,
   castTimeoutMs,
   resultToErrors,
 } from '@screenshot-service/shared';
 import { Application, ErrorRequestHandler, Router } from 'express';
 import { Browser } from 'puppeteer';
-import env from './dotenv';
-import { getScreenshot } from './screenshot-data-access/screenshot-data-access';
-import * as ScreenshotPuppeteer from './screenshot-data-access/screenshot-data-access-puppeteer';
+import { getScreenshot } from './screenshots/screenshot';
+import * as WebBrowser from './web-browser';
 
 export const useApi = async (app: Application) => {
-  const browser = await ScreenshotPuppeteer.createPuppeteerBrowser();
+  const webBrowser = await WebBrowser.create();
 
   const router = Router();
 
-  useGetScreenshot(browser, router);
+  useGetScreenshot(webBrowser, router);
 
-  useErrorHandler(browser, router);
+  useErrorHandler(webBrowser, router);
 
   app.use(API_ENDPOINT, router);
 };
@@ -101,67 +99,6 @@ const useGetScreenshot = async (browser: Browser, router: Router) => {
         'Content-Length': result.data.length,
       })
       .end(result.data);
-  });
-};
-
-/**
- *
- *
- *
- * security
- *
- *
- *
- */
-
-const useSecurity = async (router: Router) => {
-  router.use(async (req, res, next) => {
-    const whitelist = await getWhitelist();
-    const clientUrl = req.headers.origin ?? req.headers.referer;
-
-    if (!clientUrl) {
-      const apiErrorBody: IApiErrorBody = [
-        {
-          message: `'origin' header is undefined or 'referer' header is undefined. One of these headers has to be defined so I can check if you are on the whitelist.`,
-        },
-      ];
-
-      res.status(400).json(apiErrorBody).end();
-      return;
-    }
-
-    if (isOnWhitelist(whitelist, clientUrl)) {
-      next();
-      return;
-    }
-
-    const apiErrorBody: IApiErrorBody = [
-      {
-        message: `You are not on the whitelist. Your url is ${clientUrl}. Whitelisted urls are: ${whitelist.join(
-          ', '
-        )} `,
-      },
-    ];
-
-    res.status(400).json(apiErrorBody).end();
-  });
-};
-
-export const getWhitelist = async () => {
-  return env.URL_WHITELIST_CSV?.split(',').map((item) => item.trim()) ?? [];
-};
-
-const toHostname = (maybeUrl: string) => {
-  try {
-    return new URL(maybeUrl).hostname;
-  } catch (_error) {
-    return maybeUrl;
-  }
-};
-
-export const isOnWhitelist = (whitelist: string[], item: string) => {
-  return whitelist.some((whitelistedItem) => {
-    return toHostname(whitelistedItem) === toHostname(item);
   });
 };
 

@@ -1,11 +1,11 @@
 import { IImageType, ITargetUrl, ITimeoutMs } from '@screenshot-service/shared';
 import puppeteer from 'puppeteer';
-import * as Projects from '../projects';
-import * as ScreenshotPuppeteer from './screenshot-data-access-puppeteer';
-import * as ScreenshotSupabaseStorage from './screenshot-data-access-supabase-storage';
+import * as ProjectStorage from '../projects/project-storage';
+import * as WebBrowserPage from '../web-browser';
+import * as ScreenshotStorage from './screenshot-storage';
 import { IScreenshotData } from './types';
 
-type IGetResult =
+type IGetScreenshotResult =
   | {
       type: 'success';
       source: 'FromCache' | 'FromPuppeteer';
@@ -30,8 +30,8 @@ export const getScreenshot = async (
     timeoutMs: ITimeoutMs;
     targetUrl: ITargetUrl;
   }
-): Promise<IGetResult> => {
-  const projectResult = await Projects.getOneById({ projectId });
+): Promise<IGetScreenshotResult> => {
+  const projectResult = await ProjectStorage.getOneById({ projectId });
 
   if (projectResult.type === 'error') {
     return {
@@ -47,36 +47,36 @@ export const getScreenshot = async (
 
   console.log('finding result in storage');
 
-  const supabaseResult = await ScreenshotSupabaseStorage.get({
+  const getResult = await ScreenshotStorage.get({
     timeoutMs,
     targetUrl,
     imageType,
     projectId,
   });
 
-  if (supabaseResult.type === 'error') {
-    const puppeteerResult = await ScreenshotPuppeteer.get(browser, {
+  if (getResult.type === 'error') {
+    const screenshotResult = await WebBrowserPage.takeScreenshot(browser, {
       imageType,
       timeoutMs,
       targetUrl,
     });
 
-    if (puppeteerResult.type === 'error') {
+    if (screenshotResult.type === 'error') {
       return {
         type: 'error',
-        errors: [...puppeteerResult.errors, ...supabaseResult.errors],
+        errors: [...screenshotResult.errors, ...getResult.errors],
       };
     }
 
-    await ScreenshotSupabaseStorage.put(
+    await ScreenshotStorage.put(
       { imageType, timeoutMs, targetUrl, projectId },
-      puppeteerResult.data
+      screenshotResult.data
     );
 
     return {
       type: 'success',
       source: 'FromPuppeteer',
-      data: puppeteerResult.data,
+      data: screenshotResult.data,
       imageType: imageType,
     };
   }
@@ -84,29 +84,7 @@ export const getScreenshot = async (
   return {
     type: 'success',
     source: 'FromCache',
-    data: supabaseResult.data,
+    data: getResult.data,
     imageType: imageType,
   };
 };
-
-// //
-// //
-// // helpers
-// //
-// //
-
-// const toHours = (ms: number) => Math.floor((ms / (1000 * 60 * 60)) % 60);
-// const toMinutes = (ms: number) => Math.floor((ms / (1000 * 60)) % 60);
-// const toSeconds = (ms: number) => Math.floor((ms / 1000) % 60);
-// //
-// const formatHours = (hours: number) => `${hours} hr`;
-// const formatMinutes = (minutes: number) => `${minutes} min`;
-// const formatSeconds = (seconds: number) => `${seconds} sec`;
-// //
-
-// export const formatMs = (ms: number) =>
-//   [
-//     formatHours(toHours(ms)),
-//     formatMinutes(toMinutes(ms)),
-//     formatSeconds(toSeconds(ms)),
-//   ].join(' ');
