@@ -1,7 +1,7 @@
 import { Container } from '@mui/material';
 import { useProfileSingleOutletContext } from '../Project';
-import { ProjectApiKeysSection } from './ProjectApiKeysSection';
 import { ProjectDeleteSection } from './ProjectDeleteSection';
+import { ProjectIdSection } from './ProjectIdSection';
 import { ProjectNameSection } from './ProjectNameSection';
 import { ProjectWhitelistedUrlsSection } from './ProjectWhitelistedUrlsSection';
 
@@ -10,7 +10,7 @@ export const ProjectOverviewTab = () => {
 
   return (
     <Container maxWidth="sm">
-      <ProjectApiKeysSection project={project} />
+      <ProjectIdSection project={project} />
 
       <ProjectWhitelistedUrlsSection project={project} />
 

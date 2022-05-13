@@ -168,7 +168,7 @@ const ApiKeyField = ({
     <>
       <Box sx={{ mb: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <CopyToClipboardField text={apiKey} sx={{ mr: 1 }} />
+          <CopyToClipboardField text={apiKey} />
 
           <Tooltip title="delete forever">
             <IconButton onClick={() => setOpen(true)}>

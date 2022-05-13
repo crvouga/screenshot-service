@@ -76,10 +76,7 @@ export const CopyToClipboardIcon = ({ status }: { status: ICopyStatus }) => {
   }
 };
 
-export const CopyToClipboardField = ({
-  text,
-  ...props
-}: { text: string } & BoxProps) => {
+export const CopyToClipboardField = ({ text }: { text: string }) => {
   const copyToClipboard = useCopyToClipboard();
   const theme = useTheme();
   return (
@@ -98,7 +95,6 @@ export const CopyToClipboardField = ({
             borderColor: theme.palette.primary.main,
             backgroundColor: alpha(theme.palette.primary.dark, 0.2),
           },
-          ...props,
         }}
         onClick={() => {
           copyToClipboard.copy(text);
