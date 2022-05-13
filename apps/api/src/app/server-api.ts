@@ -53,17 +53,21 @@ const useGetScreenshot = async (browser: Browser, router: Router) => {
     const timeoutMsResult = castTimeoutMs(queryParams.timeoutMs);
     const targetUrlResult = castTargetUrl(queryParams.targetUrl);
     const imageTypeResult = castImageType(queryParams.imageType);
-    const apiKeyResult =
-      typeof queryParams.apiKey === 'string'
-        ? { type: 'success', data: queryParams.apiKey }
-        : { type: 'error' };
+    const projectIdResult =
+      typeof queryParams.projectId === 'string'
+        ? { type: 'success', data: queryParams.projectId }
+        : {
+            type: 'error',
+            errors: [
+              { message: 'projectId query param is missing or invalid' },
+            ],
+          };
 
     if (
-      !(
-        timeoutMsResult.type === 'success' &&
-        targetUrlResult.type === 'success' &&
-        imageTypeResult.type === 'success'
-      )
+      timeoutMsResult.type === 'error' ||
+      targetUrlResult.type === 'error' ||
+      imageTypeResult.type === 'error' ||
+      projectIdResult.type === 'error'
     ) {
       const apiErrorBody: IApiErrorBody = [
         ...resultToErrors(timeoutMsResult),
@@ -79,7 +83,7 @@ const useGetScreenshot = async (browser: Browser, router: Router) => {
       imageType: imageTypeResult.data,
       timeoutMs: timeoutMsResult.data,
       targetUrl: targetUrlResult.data,
-      apiKey: apiKeyResult.data,
+      projectId: projectIdResult.data,
     });
 
     if (result.type === 'error') {

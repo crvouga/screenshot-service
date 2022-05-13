@@ -12,7 +12,7 @@ export type IConfig = {
 };
 
 export type IGetScreenshotQueryParams = {
-  apiKey: string;
+  projectId: string;
   timeoutMs: string;
   imageType: string;
   targetUrl: string;

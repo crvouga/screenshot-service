@@ -6,7 +6,6 @@ export type IProject = {
   ownerId: string;
   name: string;
   whitelistedUrls: string[];
-  apiKeys: string[];
 };
 
 const rowToProject = (row: definitions['projects']): IProject => {
@@ -14,9 +13,6 @@ const rowToProject = (row: definitions['projects']): IProject => {
     projectId: row.id,
     ownerId: row.owner_id,
     name: row.name,
-    apiKeys: (row.api_keys ?? []).filter(
-      (url) => typeof url === 'string'
-    ) as string[],
     whitelistedUrls: (row.whitelisted_urls ?? []).filter(
       (url) => typeof url === 'string'
     ) as string[],
@@ -137,7 +133,6 @@ export const update = async ({
     .update({
       name: updates.name,
       whitelisted_urls: updates.whitelistedUrls,
-      api_keys: updates.apiKeys,
     })
     .match({
       id: projectId,

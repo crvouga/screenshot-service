@@ -32,7 +32,7 @@ export const TryPage = () => {
   const [targetUrl, setTargetUrl] = useState('');
   const [imageType, setImageType] = useState<'png' | 'jpeg'>('jpeg');
   const [timeoutMs, setTimeoutMs] = useState('1000');
-  const [apiKey, setApiKey] = useState('');
+  const [projectId, setProjectId] = useState('');
 
   const castedTargetUrl = castTargetUrl(targetUrl);
 
@@ -53,7 +53,7 @@ export const TryPage = () => {
         targetUrl,
         imageType,
         timeoutMs,
-        apiKey,
+        projectId,
       },
       {
         baseUrl: 'http://localhost:8000',
@@ -87,10 +87,10 @@ export const TryPage = () => {
       </Typography>
 
       <TextFieldInput
-        id="apiKey"
-        value={apiKey}
-        placeholder="api key a project"
-        onChange={setApiKey}
+        id="projectId"
+        value={projectId}
+        placeholder="project id"
+        onChange={setProjectId}
         sx={{ marginBottom: 2 }}
       />
 

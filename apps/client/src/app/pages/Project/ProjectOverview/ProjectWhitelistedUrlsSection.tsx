@@ -45,8 +45,8 @@ export const ProjectWhitelistedUrlsSection = ({
       {whitelistedUrls.length === 0 && (
         <Alert severity="warning">
           <AlertTitle>no whitelisted urls</AlertTitle>
-          you're going to need to add a url to the white list to be able to use
-          this project
+          you're going to need to add a url to the white list to be able to
+          access the backend api from this
         </Alert>
       )}
 

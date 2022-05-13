@@ -20,33 +20,30 @@ type IGetResult =
 export const getScreenshot = async (
   browser: puppeteer.Browser,
   {
-    apiKey,
+    projectId,
     timeoutMs,
     targetUrl,
     imageType,
   }: {
-    apiKey: string;
+    projectId: string;
     imageType: IImageType;
     timeoutMs: ITimeoutMs;
     targetUrl: ITargetUrl;
   }
 ): Promise<IGetResult> => {
-  console.log('finding project');
-  const projectResult = await Projects.getOneByApiKey({ apiKey });
+  const projectResult = await Projects.getOneById({ projectId });
 
   if (projectResult.type === 'error') {
     return {
       type: 'error',
       errors: [
         {
-          message: `Failed to find a project associated with the provided api key: ${apiKey}`,
+          message: `Failed to find a project associated with the provided id: ${projectId}`,
         },
       ],
     };
   }
   console.log('found project', projectResult.project);
-
-  const projectId = projectResult.project.projectId;
 
   console.log('finding result in storage');
 
@@ -92,24 +89,24 @@ export const getScreenshot = async (
   };
 };
 
-//
-//
-// helpers
-//
-//
+// //
+// //
+// // helpers
+// //
+// //
 
-const toHours = (ms: number) => Math.floor((ms / (1000 * 60 * 60)) % 60);
-const toMinutes = (ms: number) => Math.floor((ms / (1000 * 60)) % 60);
-const toSeconds = (ms: number) => Math.floor((ms / 1000) % 60);
-//
-const formatHours = (hours: number) => `${hours} hr`;
-const formatMinutes = (minutes: number) => `${minutes} min`;
-const formatSeconds = (seconds: number) => `${seconds} sec`;
-//
+// const toHours = (ms: number) => Math.floor((ms / (1000 * 60 * 60)) % 60);
+// const toMinutes = (ms: number) => Math.floor((ms / (1000 * 60)) % 60);
+// const toSeconds = (ms: number) => Math.floor((ms / 1000) % 60);
+// //
+// const formatHours = (hours: number) => `${hours} hr`;
+// const formatMinutes = (minutes: number) => `${minutes} min`;
+// const formatSeconds = (seconds: number) => `${seconds} sec`;
+// //
 
-export const formatMs = (ms: number) =>
-  [
-    formatHours(toHours(ms)),
-    formatMinutes(toMinutes(ms)),
-    formatSeconds(toSeconds(ms)),
-  ].join(' ');
+// export const formatMs = (ms: number) =>
+//   [
+//     formatHours(toHours(ms)),
+//     formatMinutes(toMinutes(ms)),
+//     formatSeconds(toSeconds(ms)),
+//   ].join(' ');

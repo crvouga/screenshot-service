@@ -6,7 +6,6 @@ export type IProject = {
   ownerId: string;
   name: string;
   whitelistedUrls: string[];
-  apiKeys: string[];
 };
 
 const rowToProject = (row: definitions['projects']): IProject => {
@@ -14,9 +13,6 @@ const rowToProject = (row: definitions['projects']): IProject => {
     projectId: row.id,
     ownerId: row.owner_id,
     name: row.name,
-    apiKeys: (row.api_keys ?? []).filter(
-      (url) => typeof url === 'string'
-    ) as string[],
     whitelistedUrls: (row.whitelisted_urls ?? []).filter(
       (url) => typeof url === 'string'
     ) as string[],
@@ -38,17 +34,17 @@ export const queryKeys = {
   ],
 };
 
-export const getOneByApiKey = async ({
-  apiKey,
+export const getOneById = async ({
+  projectId,
 }: {
-  apiKey: string;
+  projectId: string;
 }): Promise<
   { type: 'error'; error: string } | { type: 'success'; project: IProject }
 > => {
   const response = await supabaseClient
     .from<definitions['projects']>('projects')
     .select('*')
-    .contains('api_keys', [apiKey])
+    .match({ id: projectId })
     .single();
 
   if (response.error) {
