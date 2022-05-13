@@ -115,11 +115,7 @@ const AddToWhitelistInput = ({
 
   return (
     <>
-      <Alert sx={{ mt: 2, mb: 1 }} severity="info">
-        must be the base url of your website. an example url could be:
-        https://example.com/
-      </Alert>
-      <Box sx={{ mb: 2, display: 'flex' }}>
+      <Box sx={{ mt: 2, mb: 2, display: 'flex' }}>
         <TextField
           placeholder="https://example.com/"
           label="base url"
