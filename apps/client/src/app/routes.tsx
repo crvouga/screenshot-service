@@ -93,8 +93,6 @@ export const Link = ({
   ...linkProps
 }: { state?: ILocationState; to: string } & LinkProps) => {
   return (
-    <RouterLink to={to} state={state}>
-      <MuiLink {...linkProps} />
-    </RouterLink>
+    <MuiLink component={RouterLink} to={to} state={state} {...linkProps} />
   );
 };
