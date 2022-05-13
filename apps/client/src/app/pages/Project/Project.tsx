@@ -75,6 +75,8 @@ const ProjectPageWithParams = ({ projectId }: { projectId: string }) => {
     ? tabValues.overview
     : isMatch(location.pathname, routes['/projects/:id/screenshots'])
     ? tabValues.screenshots
+    : isMatch(location.pathname, routes['/projects/:id/logs'])
+    ? tabValues.logs
     : tabValues.overview;
 
   const outletContext: IOutletContext = { project };
@@ -105,9 +107,9 @@ const ProjectPageWithParams = ({ projectId }: { projectId: string }) => {
         <Tab
           value={tabValues.logs}
           label="logs"
-          // onClick={() => {
-          //   navigate(routes["/projects/:id/try"].make(project.projectId));
-          // }}
+          onClick={() => {
+            navigate(routes['/projects/:id/logs'].make(project.projectId));
+          }}
         />
       </Tabs>
 

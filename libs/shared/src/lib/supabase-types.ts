@@ -111,6 +111,108 @@ export interface paths {
       };
     };
   };
+  "/project_logs": {
+    get: {
+      parameters: {
+        query: {
+          created_at?: parameters["rowFilter.project_logs.created_at"];
+          message?: parameters["rowFilter.project_logs.message"];
+          log_level?: parameters["rowFilter.project_logs.log_level"];
+          project_id?: parameters["rowFilter.project_logs.project_id"];
+          request_id?: parameters["rowFilter.project_logs.request_id"];
+          id?: parameters["rowFilter.project_logs.id"];
+          /** Filtering Columns */
+          select?: parameters["select"];
+          /** Ordering */
+          order?: parameters["order"];
+          /** Limiting and Pagination */
+          offset?: parameters["offset"];
+          /** Limiting and Pagination */
+          limit?: parameters["limit"];
+        };
+        header: {
+          /** Limiting and Pagination */
+          Range?: parameters["range"];
+          /** Limiting and Pagination */
+          "Range-Unit"?: parameters["rangeUnit"];
+          /** Preference */
+          Prefer?: parameters["preferCount"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: {
+          schema: definitions["project_logs"][];
+        };
+        /** Partial Content */
+        206: unknown;
+      };
+    };
+    post: {
+      parameters: {
+        body: {
+          /** project_logs */
+          project_logs?: definitions["project_logs"];
+        };
+        query: {
+          /** Filtering Columns */
+          select?: parameters["select"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** Created */
+        201: unknown;
+      };
+    };
+    delete: {
+      parameters: {
+        query: {
+          created_at?: parameters["rowFilter.project_logs.created_at"];
+          message?: parameters["rowFilter.project_logs.message"];
+          log_level?: parameters["rowFilter.project_logs.log_level"];
+          project_id?: parameters["rowFilter.project_logs.project_id"];
+          request_id?: parameters["rowFilter.project_logs.request_id"];
+          id?: parameters["rowFilter.project_logs.id"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+    patch: {
+      parameters: {
+        query: {
+          created_at?: parameters["rowFilter.project_logs.created_at"];
+          message?: parameters["rowFilter.project_logs.message"];
+          log_level?: parameters["rowFilter.project_logs.log_level"];
+          project_id?: parameters["rowFilter.project_logs.project_id"];
+          request_id?: parameters["rowFilter.project_logs.request_id"];
+          id?: parameters["rowFilter.project_logs.id"];
+        };
+        body: {
+          /** project_logs */
+          project_logs?: definitions["project_logs"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+  };
   "/projects": {
     get: {
       parameters: {
@@ -340,6 +442,38 @@ export interface definitions {
      */
     theme_mode: "light" | "dark";
   };
+  project_logs: {
+    /**
+     * Format: timestamp with time zone
+     * @default now()
+     */
+    created_at?: string;
+    /** Format: text */
+    message: string;
+    /**
+     * Format: public.log_level
+     * @enum {string}
+     */
+    log_level: "info" | "notice" | "warn" | "error";
+    /**
+     * Format: uuid
+     * @description Note:
+     * This is a Foreign Key to `projects.id`.<fk table='projects' column='id'/>
+     */
+    project_id: string;
+    /**
+     * Format: uuid
+     * @default extensions.uuid_generate_v4()
+     */
+    request_id: string;
+    /**
+     * Format: uuid
+     * @description Note:
+     * This is a Primary Key.<pk/>
+     * @default extensions.uuid_generate_v4()
+     */
+    id: string;
+  };
   projects: {
     /**
      * Format: uuid
@@ -438,6 +572,20 @@ export interface parameters {
   "rowFilter.profiles.name": string;
   /** Format: public.theme_mode */
   "rowFilter.profiles.theme_mode": string;
+  /** @description project_logs */
+  "body.project_logs": definitions["project_logs"];
+  /** Format: timestamp with time zone */
+  "rowFilter.project_logs.created_at": string;
+  /** Format: text */
+  "rowFilter.project_logs.message": string;
+  /** Format: public.log_level */
+  "rowFilter.project_logs.log_level": string;
+  /** Format: uuid */
+  "rowFilter.project_logs.project_id": string;
+  /** Format: uuid */
+  "rowFilter.project_logs.request_id": string;
+  /** Format: uuid */
+  "rowFilter.project_logs.id": string;
   /** @description projects */
   "body.projects": definitions["projects"];
   /** Format: uuid */

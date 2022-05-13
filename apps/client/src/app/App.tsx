@@ -20,6 +20,7 @@ import {
   ProjectOverviewTab,
   ProjectScreenshotsTab,
 } from './pages/Project';
+import { ProjectLogsTab } from './pages/Project/ProjectLogs';
 import { ProjectsPage } from './pages/Projects';
 import { ProjectsCreatePage } from './pages/ProjectsCreate';
 import { TryPage } from './pages/Try';
@@ -151,6 +152,10 @@ export const Loaded = () => {
             <Route
               path={routes['/projects/:id/screenshots'].pattern}
               element={<ProjectScreenshotsTab />}
+            />
+            <Route
+              path={routes['/projects/:id/logs'].pattern}
+              element={<ProjectLogsTab />}
             />
           </Route>
 

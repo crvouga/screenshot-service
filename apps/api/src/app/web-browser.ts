@@ -1,6 +1,8 @@
 import { IImageType, ITargetUrl, ITimeoutMs } from '@screenshot-service/shared';
 import puppeteer from 'puppeteer';
-import { IScreenshotData } from './screenshots/types';
+import { IScreenshotData } from './types';
+
+export type WebBrowser = puppeteer.Browser;
 
 type Result =
   | {

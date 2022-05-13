@@ -35,6 +35,10 @@ export const routes = {
     pattern: '/projects/:id/screenshots',
     make: (id: string) => `/projects/${id}/screenshots`,
   },
+  '/projects/:id/logs': {
+    pattern: '/projects/:id/logs',
+    make: (id: string) => `/projects/${id}/logs`,
+  },
   '/try': {
     pattern: '/try',
     make: () => `/try`,

@@ -83,7 +83,7 @@ export const TryPage = () => {
   return (
     <>
       <Typography gutterBottom color="text.secondary">
-        apiKey
+        project id
       </Typography>
 
       <TextFieldInput

@@ -9,3 +9,10 @@ export type IScreenshot = {
 };
 
 export type IScreenshotData = Buffer | string;
+
+export type IProject = {
+  projectId: string;
+  ownerId: string;
+  name: string;
+  whitelistedUrls: string[];
+};

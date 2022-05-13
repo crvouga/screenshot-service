@@ -1,5 +1,5 @@
 import { definitions } from '@screenshot-service/shared';
-import { supabaseClient } from '../supabase';
+import { supabaseClient } from './supabase';
 import { IProject } from './types';
 
 const rowToProject = (row: definitions['projects']): IProject => {

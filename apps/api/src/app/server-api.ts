@@ -12,7 +12,7 @@ import {
 } from '@screenshot-service/shared';
 import { Application, ErrorRequestHandler, Router } from 'express';
 import { Browser } from 'puppeteer';
-import { getScreenshot } from './screenshots/screenshot';
+import { requestScreenshotFromStorageFirst } from './screenshot';
 import * as WebBrowser from './web-browser';
 
 export const useApi = async (app: Application) => {
@@ -77,7 +77,7 @@ const useGetScreenshot = async (browser: Browser, router: Router) => {
       return;
     }
 
-    const result = await getScreenshot(browser, {
+    const result = await requestScreenshotFromStorageFirst(browser)({
       imageType: imageTypeResult.data,
       timeoutMs: timeoutMsResult.data,
       targetUrl: targetUrlResult.data,
@@ -91,7 +91,7 @@ const useGetScreenshot = async (browser: Browser, router: Router) => {
       return;
     }
 
-    const statusCode = result.source === 'FromPuppeteer' ? 201 : 200;
+    const statusCode = result.source === 'WebBrowser' ? 201 : 200;
 
     res
       .writeHead(statusCode, {

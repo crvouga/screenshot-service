@@ -10,7 +10,7 @@ import {
   toFilename,
   resultToErrors,
 } from '@screenshot-service/shared';
-import { supabaseClient } from '../supabase';
+import { supabaseClient } from './supabase';
 import { IScreenshot, IScreenshotData } from './types';
 
 /**
