@@ -1,22 +1,18 @@
 import {
   Alert,
   Box,
-  Card,
   CircularProgress,
   Container,
-  List,
-  ListItem,
-  ListItemText,
   Paper,
   Skeleton,
   Typography,
 } from '@mui/material';
 import { IImageType } from '@screenshot-service/shared';
 import { useQuery } from 'react-query';
-import * as Screenshots from '../screenshots';
-import { useProfileSingleOutletContext } from './ProjectsSingle';
+import * as Screenshots from '../../../screenshots';
+import { useProfileSingleOutletContext } from '../Project';
 
-export const ProjectSingleScreenshotsPage = () => {
+export const ProjectScreenshotsTab = () => {
   const { project } = useProfileSingleOutletContext();
 
   const query = useQuery(

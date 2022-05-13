@@ -7,11 +7,11 @@ import {
   useOutletContext,
   useParams,
 } from 'react-router-dom';
-import { Header } from '../Header';
-import * as Projects from '../projects';
-import { isMatch, routes } from '../routes';
-import { ErrorPage } from './Error';
-import { NotFoundPage } from './NotFound';
+import { Header } from '../../Header';
+import * as Projects from '../../projects';
+import { isMatch, routes } from '../../routes';
+import { ErrorPage } from '../Error';
+import { NotFoundPage } from '../NotFound';
 
 export type IOutletContext = { project: Projects.IProject };
 
@@ -19,7 +19,7 @@ export const useProfileSingleOutletContext = () => {
   return useOutletContext<IOutletContext>();
 };
 
-export const ProjectsSinglePage = () => {
+export const ProjectPage = () => {
   const params = useParams();
 
   const projectId = params['id'];
@@ -28,10 +28,10 @@ export const ProjectsSinglePage = () => {
     return <NotFoundPage message="missing project id from url" />;
   }
 
-  return <ProjectPage projectId={projectId} />;
+  return <ProjectPageWithParams projectId={projectId} />;
 };
 
-const ProjectPage = ({ projectId }: { projectId: string }) => {
+const ProjectPageWithParams = ({ projectId }: { projectId: string }) => {
   const query = useQuery(Projects.queryKeys.getOne({ projectId }), () =>
     Projects.getOne({ projectId })
   );
@@ -64,6 +64,7 @@ const ProjectPage = ({ projectId }: { projectId: string }) => {
   }
 
   const { project } = result;
+
   const tabValues = {
     overview: 'overview',
     screenshots: 'screenshots',

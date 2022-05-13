@@ -15,11 +15,13 @@ import { AccountCreatePage } from './pages/AccountCreate';
 import { BrandedLoadingPage } from './pages/Loading';
 import { LoginPage } from './pages/Login';
 import { LogoutPage } from './pages/Logout';
+import {
+  ProjectPage,
+  ProjectOverviewTab,
+  ProjectScreenshotsTab,
+} from './pages/Project';
 import { ProjectsPage } from './pages/Projects';
 import { ProjectsCreatePage } from './pages/ProjectsCreate';
-import { ProjectSingleOverviewPage } from './pages/ProjectSingleOverview';
-import { ProjectsSinglePage } from './pages/ProjectsSingle';
-import { ProjectSingleScreenshotsPage } from './pages/ProjectsSingleScreenshots';
 import { TryPage } from './pages/Try';
 import * as Profiles from './profiles';
 import { Link, routes, useLocation, useNavigate } from './routes';
@@ -140,15 +142,15 @@ export const Loaded = () => {
 
           <Route
             path={routes['/projects/:id'].pattern}
-            element={<ProjectsSinglePage />}
+            element={<ProjectPage />}
           >
             <Route
               path={routes['/projects/:id'].pattern}
-              element={<ProjectSingleOverviewPage />}
+              element={<ProjectOverviewTab />}
             />
             <Route
               path={routes['/projects/:id/screenshots'].pattern}
-              element={<ProjectSingleScreenshotsPage />}
+              element={<ProjectScreenshotsTab />}
             />
           </Route>
 
