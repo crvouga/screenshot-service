@@ -31,7 +31,7 @@ export const LoginPage = () => {
       <Container maxWidth="xs" sx={{ textAlign: 'center' }}>
         <CameraAlt sx={{ width: 64, height: 64, marginBottom: -1 }} />
 
-        <Typography variant="h4" align="center" sx={{ marginBottom: 3 }}>
+        <Typography variant="h4" align="center" sx={{ marginBottom: 2 }}>
           screenshot service
         </Typography>
 
