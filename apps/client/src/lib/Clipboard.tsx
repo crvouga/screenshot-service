@@ -87,7 +87,7 @@ export const CopyToClipboardField = ({ text }: { text: string }) => {
           flex: 1,
           display: 'flex',
           alignItems: 'center',
-          border: `1.5px solid ${theme.palette.grey[800]}`,
+          border: `1.5px solid ${theme.palette.grey[400]}`,
           borderRadius: 1,
           paddingX: 2,
           paddingY: 1,
@@ -95,12 +95,19 @@ export const CopyToClipboardField = ({ text }: { text: string }) => {
             borderColor: theme.palette.primary.main,
             backgroundColor: alpha(theme.palette.primary.dark, 0.2),
           },
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
         }}
         onClick={() => {
           copyToClipboard.copy(text);
         }}
       >
-        <Typography sx={{ flex: 1 }}>{text}</Typography>
+        <Typography
+          sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}
+        >
+          {text}
+        </Typography>
         <CopyToClipboardIcon {...copyToClipboard} />
       </Box>
     </CopyToClipboardTooltip>
