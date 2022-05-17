@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { IProfile } from './profiles';
 
 export type IAppEvent = {
+  OpenedScreenshotDrawer: null;
   Profile: { profile: IProfile };
 };
 

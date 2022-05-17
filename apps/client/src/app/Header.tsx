@@ -1,9 +1,10 @@
 import { CameraAlt, NavigateNext } from '@mui/icons-material';
 import { Avatar, Box, Breadcrumbs, Toolbar } from '@mui/material';
 import React, { ReactNode } from 'react';
+import * as ProfileAvatar from './profile-avatar';
 import { useProfileContext } from './profiles';
 import { Link, routes } from './routes';
-import * as ProfileAvatar from './profile-avatar';
+import { ScreenshotDrawerButton } from './ScreenshotDrawer';
 
 export const Header = ({ breadcrumbs }: { breadcrumbs: ReactNode[] }) => {
   const { profile } = useProfileContext();
@@ -30,8 +31,11 @@ export const Header = ({ breadcrumbs }: { breadcrumbs: ReactNode[] }) => {
 
       <Box sx={{ flex: 1 }}></Box>
 
+      <ScreenshotDrawerButton />
+
       <Link to={routes['/account'].make()}>
         <Avatar
+          sx={{ ml: 2 }}
           src={ProfileAvatar.toUrl({
             seed: ProfileAvatar.toSeed(profile.avatarSeed),
           })}

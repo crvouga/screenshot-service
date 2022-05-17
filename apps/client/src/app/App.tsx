@@ -1,13 +1,4 @@
-import { CameraAlt, Close } from '@mui/icons-material';
-import {
-  Box,
-  Button,
-  Divider,
-  Drawer,
-  Fab,
-  Toolbar,
-  useTheme,
-} from '@mui/material';
+import { Box } from '@mui/material';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthUserContext, useAuthState, useAuthUser } from './authentication';
 import { AccountPage } from './pages/Account';
@@ -16,8 +7,8 @@ import { BrandedLoadingPage } from './pages/Loading';
 import { LoginPage } from './pages/Login';
 import { LogoutPage } from './pages/Logout';
 import {
-  ProjectPage,
   ProjectOverviewTab,
+  ProjectPage,
   ProjectScreenshotsTab,
 } from './pages/Project';
 import { ProjectLogsTab } from './pages/Project/ProjectLogs';
@@ -25,7 +16,8 @@ import { ProjectsPage } from './pages/Projects';
 import { ProjectsCreatePage } from './pages/ProjectsCreate';
 import { TryPage } from './pages/Try';
 import * as Profiles from './profiles';
-import { Link, routes, useLocation, useNavigate } from './routes';
+import { routes } from './routes';
+import { ScreenshotDrawer, ScreenshotDrawerButton } from './ScreenshotDrawer';
 
 export const App = () => {
   return (
@@ -114,119 +106,57 @@ const LoadingProfile = () => {
 };
 
 export const Loaded = () => {
-  const theme = useTheme();
-  const location = useLocation();
-  const navigate = useNavigate();
   return (
-    <>
-      <Box
-        sx={{
-          position: 'relative',
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          overflowY: 'scroll',
-        }}
-      >
-        <Routes>
-          <Route path={routes['/'].pattern} element={<ProjectsPage />} />
+    <Box
+      sx={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        overflowY: 'scroll',
+      }}
+    >
+      <ScreenshotDrawer />
 
-          <Route path={routes['/try'].pattern} element={<TryPage />} />
+      <Routes>
+        <Route path={routes['/'].pattern} element={<ProjectsPage />} />
 
-          <Route path={routes['/account'].pattern} element={<AccountPage />} />
+        <Route path={routes['/try'].pattern} element={<TryPage />} />
 
-          <Route
-            path={routes['/projects'].pattern}
-            element={<ProjectsPage />}
-          />
+        <Route path={routes['/account'].pattern} element={<AccountPage />} />
 
+        <Route path={routes['/projects'].pattern} element={<ProjectsPage />} />
+
+        <Route path={routes['/projects/:id'].pattern} element={<ProjectPage />}>
           <Route
             path={routes['/projects/:id'].pattern}
-            element={<ProjectPage />}
-          >
-            <Route
-              path={routes['/projects/:id'].pattern}
-              element={<ProjectOverviewTab />}
-            />
-            <Route
-              path={routes['/projects/:id/screenshots'].pattern}
-              element={<ProjectScreenshotsTab />}
-            />
-            <Route
-              path={routes['/projects/:id/logs'].pattern}
-              element={<ProjectLogsTab />}
-            />
-          </Route>
-
-          <Route
-            path={routes['/projects/create'].pattern}
-            element={<ProjectsCreatePage />}
+            element={<ProjectOverviewTab />}
           />
-
-          <Route path="/logout" element={<LogoutPage />} />
-
           <Route
-            path="*"
-            element={<Navigate to={routes['/projects'].pattern} />}
+            path={routes['/projects/:id/screenshots'].pattern}
+            element={<ProjectScreenshotsTab />}
           />
-        </Routes>
+          <Route
+            path={routes['/projects/:id/logs'].pattern}
+            element={<ProjectLogsTab />}
+          />
+        </Route>
 
-        <Box sx={{ p: 8 }}></Box>
-      </Box>
+        <Route
+          path={routes['/projects/create'].pattern}
+          element={<ProjectsCreatePage />}
+        />
 
-      <Link to={location.pathname} state="try-drawer-opened">
-        <Fab
-          variant="extended"
-          sx={{
-            position: 'absolute',
-            bottom: theme.spacing(4),
-            right: theme.spacing(2),
-          }}
-        >
-          <CameraAlt sx={{ mr: 1 }} />
-          take screenshots
-        </Fab>
-      </Link>
+        <Route path="/logout" element={<LogoutPage />} />
 
-      <Drawer
-        open={location.state === 'try-drawer-opened'}
-        anchor="right"
-        keepMounted
-        PaperProps={{
-          sx: {
-            width: '100%',
-            maxWidth: 'sm',
-            overflow: 'hidden',
-          },
-        }}
-        onClose={() => {
-          navigate({ to: location.pathname, state: 'closed' });
-        }}
-      >
-        <Toolbar>
-          <Link to={location.pathname} state="closed">
-            <Button sx={{ marginLeft: -1 }} startIcon={<Close />} size="large">
-              Close
-            </Button>
-          </Link>
-        </Toolbar>
+        <Route
+          path="*"
+          element={<Navigate to={routes['/projects'].pattern} />}
+        />
+      </Routes>
 
-        <Divider />
-
-        <Box
-          sx={{
-            width: '100%',
-            height: '100%',
-            overflowY: 'scroll',
-            paddingBottom: 4,
-            paddingX: 2,
-            paddingTop: 2,
-          }}
-        >
-          <TryPage />
-        </Box>
-      </Drawer>
-    </>
+      <Box sx={{ p: 8 }}></Box>
+    </Box>
   );
 };
