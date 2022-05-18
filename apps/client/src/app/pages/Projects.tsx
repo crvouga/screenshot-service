@@ -1,30 +1,22 @@
 import { CameraAlt, ChevronRight, Create } from '@mui/icons-material';
 import {
   Box,
-  Container,
   Button,
   Card,
   CardActionArea,
-  CardHeader,
   CircularProgress,
-  Grid,
-  Toolbar,
+  Container,
   Typography,
 } from '@mui/material';
-import { useQuery } from 'react-query';
 import { Link } from 'react-router-dom';
 import { useAuthUser } from '../authentication';
 import { Header } from '../Header';
-import * as Projects from '../projects';
+import { useProjectsQuery } from '../projects';
 import { routes } from '../routes';
 
 export const ProjectsPage = () => {
   const authUser = useAuthUser();
-
-  const query = useQuery(
-    Projects.queryKeys.getAll({ ownerId: authUser.userId }),
-    () => Projects.getAll({ ownerId: authUser.userId })
-  );
+  const query = useProjectsQuery({ ownerId: authUser.userId });
 
   return (
     <>

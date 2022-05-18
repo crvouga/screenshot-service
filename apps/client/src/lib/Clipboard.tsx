@@ -121,24 +121,3 @@ export const CopyToClipboardField = ({ text }: { text: string }) => {
  *
  *
  */
-
-// type IPasteStatus = 'idle' | 'pasted';
-
-// export const usePasteClipboard = () => {
-//   const [status, setStatus] = useState<IPasteStatus>('idle');
-
-//   const paste = async () => {
-//     if (inputRef.current) {
-//       const url = await navigator.clipboard.readText();
-
-//       inputRef.current.value = url;
-
-//       onChange(url);
-//     }
-//   };
-
-//   return {
-//     status,
-//     paste,
-//   };
-// };

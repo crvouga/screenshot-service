@@ -8,22 +8,20 @@ import {
   ImageList,
   ImageListItem,
   ImageListItemBar,
-  Paper,
   Skeleton,
   Typography,
 } from '@mui/material';
 import { IImageType } from '@screenshot-service/shared';
 import { useQuery } from 'react-query';
-import * as Screenshots from '../../../screenshots';
+import {
+  useScreenshotsQuery,
+  useScreenshotSrcQuery,
+} from '../../../screenshots';
 import { useProfileSingleOutletContext } from '../Project';
 
 export const ProjectScreenshotsTab = () => {
   const { project } = useProfileSingleOutletContext();
-
-  const query = useQuery(
-    Screenshots.queryKeys.findManyByProjectId(project),
-    () => Screenshots.findManyByProjectId(project)
-  );
+  const query = useScreenshotsQuery(project);
 
   switch (query.status) {
     case 'error':
@@ -87,10 +85,7 @@ const ScreenshotImage = ({
   screenshotId: string;
   imageType: IImageType;
 }) => {
-  const query = useQuery(
-    Screenshots.queryKeys.screenshotSrc({ screenshotId }),
-    () => Screenshots.getScreenshotSrc({ screenshotId, imageType })
-  );
+  const query = useScreenshotSrcQuery({ screenshotId, imageType });
 
   return (
     <Box sx={{ position: 'relative', paddingTop: '100%' }}>

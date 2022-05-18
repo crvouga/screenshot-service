@@ -1,16 +1,16 @@
 import { fetchScreenshot, IApiErrorBody } from '@crvouga/screenshot-service';
-import { Cancel } from '@mui/icons-material';
+import { Cancel, ContentPaste, History } from '@mui/icons-material';
 import BrokenImageIcon from '@mui/icons-material/BrokenImage';
 import DownloadIcon from '@mui/icons-material/Download';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { LoadingButton } from '@mui/lab';
-import { environment } from '../../../environments/environment';
 import {
   Alert,
   AlertTitle,
   Box,
   Button,
   Divider,
+  IconButton,
   Paper,
   PaperProps,
   Skeleton,
@@ -18,10 +18,15 @@ import {
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
-import { castTargetUrl } from '@screenshot-service/shared';
+import TextField from '@mui/material/TextField';
+import useLocalStorage from 'apps/client/src/lib/use-local-storage';
 import { useSnackbar } from 'notistack';
+import * as React from 'react';
 import { useState } from 'react';
+import { environment } from '../../../environments/environment';
 import { TextFieldInput } from '../../../lib/TextFieldInput';
+import { ProjectIdInput } from './ProjectIdInput';
+import { TargetUrlInput } from './TargetUrlInput';
 
 type IQueryState =
   | { type: 'idle' }
@@ -35,17 +40,12 @@ export const TryPage = () => {
   const [timeoutMs, setTimeoutMs] = useState('1000');
   const [projectId, setProjectId] = useState('');
 
-  const castedTargetUrl = castTargetUrl(targetUrl);
-
-  const targetUrlHelperText =
-    castedTargetUrl.type === 'error'
-      ? castedTargetUrl.errors.map((error) => error.message).join(', ')
-      : '';
-
   const [query, setQuery] = useState<IQueryState>({ type: 'idle' });
 
   const onFetch = async () => {
     setQuery({ type: 'loading' });
+
+    console.log({ targetUrl, imageType, timeoutMs, projectId });
 
     const result = await fetchScreenshot(
       {
@@ -85,32 +85,31 @@ export const TryPage = () => {
   return (
     <>
       <Typography gutterBottom color="text.secondary">
-        project id
+        project
       </Typography>
 
-      <TextFieldInput
-        id="projectId"
-        value={projectId}
-        placeholder="project id"
-        onChange={setProjectId}
-        sx={{ marginBottom: 2 }}
+      <ProjectIdInput
+        onChange={(project) => {
+          if (project) {
+            setProjectId(project.projectId);
+          }
+        }}
       />
 
-      <Typography gutterBottom color="text.secondary">
+      <Typography sx={{ mt: 2 }} gutterBottom color="text.secondary">
         targetUrl
       </Typography>
 
-      <TextFieldInput
-        type="url"
-        value={targetUrl}
-        onChange={setTargetUrl}
-        helperText={targetUrlHelperText}
-        id="targetUrl"
-        placeholder="https://www.example.com/"
-        sx={{ marginBottom: 2 }}
+      <TargetUrlInput
+        projectId={projectId}
+        onChange={(targetUrl) => {
+          if (targetUrl) {
+            setTargetUrl(targetUrl);
+          }
+        }}
       />
 
-      <Typography gutterBottom color="text.secondary">
+      <Typography sx={{ mt: 2 }} gutterBottom color="text.secondary">
         imageType
       </Typography>
 
@@ -219,8 +218,6 @@ export const TryPage = () => {
     </>
   );
 };
-
-const ProjectIdInput = () => {};
 
 const Screenshot = ({
   alt,

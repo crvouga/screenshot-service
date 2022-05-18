@@ -6,6 +6,7 @@ import {
   resultToErrors,
   toFilename,
 } from '@screenshot-service/shared';
+import { useQuery } from 'react-query';
 import { supabaseClient } from './supabase';
 
 export type IScreenshot = {
@@ -105,4 +106,30 @@ export const getScreenshotSrc = async ({
   }
 
   return { type: 'error', error: 'Failed to get screenshot url' };
+};
+
+/* 
+
+
+state
+
+
+*/
+
+export const useScreenshotsQuery = ({ projectId }: { projectId: string }) => {
+  return useQuery(queryKeys.findManyByProjectId({ projectId }), () =>
+    findManyByProjectId({ projectId })
+  );
+};
+
+export const useScreenshotSrcQuery = ({
+  screenshotId,
+  imageType,
+}: {
+  screenshotId: string;
+  imageType: IImageType;
+}) => {
+  return useQuery(queryKeys.screenshotSrc({ screenshotId }), () =>
+    getScreenshotSrc({ screenshotId, imageType })
+  );
 };

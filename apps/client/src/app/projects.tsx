@@ -1,4 +1,5 @@
 import { definitions } from '@screenshot-service/shared';
+import { useQuery } from 'react-query';
 import { supabaseClient } from './supabase';
 
 export type IProject = {
@@ -17,21 +18,6 @@ const rowToProject = (row: definitions['projects']): IProject => {
       (url) => typeof url === 'string'
     ) as string[],
   };
-};
-
-export const queryFilter = 'projects';
-
-export const queryKeys = {
-  getOne: ({ projectId }: { projectId: string }) => [
-    queryFilter,
-    'getOne',
-    projectId,
-  ],
-  getAll: ({ ownerId }: { ownerId: string }) => [
-    queryFilter,
-    'getAll',
-    ownerId,
-  ],
 };
 
 export const getAll = async ({
@@ -145,4 +131,31 @@ export const update = async ({
   return {
     type: 'success',
   };
+};
+
+/* 
+
+
+query
+
+
+*/
+
+export const queryFilter = 'projects';
+
+export const queryKeys = {
+  getOne: ({ projectId }: { projectId: string }) => [
+    queryFilter,
+    'getOne',
+    projectId,
+  ],
+  getAll: ({ ownerId }: { ownerId: string }) => [
+    queryFilter,
+    'getAll',
+    ownerId,
+  ],
+};
+
+export const useProjectsQuery = ({ ownerId }: { ownerId: string }) => {
+  return useQuery(queryKeys.getAll({ ownerId }), () => getAll({ ownerId }));
 };
