@@ -58,8 +58,8 @@ export const TryPage = () => {
       },
       {
         overrides: environment.production
-          ? { baseUrl: 'http://localhost:8000' }
-          : {},
+          ? {}
+          : { baseUrl: 'http://localhost:8000' },
       }
     );
 
