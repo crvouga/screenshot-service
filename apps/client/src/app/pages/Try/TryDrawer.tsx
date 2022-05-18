@@ -1,15 +1,15 @@
 import { CameraAlt, Close } from '@mui/icons-material';
 import { Box, Button, Divider, Drawer, Toolbar } from '@mui/material';
 import { useState } from 'react';
-import { appEventEmitter, useAppEventListener } from './event-emitter';
-import { TryPage } from './pages/Try';
+import { appEventEmitter, useAppEventListener } from '../../event-emitter';
+import { TryPage } from '.';
 
-export const ScreenshotDrawerButton = () => {
+export const TryDrawerButton = () => {
   return (
     <Button
       variant="contained"
       onClick={() => {
-        appEventEmitter.emit('OpenedScreenshotDrawer', null);
+        appEventEmitter.emit('OpenedTryDrawer', null);
       }}
       startIcon={<CameraAlt />}
     >
@@ -18,10 +18,10 @@ export const ScreenshotDrawerButton = () => {
   );
 };
 
-export const ScreenshotDrawer = () => {
+export const TryDrawer = () => {
   const [state, setState] = useState<'opened' | 'closed'>('closed');
 
-  useAppEventListener('OpenedScreenshotDrawer', () => {
+  useAppEventListener('OpenedTryDrawer', () => {
     setState('opened');
   });
 

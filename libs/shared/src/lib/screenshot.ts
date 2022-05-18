@@ -1,5 +1,3 @@
-import { encode as toBase64 } from 'js-base64';
-
 type ICastResult<T> =
   | { type: 'success'; data: T }
   | { type: 'error'; errors: { message: string }[] };
@@ -107,7 +105,7 @@ export type ITimeoutMs = number & { type: 'ITimeoutMs' };
 
 export const castTimeoutMs = (
   timeoutMs: unknown,
-  name: string = 'timeoutMs'
+  name = 'timeoutMs'
 ): ICastResult<ITimeoutMs> => {
   const errors = validateTimeoutMs(timeoutMs, { name });
 

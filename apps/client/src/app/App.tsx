@@ -14,10 +14,9 @@ import {
 import { ProjectLogsTab } from './pages/Project/ProjectLogs';
 import { ProjectsPage } from './pages/Projects';
 import { ProjectsCreatePage } from './pages/ProjectsCreate';
-import { TryPage } from './pages/Try';
+import { TryDrawer } from './pages/Try';
 import * as Profiles from './profiles';
 import { routes } from './routes';
-import { ScreenshotDrawer, ScreenshotDrawerButton } from './ScreenshotDrawer';
 
 export const App = () => {
   return (
@@ -117,12 +116,10 @@ export const Loaded = () => {
         overflowY: 'scroll',
       }}
     >
-      <ScreenshotDrawer />
+      <TryDrawer />
 
       <Routes>
         <Route path={routes['/'].pattern} element={<ProjectsPage />} />
-
-        <Route path={routes['/try'].pattern} element={<TryPage />} />
 
         <Route path={routes['/account'].pattern} element={<AccountPage />} />
 

@@ -4,7 +4,7 @@ import React, { ReactNode } from 'react';
 import * as ProfileAvatar from './profile-avatar';
 import { useProfileContext } from './profiles';
 import { Link, routes } from './routes';
-import { ScreenshotDrawerButton } from './ScreenshotDrawer';
+import { TryDrawerButton } from './pages/Try';
 
 export const Header = ({ breadcrumbs }: { breadcrumbs: ReactNode[] }) => {
   const { profile } = useProfileContext();
@@ -31,7 +31,7 @@ export const Header = ({ breadcrumbs }: { breadcrumbs: ReactNode[] }) => {
 
       <Box sx={{ flex: 1 }}></Box>
 
-      <ScreenshotDrawerButton />
+      <TryDrawerButton />
 
       <Link to={routes['/account'].make()}>
         <Avatar

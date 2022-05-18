@@ -4,7 +4,7 @@ import BrokenImageIcon from '@mui/icons-material/BrokenImage';
 import DownloadIcon from '@mui/icons-material/Download';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { LoadingButton } from '@mui/lab';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 import {
   Alert,
   AlertTitle,
@@ -21,11 +21,11 @@ import {
 import { castTargetUrl } from '@screenshot-service/shared';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
-import { TextFieldInput } from '../../lib/TextFieldInput';
+import { TextFieldInput } from '../../../lib/TextFieldInput';
 
 type IQueryState =
   | { type: 'idle' }
-  | { type: 'loading'; abortController: AbortController }
+  | { type: 'loading' }
   | { type: 'error'; errors: IApiErrorBody }
   | { type: 'success'; src: string };
 
@@ -45,9 +45,7 @@ export const TryPage = () => {
   const [query, setQuery] = useState<IQueryState>({ type: 'idle' });
 
   const onFetch = async () => {
-    const abortController = new AbortController();
-
-    setQuery({ type: 'loading', abortController });
+    setQuery({ type: 'loading' });
 
     const result = await fetchScreenshot(
       {
@@ -59,7 +57,9 @@ export const TryPage = () => {
       {
         overrides: environment.production
           ? {}
-          : { baseUrl: 'http://localhost:8000' },
+          : {
+              baseUrl: 'http://localhost:8000',
+            },
       }
     );
 
@@ -219,6 +219,8 @@ export const TryPage = () => {
     </>
   );
 };
+
+const ProjectIdInput = () => {};
 
 const Screenshot = ({
   alt,
