@@ -7,7 +7,7 @@
     "build": "nx build",
     "test": "nx test",
     "dev": "nx run-many --target=serve --projects=client,api",
-    "kill": "npx kill-port 4200 && npx kill-port 3333 && npx kill-port 5000",
+    "kill": "npx kill-port 4200 && npx kill-port 3333 && npx kill-port 5000 && npx kill-port 8000",
     "supabase:types": "npx openapi-typescript https://rcqvjrnexkyfcimdrnri.supabase.co/rest/v1/?apikey=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjcXZqcm5leGt5ZmNpbWRybnJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NTIyMjIxMzQsImV4cCI6MTk2Nzc5ODEzNH0.kuSVPHPQ1BC8PKWhyisHhTMUwDhKxy9MPt_Bh_u8VvI --output libs/shared/src/lib/supabase-types.ts",
     "heroku:deploy": "git push heroku master",
     "heroku-postbuild": "npx nx run-many --target=build --projects=api,client",
