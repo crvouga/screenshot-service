@@ -57,8 +57,9 @@ export const TryPage = () => {
         projectId,
       },
       {
-        baseUrl: environment.production ? undefined : 'http://localhost:8000',
-        signal: abortController.signal,
+        overrides: environment.production
+          ? { baseUrl: 'http://localhost:8000' }
+          : {},
       }
     );
 
