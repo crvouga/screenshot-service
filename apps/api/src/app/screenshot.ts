@@ -41,12 +41,14 @@ export const requestScreenshotFromStorageFirst =
     const requestId = randomUUID();
 
     const log = async (logLevel: ILogLevel, message: string) => {
-      await ProjectLogStorage.append({
+      const entry = {
         requestId,
         projectId,
         logLevel,
         message,
-      });
+      };
+      console.log(entry);
+      await ProjectLogStorage.append(entry);
     };
 
     await log('notice', 'screenshot request started');
