@@ -4,6 +4,7 @@ import BrokenImageIcon from '@mui/icons-material/BrokenImage';
 import DownloadIcon from '@mui/icons-material/Download';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { LoadingButton } from '@mui/lab';
+import { environment } from '../../environments/environment';
 import {
   Alert,
   AlertTitle,
@@ -56,7 +57,7 @@ export const TryPage = () => {
         projectId,
       },
       {
-        baseUrl: 'http://localhost:8000',
+        baseUrl: environment.production ? undefined : 'http://localhost:8000',
         signal: abortController.signal,
       }
     );

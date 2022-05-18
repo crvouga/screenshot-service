@@ -1,13 +1,14 @@
 export type IApiErrorBody = { message: string }[];
 
-export const BASE_URL = 'https://crvouga-screenshot-service.herokuapp.com';
+export const DEFAULT_BASE_URL =
+  'https://crvouga-screenshot-service.herokuapp.com';
 
 export const GET_SCREENSHOT_ENDPOINT = '/screenshot';
 
 export const API_ENDPOINT = '/api';
 
 export type IConfig = {
-  baseUrl: string;
+  baseUrl?: string;
   signal?: AbortSignal;
 };
 
@@ -24,9 +25,9 @@ export const toGetScreenshotEndpoint = (
 ): string => {
   const queryParams = new URLSearchParams(params);
 
-  const url = `${
-    config.baseUrl
-  }${API_ENDPOINT}${GET_SCREENSHOT_ENDPOINT}?${queryParams.toString()}`;
+  const baseUrl = config.baseUrl ?? DEFAULT_BASE_URL;
+
+  const url = `${baseUrl}${API_ENDPOINT}${GET_SCREENSHOT_ENDPOINT}?${queryParams.toString()}`;
 
   return url;
 };
