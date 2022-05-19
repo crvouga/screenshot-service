@@ -1,9 +1,17 @@
 import socketClient, { Socket } from 'socket.io-client';
-import { IDelaySec, IImageType, ITargetUrl } from './screenshot';
+import { ILogLevel } from './project-log';
+import {
+  IDelaySec,
+  IImageType,
+  IProjectId,
+  IScreenshotId,
+  ITargetUrl,
+} from './screenshot';
+import { Uuid } from './uuid';
 
 type ScreenshotRequest = {
-  requestId: string;
-  projectId: string;
+  requestId: Uuid;
+  projectId: IProjectId;
   delaySec: IDelaySec;
   imageType: IImageType;
   targetUrl: ITargetUrl;
@@ -11,14 +19,17 @@ type ScreenshotRequest = {
 
 // docs: https://socket.io/docs/v4/typescript/
 
-export interface ServerToClientEvents {
-  noArg: () => void;
-  basicEmit: (a: number, b: string, c: Buffer) => void;
-  withAck: (d: string, callback: (e: number) => void) => void;
-}
-
 export interface ClientToServerEvents {
   requestScreenshot: (request: ScreenshotRequest) => void;
+}
+
+export interface ServerToClientEvents {
+  requestScreenshotFailed: (errors: { message: string }[]) => void;
+  requestScreenshotSucceeded: (response: {
+    screenshotId: IScreenshotId;
+    imageType: IImageType;
+  }) => void;
+  log: (logLevel: ILogLevel, message: string) => void;
 }
 
 export interface InterServerEvents {

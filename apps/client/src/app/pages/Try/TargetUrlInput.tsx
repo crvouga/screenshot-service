@@ -1,3 +1,4 @@
+import { IProjectId, Uuid } from '@crvouga/screenshot-service';
 import { ContentPaste } from '@mui/icons-material';
 import { Autocomplete, IconButton, TextField } from '@mui/material';
 import * as React from 'react';
@@ -13,13 +14,11 @@ const isValidUrl = (url: string) => {
 };
 
 export const TargetUrlInput = ({
-  projectId,
   targetUrl,
   setTargetUrl,
 }: {
   targetUrl: string;
   setTargetUrl: (targetUrl: string) => void;
-  projectId: string;
 }) => {
   const [history, setHistory] = useLocalStorage<string[]>(
     'targetUrlHistory',

@@ -1,9 +1,10 @@
+import { IProjectId } from '@crvouga/screenshot-service';
 import { definitions } from '@screenshot-service/shared';
 import { useQuery } from 'react-query';
 import { supabaseClient } from './supabase';
 
 export type IProject = {
-  projectId: string;
+  projectId: IProjectId;
   ownerId: string;
   name: string;
   whitelistedUrls: string[];
@@ -11,7 +12,8 @@ export type IProject = {
 
 const rowToProject = (row: definitions['projects']): IProject => {
   return {
-    projectId: row.id,
+    // todo validate
+    projectId: row.id as IProjectId,
     ownerId: row.owner_id,
     name: row.name,
     whitelistedUrls: (row.whitelisted_urls ?? []).filter(

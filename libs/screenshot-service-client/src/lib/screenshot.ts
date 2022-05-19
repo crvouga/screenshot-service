@@ -1,9 +1,83 @@
+/**
+ *
+ *
+ *
+ */
+
+import { isUuid, Uuid } from './uuid';
+
 type ICastResult<T> =
   | { type: 'success'; data: T }
   | { type: 'error'; errors: { message: string }[] };
 
 export const resultToErrors = <T>(result: ICastResult<T>) => {
   return result.type === 'error' ? result.errors : [];
+};
+
+/**
+ *
+ *
+ *
+ */
+
+export type IRequestId = Uuid & { tag: 'IRequestId' };
+
+export const castRequestId = (id: unknown): ICastResult<IRequestId> => {
+  if (isUuid(id)) {
+    return {
+      type: 'success',
+      data: id as IRequestId,
+    };
+  }
+
+  return {
+    type: 'error',
+    errors: [{ message: 'request id must be a valid uuid' }],
+  };
+};
+
+/**
+ *
+ *
+ *
+ */
+
+export type IProjectId = Uuid & { tag: 'IProjectId' };
+
+export const castProjectId = (id: unknown): ICastResult<IProjectId> => {
+  if (isUuid(id)) {
+    return {
+      type: 'success',
+      data: id as IProjectId,
+    };
+  }
+
+  return {
+    type: 'error',
+    errors: [{ message: 'projectIs is not a uuid' }],
+  };
+};
+
+/**
+ *
+ *
+ *
+ */
+
+export type IScreenshotId = Uuid & { tag: 'IScreenshotId' };
+
+export const castScreenshotId = (id: unknown): ICastResult<IScreenshotId> => {
+  if (isUuid(id)) {
+    return {
+      type: 'success',
+      data: id as IScreenshotId,
+    };
+  }
+
+  return {
+    type: 'error',
+    errors: [{ message: 'screenshot id is not a uuid' }],
+  };
 };
 
 /**
@@ -43,7 +117,7 @@ export type ITargetUrl = string & { type: 'ITargetUrl' };
 
 export const castTargetUrl = (
   url: unknown,
-  name: string = 'targetUrl'
+  name = 'targetUrl'
 ): ICastResult<ITargetUrl> => {
   const errors = validateTargetUrl(url, { name });
 

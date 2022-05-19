@@ -1,12 +1,15 @@
 import {
   All_DELAY_SEC,
-  fetchScreenshot,
+  castTargetUrl,
+  generateUuid,
   IApiErrorBody,
   IDelaySec,
   IImageType,
+  IProjectId,
+  IScreenshotId,
   toDelaySec,
 } from '@crvouga/screenshot-service';
-import { Cancel } from '@mui/icons-material';
+import { Cancel, SettingsInputAntennaTwoTone } from '@mui/icons-material';
 import BrokenImageIcon from '@mui/icons-material/BrokenImage';
 import DownloadIcon from '@mui/icons-material/Download';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
@@ -30,9 +33,9 @@ import {
 import { useSnackbar } from 'notistack';
 import * as React from 'react';
 import { useState } from 'react';
-import { environment } from '../../../environments/environment';
-import { TextFieldInput } from '../../../lib/TextFieldInput';
-import { ProjectIdInput } from './ProjectIdInput';
+import { screenshotClient } from '../../screenshot-service';
+import { getScreenshotSrc } from '../../screenshots';
+import { ProjectInput } from './ProjectInput';
 import { TargetUrlInput } from './TargetUrlInput';
 
 type IQueryState =
@@ -42,33 +45,82 @@ type IQueryState =
   | { type: 'success'; src: string };
 
 export const TryPage = () => {
-  const [targetUrl, setTargetUrl] = useState('');
+  const [targetUrl, setTargetUrl] = useState<string>('');
   const [imageType, setImageType] = useState<IImageType>('jpeg');
   const [delaySec, setDelaySec] = useState<IDelaySec>(0);
-  const [projectId, setProjectId] = useState('');
-
+  const [projectId, setProjectId] = useState<IProjectId | null>(null);
   const [query, setQuery] = useState<IQueryState>({ type: 'idle' });
 
-  const onFetch = async () => {
+  const submit = async () => {
+    const requestId = generateUuid();
+
     setQuery({ type: 'loading' });
 
-    const result = await fetchScreenshot(
-      {
-        targetUrl,
-        imageType,
-        delaySec: String(delaySec),
-        projectId,
-      },
-      {
-        overrides: environment.production
-          ? {}
-          : {
-              baseUrl: environment.devServerBaseUrl,
-            },
-      }
-    );
+    if (!projectId) {
+      setQuery({ type: 'error', errors: [{ message: 'project is required' }] });
+      return;
+    }
 
-    setQuery(result);
+    const targetUrlResult = castTargetUrl(targetUrl);
+
+    if (targetUrlResult.type === 'error') {
+      setQuery({ type: 'error', errors: targetUrlResult.errors });
+      return;
+    }
+
+    const request = {
+      requestId: requestId,
+      projectId: projectId,
+      targetUrl: targetUrlResult.data,
+      imageType: imageType,
+      delaySec: delaySec,
+    };
+
+    console.log('EMIT requestScreenshot', request);
+
+    screenshotClient.socket.emit('requestScreenshot', request);
+
+    screenshotClient.socket.on('log', (level, message) => {
+      console.log('log', level, message);
+    });
+
+    type IResponse =
+      | { type: 'failed'; errors: { message: string }[] }
+      | {
+          type: 'succeeded';
+          screenshotId: IScreenshotId;
+          imageType: IImageType;
+        };
+
+    const response = await new Promise<IResponse>((resolve) => {
+      screenshotClient.socket.once('requestScreenshotFailed', (errors) => {
+        resolve({ type: 'failed', errors });
+      });
+
+      screenshotClient.socket.once('requestScreenshotSucceeded', (payload) => {
+        resolve({ type: 'succeeded', ...payload });
+      });
+    });
+
+    if (response.type === 'failed') {
+      console.log('requestScreenshotFailed', response);
+      setQuery({ type: 'error', errors: response.errors });
+      return;
+    }
+
+    console.log('requestScreenshotSucceeded');
+
+    const screenshotSrcResult = await getScreenshotSrc(response);
+
+    if (screenshotSrcResult.type === 'error') {
+      setQuery({
+        type: 'error',
+        errors: [{ message: screenshotSrcResult.error }],
+      });
+      return;
+    }
+
+    setQuery({ type: 'success', src: screenshotSrcResult.src });
   };
 
   const snackbar = useSnackbar();
@@ -93,7 +145,7 @@ export const TryPage = () => {
         project
       </Typography>
 
-      <ProjectIdInput
+      <ProjectInput
         onChange={(project) => {
           if (project) {
             setProjectId(project.projectId);
@@ -105,11 +157,7 @@ export const TryPage = () => {
         target url
       </Typography>
 
-      <TargetUrlInput
-        projectId={projectId}
-        targetUrl={targetUrl}
-        setTargetUrl={setTargetUrl}
-      />
+      <TargetUrlInput targetUrl={targetUrl} setTargetUrl={setTargetUrl} />
 
       <Typography sx={{ mt: 2 }} gutterBottom color="text.secondary">
         image type
@@ -171,7 +219,7 @@ export const TryPage = () => {
         sx={{
           mt: 2,
         }}
-        onClick={onFetch}
+        onClick={submit}
         loading={query.type === 'loading'}
       >
         take screenshot

@@ -1,3 +1,4 @@
+import { IProjectId } from '@crvouga/screenshot-service';
 import { DeleteForever } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import {
@@ -74,7 +75,7 @@ const AddToWhitelistInput = ({
   whitelistedUrls,
   setWhitelistedUrls,
 }: {
-  projectId: string;
+  projectId: IProjectId;
   whitelistedUrls: string[];
   setWhitelistedUrls: (urls: string[]) => void;
 }) => {
@@ -145,7 +146,7 @@ const WhitelistedUrlField = ({
   setWhitelistedUrls,
   whitelistedUrl,
 }: {
-  projectId: string;
+  projectId: IProjectId;
   whitelistedUrl: string;
   whitelistedUrls: string[];
   setWhitelistedUrls: (urls: string[]) => void;

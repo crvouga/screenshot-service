@@ -1,11 +1,17 @@
-import { IDelaySec, IImageType, ITargetUrl } from '@crvouga/screenshot-service';
+import {
+  IDelaySec,
+  IImageType,
+  IProjectId,
+  IScreenshotId,
+  ITargetUrl,
+} from '@crvouga/screenshot-service';
 
 export type IScreenshot = {
-  screenshotId: string;
+  screenshotId: IScreenshotId;
   imageType: IImageType;
   delaySec: IDelaySec;
   targetUrl: ITargetUrl;
-  projectId: string;
+  projectId: IProjectId;
 };
 
 export type IScreenshotData = Buffer | string;

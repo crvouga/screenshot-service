@@ -6,7 +6,7 @@ import * as React from 'react';
 import { useAuthUser } from '../../authentication';
 import { IProject, useProjectsQuery } from '../../projects';
 
-export const ProjectIdInput = ({
+export const ProjectInput = ({
   onChange,
 }: {
   onChange: (project: IProject | null) => void;

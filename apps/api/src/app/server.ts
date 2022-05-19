@@ -2,12 +2,15 @@ import {
   API_ENDPOINT,
   castDelaySec,
   castImageType,
+  castProjectId,
   castTargetUrl,
   ClientToServerEvents,
   GET_SCREENSHOT_ENDPOINT,
   IApiErrorBody,
   IGetScreenshotQueryParams,
+  ILogLevel,
   InterServerEvents,
+  IProjectId,
   resultToErrors,
   ServerToClientEvents,
   SocketData,
@@ -49,21 +52,35 @@ export const startServer = async ({ port }: { port: number }) => {
     },
   });
 
+  const webBrowser = await WebBrowser.create();
+
   io.on('connection', (socket) => {
     console.log('client connected');
 
     socket.on('requestScreenshot', async (request) => {
-      // const result = await requestScreenshotStorageFirst({
-      //   webBrowser: browser,
-      //   log: async (level, message) => {
-      //     console.log(level, message);
-      //   },
-      // })({
-      //   imageType: imageTypeResult.data,
-      //   delaySec: delaySecResult.data,
-      //   targetUrl: targetUrlResult.data,
-      //   projectId: projectIdResult.data,
-      // });
+      console.log('requestScreenshot', request);
+
+      socket.join(request.requestId);
+
+      const log = async (level: ILogLevel, message: string) => {
+        socket.to(request.requestId).emit('log', level, message);
+        console.log(level, message);
+      };
+
+      const result = await requestScreenshotStorageFirst(
+        { webBrowser, log },
+        request
+      );
+
+      socket.leave(request.requestId);
+
+      if (result.type === 'error') {
+        socket.emit('requestScreenshotFailed', result.errors);
+
+        return;
+      }
+
+      socket.emit('requestScreenshotSucceeded', result);
     });
   });
 
@@ -165,15 +182,7 @@ const useGetScreenshot = async (browser: Browser, router: Router) => {
     const delaySecResult = castDelaySec(queryParams.delaySec);
     const targetUrlResult = castTargetUrl(queryParams.targetUrl);
     const imageTypeResult = castImageType(queryParams.imageType);
-    const projectIdResult =
-      typeof queryParams.projectId === 'string'
-        ? { type: 'success', data: queryParams.projectId }
-        : {
-            type: 'error',
-            errors: [
-              { message: 'projectId query param is missing or invalid' },
-            ],
-          };
+    const projectIdResult = castProjectId(queryParams.projectId);
 
     if (
       delaySecResult.type === 'error' ||
@@ -191,17 +200,20 @@ const useGetScreenshot = async (browser: Browser, router: Router) => {
       return;
     }
 
-    const result = await requestScreenshotStorageFirst({
-      webBrowser: browser,
-      log: async (level, message) => {
-        console.log(level, message);
+    const result = await requestScreenshotStorageFirst(
+      {
+        webBrowser: browser,
+        log: async (level, message) => {
+          console.log(level, message);
+        },
       },
-    })({
-      imageType: imageTypeResult.data,
-      delaySec: delaySecResult.data,
-      targetUrl: targetUrlResult.data,
-      projectId: projectIdResult.data,
-    });
+      {
+        imageType: imageTypeResult.data,
+        delaySec: delaySecResult.data,
+        targetUrl: targetUrlResult.data,
+        projectId: projectIdResult.data,
+      }
+    );
 
     if (result.type === 'error') {
       const apiErrorBody: IApiErrorBody = result.errors;

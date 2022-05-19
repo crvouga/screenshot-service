@@ -5,6 +5,8 @@ import {
   castTargetUrl,
   IDelaySec,
   IImageType,
+  IProjectId,
+  IScreenshotId,
   ITargetUrl,
   resultToErrors,
   toFilename,
@@ -27,7 +29,7 @@ type IGetResult =
   | { type: 'error'; errors: { message: string }[] };
 
 type IPutResult =
-  | { type: 'success' }
+  | { type: 'success'; screenshotId: IScreenshotId }
   | { type: 'error'; errors: { message: string }[] };
 
 /**
@@ -96,6 +98,7 @@ export const put = async (
 
   return {
     type: 'success',
+    screenshotId: getResult.screenshot.screenshotId,
   };
 };
 
@@ -200,8 +203,8 @@ const rowToScreenshot = (
     imageTypeResult.type === 'success'
   ) {
     const screenshot: IScreenshot = {
-      screenshotId: row.id,
-      projectId: row.project_id,
+      screenshotId: row.id as IScreenshotId,
+      projectId: row.project_id as IProjectId,
       targetUrl: targetUrlResult.data,
       delaySec: delaySecResult.data,
       imageType: imageTypeResult.data,
