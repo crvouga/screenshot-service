@@ -63,7 +63,7 @@ export const startServer = async ({ port }: { port: number }) => {
       socket.join(request.requestId);
 
       const log = async (level: ILogLevel, message: string) => {
-        socket.to(request.requestId).emit('log', level, message);
+        socket.emit('log', level, message);
         console.log(level, message);
       };
 

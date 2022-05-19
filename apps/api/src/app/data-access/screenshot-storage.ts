@@ -71,7 +71,7 @@ export const put = async (
   });
 
   if (getResult.type === 'error') {
-    return { type: 'error', errors: [{ message: getResult.error }] };
+    return getResult;
   }
 
   const screenshot = getResult.screenshot;
@@ -283,21 +283,31 @@ const insertOne = async ({
   targetUrl: ITargetUrl;
   delaySec: IDelaySec;
   imageType: IImageType;
-}): Promise<{ type: 'success' } | { type: 'error'; error: string }> => {
-  const result = await supabaseClient
+}): Promise<
+  | { type: 'success'; screenshot: IScreenshot }
+  | { type: 'error'; errors: { message: string }[] }
+> => {
+  const response = await supabaseClient
     .from<definitions['screenshots']>('screenshots')
     .insert({
       project_id: projectId,
       target_url: targetUrl,
       delay_sec: delaySec,
       image_type: imageType,
-    });
+    })
+    .single();
 
-  if (result.error) {
-    return { type: 'error', error: String(result.error) };
+  if (response.error) {
+    return { type: 'error', errors: [{ message: String(response.error) }] };
   }
 
-  return { type: 'success' };
+  const result = rowToScreenshot(response.data);
+
+  if (result.type === 'error') {
+    return result;
+  }
+
+  return { type: 'success', screenshot: result.screenshot };
 };
 
 const getElseInsertRow = async ({
@@ -315,7 +325,7 @@ const getElseInsertRow = async ({
       type: 'success';
       screenshot: IScreenshot;
     }
-  | { type: 'error'; error: string }
+  | { type: 'error'; errors: { message: string }[] }
 > => {
   const got = await getOne({ projectId, targetUrl, delaySec, imageType });
 
@@ -323,21 +333,16 @@ const getElseInsertRow = async ({
     return { type: 'success', screenshot: got.screenshot };
   }
 
-  await insertOne({ projectId, targetUrl, delaySec, imageType });
-
-  const gotAfterCreated = await getOne({
+  const inserted = await insertOne({
     projectId,
     targetUrl,
     delaySec,
     imageType,
   });
 
-  if (gotAfterCreated.type === 'error') {
-    return {
-      type: 'error',
-      error: `Supabase is not working. Gettting a screenshot record after just creating one does not return any data.`,
-    };
+  if (inserted.type === 'error') {
+    return inserted;
   }
 
-  return { type: 'success', screenshot: gotAfterCreated.screenshot };
+  return { type: 'success', screenshot: inserted.screenshot };
 };

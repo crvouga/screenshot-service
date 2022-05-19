@@ -16,6 +16,52 @@ type Result =
       errors: [{ message: string }];
     };
 
+export const openNewPage = async (browser: puppeteer.Browser) => {
+  const page = await browser.newPage();
+  return page;
+};
+
+export const goTo = async (page: puppeteer.Page, url: ITargetUrl) => {
+  await page.goto(url, {
+    waitUntil: 'networkidle2',
+  });
+};
+
+export const takeScreenshot = async (
+  page: puppeteer.Page,
+  imageType: IImageType
+) => {
+  try {
+    const buffer = await page.screenshot({
+      type: imageType,
+    });
+
+    if (typeof buffer !== 'string' && !buffer) {
+      return {
+        type: 'error',
+        errors: [
+          {
+            message: 'puppeteer did not return a buffer for the screenshot',
+          },
+        ],
+      };
+    }
+
+    return { type: 'success', buffer };
+  } catch (error) {
+    const message = String(error?.toString?.() ?? 'puppeteer threw an error');
+
+    return {
+      type: 'error',
+      errors: [
+        {
+          message,
+        },
+      ],
+    };
+  }
+};
+
 export const captureScreenshot = async (
   browser: puppeteer.Browser,
   {

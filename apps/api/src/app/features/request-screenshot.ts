@@ -37,14 +37,12 @@ export const requestScreenshotStorageFirst = async (
   { webBrowser, log }: { webBrowser: WebBrowser.WebBrowser; log: Log },
   { projectId, delaySec, targetUrl, imageType }: IRequest
 ): Promise<IResponse> => {
-  await log('notice', 'screenshot request started');
-
-  await log('info', 'finding associated project');
+  await log('info', 'getting project');
 
   const projectResult = await ProjectStorage.getOneById({ projectId });
 
   if (projectResult.type === 'error') {
-    await log('error', 'failed to find associated project in storage');
+    await log('error', "didn't find project");
 
     return {
       type: 'error',
@@ -56,9 +54,7 @@ export const requestScreenshotStorageFirst = async (
     };
   }
 
-  await log('info', 'found associated project');
-
-  await log('info', 'checking if screenshot is in storage');
+  await log('info', 'checking cache');
 
   const getResult = await ScreenshotStorage.get({
     delaySec,
@@ -68,9 +64,7 @@ export const requestScreenshotStorageFirst = async (
   });
 
   if (getResult.type === 'success') {
-    await log('info', 'found screenshot in storage');
-
-    await log('notice', 'screenshot request suceeded ');
+    await log('info', 'found screenshot cache');
 
     return {
       type: 'success',
@@ -81,18 +75,23 @@ export const requestScreenshotStorageFirst = async (
     };
   }
 
-  await log('info', 'failed to find screenshot in storage');
+  await log('info', 'opening new page');
 
-  await log('notice', 'started taking screenshot from web browser');
+  const page = await WebBrowser.openNewPage(webBrowser);
 
-  const screenshotResult = await WebBrowser.captureScreenshot(webBrowser, {
-    imageType,
-    delaySec,
-    targetUrl,
-  });
+  await log('info', 'going to url');
+
+  await WebBrowser.goTo(page, targetUrl);
+
+  for (let elapsed = 0; elapsed < delaySec; elapsed++) {
+    await log('info', `delaying for ${delaySec - elapsed} seconds...`);
+    await timeout(1000);
+  }
+
+  const screenshotResult = await WebBrowser.takeScreenshot(page, imageType);
 
   if (screenshotResult.type === 'error') {
-    await log('error', 'failed to take screenshot from web browser');
+    await log('error', 'failed to capture screenshot');
 
     return {
       type: 'error',
@@ -100,9 +99,7 @@ export const requestScreenshotStorageFirst = async (
     };
   }
 
-  await log('info', 'took screenshot from web browser');
-
-  await log('info', 'putting screenshot in storage');
+  await log('info', 'storing screenshot');
 
   const putResult = await ScreenshotStorage.put(
     {
@@ -111,11 +108,16 @@ export const requestScreenshotStorageFirst = async (
       targetUrl,
       projectId,
     },
-    screenshotResult.data
+    screenshotResult.buffer
   );
 
   if (putResult.type === 'error') {
-    await log('error', 'failed to put screenshot in storage');
+    await log(
+      'error',
+      `failed to put screenshot in storage. ${putResult.errors
+        .map((error) => error.message)
+        .join(' & ')}`
+    );
 
     return {
       type: 'error',
@@ -123,19 +125,17 @@ export const requestScreenshotStorageFirst = async (
     };
   }
 
-  if (putResult.type === 'success') {
-    await log('info', 'put screenshot in storage');
-  }
-
-  await log('info', 'took screenshot from web browser');
-
   await log('notice', 'screenshot request suceeded ');
 
   return {
     type: 'success',
     source: 'WebBrowser',
-    data: screenshotResult.data,
+    data: screenshotResult.buffer,
     imageType: imageType,
     screenshotId: putResult.screenshotId,
   };
+};
+
+const timeout = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 };

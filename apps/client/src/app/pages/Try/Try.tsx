@@ -5,6 +5,7 @@ import {
   IApiErrorBody,
   IDelaySec,
   IImageType,
+  ILogLevel,
   IProjectId,
   IScreenshotId,
   toDelaySec,
@@ -38,11 +39,13 @@ import { getScreenshotSrc } from '../../screenshots';
 import { ProjectInput } from './ProjectInput';
 import { TargetUrlInput } from './TargetUrlInput';
 
+type ILog = { level: ILogLevel; message: string };
+
 type IQueryState =
   | { type: 'idle' }
-  | { type: 'loading' }
-  | { type: 'error'; errors: IApiErrorBody }
-  | { type: 'success'; src: string };
+  | { type: 'loading'; logs: ILog[] }
+  | { type: 'error'; errors: IApiErrorBody; logs: ILog[] }
+  | { type: 'success'; src: string; logs: ILog[] };
 
 export const TryPage = () => {
   const [targetUrl, setTargetUrl] = useState<string>('');
@@ -51,20 +54,37 @@ export const TryPage = () => {
   const [projectId, setProjectId] = useState<IProjectId | null>(null);
   const [query, setQuery] = useState<IQueryState>({ type: 'idle' });
 
+  const appendLog = (log: ILog) => {
+    setQuery((query) => {
+      if (query.type === 'loading') {
+        return {
+          ...query,
+          logs: [...query.logs, log],
+        };
+      }
+
+      return query;
+    });
+  };
+
   const submit = async () => {
     const requestId = generateUuid();
 
-    setQuery({ type: 'loading' });
+    setQuery({ type: 'loading', logs: [] });
 
     if (!projectId) {
-      setQuery({ type: 'error', errors: [{ message: 'project is required' }] });
+      setQuery({
+        type: 'error',
+        logs: [],
+        errors: [{ message: 'project is required' }],
+      });
       return;
     }
 
     const targetUrlResult = castTargetUrl(targetUrl);
 
     if (targetUrlResult.type === 'error') {
-      setQuery({ type: 'error', errors: targetUrlResult.errors });
+      setQuery({ type: 'error', logs: [], errors: targetUrlResult.errors });
       return;
     }
 
@@ -80,9 +100,16 @@ export const TryPage = () => {
 
     screenshotClient.socket.emit('requestScreenshot', request);
 
-    screenshotClient.socket.on('log', (level, message) => {
-      console.log('log', level, message);
-    });
+    const logs: ILog[] = [];
+
+    const onLog = (level: ILogLevel, message: string) => {
+      const log: ILog = { level, message };
+      console.log(log);
+      logs.push(log);
+      appendLog(log);
+    };
+
+    screenshotClient.socket.on('log', onLog);
 
     type IResponse =
       | { type: 'failed'; errors: { message: string }[] }
@@ -102,9 +129,11 @@ export const TryPage = () => {
       });
     });
 
+    screenshotClient.socket.off('log', onLog);
+
     if (response.type === 'failed') {
       console.log('requestScreenshotFailed', response);
-      setQuery({ type: 'error', errors: response.errors });
+      setQuery({ logs, type: 'error', errors: response.errors });
       return;
     }
 
@@ -115,12 +144,13 @@ export const TryPage = () => {
     if (screenshotSrcResult.type === 'error') {
       setQuery({
         type: 'error',
+        logs,
         errors: [{ message: screenshotSrcResult.error }],
       });
       return;
     }
 
-    setQuery({ type: 'success', src: screenshotSrcResult.src });
+    setQuery({ type: 'success', logs, src: screenshotSrcResult.src });
   };
 
   const snackbar = useSnackbar();
@@ -245,6 +275,16 @@ export const TryPage = () => {
           marginBottom: 4,
         }}
       />
+
+      <Box sx={{ mb: 4 }}>
+        {query.type === 'idle' && (
+          <Typography color="disabled">no logs to show</Typography>
+        )}
+
+        {query.type !== 'idle' && (
+          <Typography>{query.logs.at(-1)?.message ?? 'no logs yet'}</Typography>
+        )}
+      </Box>
 
       <Screenshot
         state={query.type}
