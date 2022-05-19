@@ -1,47 +1,81 @@
-import Autocomplete from '@mui/material/Autocomplete';
-import CircularProgress from '@mui/material/CircularProgress';
-import TextField from '@mui/material/TextField';
+import { ContentPaste, History } from '@mui/icons-material';
+import {
+  Autocomplete,
+  IconButton,
+  TextField,
+  TextFieldProps,
+} from '@mui/material';
+import useLocalStorage from 'apps/client/src/lib/use-local-storage';
 import * as React from 'react';
-import { useScreenshotsQuery } from '../../screenshots';
+
+const isValidUrl = (url: string) => {
+  try {
+    new URL(url);
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
 
 export const TargetUrlInput = ({
   projectId,
-  onChange,
+  targetUrl,
+  setTargetUrl,
 }: {
+  targetUrl: string;
+  setTargetUrl: (targetUrl: string) => void;
   projectId: string;
-  onChange: (targetUrl: string | null) => void;
 }) => {
-  const query = useScreenshotsQuery({ projectId });
-  const options: string[] =
-    query.data?.type === 'success'
-      ? query.data.screenshots.map((_) => _.targetUrl)
-      : [];
+  const [history, setHistory] = useLocalStorage<string[]>(
+    'targetUrlHistory',
+    []
+  );
+
+  const addToHistory = (targetUrl: string) => {
+    setHistory((history = []) => {
+      const nextHistory = [targetUrl]
+        .concat(history.filter((url) => url !== targetUrl))
+        .filter(isValidUrl)
+        .slice(0, 20);
+
+      return nextHistory;
+    });
+  };
+
+  const handlePaste = async () => {
+    const text = await navigator.clipboard.readText();
+    console.log('PASTE', text);
+    setTargetUrl(text);
+    addToHistory(text);
+  };
 
   return (
     <Autocomplete
-      id="targetUrl"
-      fullWidth
       freeSolo
-      options={options}
-      loading={query.isLoading}
-      onChange={(_event, option) => onChange(option)}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          placeholder="https://www.example.com/"
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <React.Fragment>
-                {query.isLoading ? (
-                  <CircularProgress color="inherit" size={20} />
-                ) : null}
-                {params.InputProps.endAdornment}
-              </React.Fragment>
-            ),
-          }}
-        />
-      )}
+      options={history}
+      inputValue={targetUrl}
+      onInputChange={(_, value) => {
+        setTargetUrl(value);
+      }}
+      renderInput={(params) => {
+        return (
+          <TextField
+            {...params}
+            placeholder="https://www.example.com/"
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  <IconButton onClick={handlePaste}>
+                    <ContentPaste />
+                  </IconButton>
+                  {params.InputProps.endAdornment}
+                </>
+              ),
+            }}
+          />
+        );
+      }}
     />
   );
 };

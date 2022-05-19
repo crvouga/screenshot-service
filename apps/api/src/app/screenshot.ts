@@ -48,7 +48,7 @@ export const requestScreenshotFromStorageFirst =
         message,
       };
       console.log(entry);
-      await ProjectLogStorage.append(entry);
+      // await ProjectLogStorage.append(entry);
     };
 
     await log('notice', 'screenshot request started');

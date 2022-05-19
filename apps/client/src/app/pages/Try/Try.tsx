@@ -1,5 +1,5 @@
 import { fetchScreenshot, IApiErrorBody } from '@crvouga/screenshot-service';
-import { Cancel, ContentPaste, History } from '@mui/icons-material';
+import { Cancel } from '@mui/icons-material';
 import BrokenImageIcon from '@mui/icons-material/BrokenImage';
 import DownloadIcon from '@mui/icons-material/Download';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
@@ -10,7 +10,6 @@ import {
   Box,
   Button,
   Divider,
-  IconButton,
   Paper,
   PaperProps,
   Skeleton,
@@ -18,8 +17,6 @@ import {
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
-import TextField from '@mui/material/TextField';
-import useLocalStorage from 'apps/client/src/lib/use-local-storage';
 import { useSnackbar } from 'notistack';
 import * as React from 'react';
 import { useState } from 'react';
@@ -44,8 +41,6 @@ export const TryPage = () => {
 
   const onFetch = async () => {
     setQuery({ type: 'loading' });
-
-    console.log({ targetUrl, imageType, timeoutMs, projectId });
 
     const result = await fetchScreenshot(
       {
@@ -102,11 +97,8 @@ export const TryPage = () => {
 
       <TargetUrlInput
         projectId={projectId}
-        onChange={(targetUrl) => {
-          if (targetUrl) {
-            setTargetUrl(targetUrl);
-          }
-        }}
+        targetUrl={targetUrl}
+        setTargetUrl={setTargetUrl}
       />
 
       <Typography sx={{ mt: 2 }} gutterBottom color="text.secondary">
