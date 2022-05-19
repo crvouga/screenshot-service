@@ -4,14 +4,16 @@ import {
   IDelaySec,
   IImageType,
   IProjectId,
+  IRequestId,
   IScreenshotId,
+  IStrategy,
   ITargetUrl,
 } from './screenshot';
-import { Uuid } from './uuid';
 
 type ScreenshotRequest = {
-  requestId: Uuid;
+  requestId: IRequestId;
   projectId: IProjectId;
+  strategy: IStrategy;
   delaySec: IDelaySec;
   imageType: IImageType;
   targetUrl: ITargetUrl;

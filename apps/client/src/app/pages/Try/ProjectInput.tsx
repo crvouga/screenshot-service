@@ -6,10 +6,10 @@ import { useProjectsQuery } from '../../projects';
 
 export const ProjectInput = ({
   projectId,
-  onChange,
+  setProjectId,
 }: {
   projectId: IProjectId | null;
-  onChange: (projectId: IProjectId | null) => void;
+  setProjectId: (projectId: IProjectId | null) => void;
 }) => {
   const authUser = useAuthUser();
   const query = useProjectsQuery({ ownerId: authUser.userId });
@@ -21,11 +21,22 @@ export const ProjectInput = ({
       value={projectId ?? 'NoProject'}
       placeholder="select a project"
     >
-      <MenuItem value={'NoProject'}>
+      <MenuItem
+        value={'NoProject'}
+        onClick={() => {
+          setProjectId(null);
+        }}
+      >
         <ListItemText primary={'No project selected'} />
       </MenuItem>
       {options.map((project) => (
-        <MenuItem key={project.projectId} value={project.projectId}>
+        <MenuItem
+          key={project.projectId}
+          value={project.projectId}
+          onClick={() => {
+            setProjectId(project.projectId);
+          }}
+        >
           <ListItemText primary={project.name} />
         </MenuItem>
       ))}

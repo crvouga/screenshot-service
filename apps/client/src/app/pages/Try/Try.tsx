@@ -1,6 +1,7 @@
 import {
   All_DELAY_SEC,
   castTargetUrl,
+  generateRequestId,
   generateUuid,
   IDelaySec,
   IErrors,
@@ -8,6 +9,8 @@ import {
   ILogLevel,
   IProjectId,
   IScreenshotId,
+  isStrategy,
+  IStrategy,
   toDelaySec,
 } from '@crvouga/screenshot-service';
 import { Cancel } from '@mui/icons-material';
@@ -52,6 +55,7 @@ export const TryPage = () => {
   const [imageType, setImageType] = useState<IImageType>('jpeg');
   const [delaySec, setDelaySec] = useState<IDelaySec>(0);
   const [projectId, setProjectId] = useState<IProjectId | null>(null);
+  const [strategy, setStrategy] = useState<IStrategy>('cache-first');
   const [query, setQuery] = useState<IQueryState>({ type: 'idle' });
 
   const appendLog = (log: ILog) => {
@@ -68,7 +72,7 @@ export const TryPage = () => {
   };
 
   const submit = async () => {
-    const requestId = generateUuid();
+    const requestId = generateRequestId();
 
     setQuery({ type: 'loading', logs: [] });
 
@@ -89,6 +93,7 @@ export const TryPage = () => {
     }
 
     const request = {
+      strategy: strategy,
       requestId: requestId,
       projectId: projectId,
       targetUrl: targetUrlResult.data,
@@ -175,7 +180,7 @@ export const TryPage = () => {
         project
       </Typography>
 
-      <ProjectInput projectId={projectId} onChange={setProjectId} />
+      <ProjectInput projectId={projectId} setProjectId={setProjectId} />
 
       <Typography sx={{ mt: 2 }} gutterBottom color="text.secondary">
         target url
@@ -220,6 +225,24 @@ export const TryPage = () => {
         ))}
       </Select>
 
+      <Typography sx={{ mt: 2 }} gutterBottom color="text.secondary">
+        strategy
+      </Typography>
+
+      <ToggleButtonGroup
+        value={strategy}
+        onChange={(_event, value) => {
+          if (isStrategy(value)) {
+            setStrategy(value);
+          }
+        }}
+        exclusive
+        sx={{ mb: 2 }}
+      >
+        <ToggleButton value="cache-first">Cache First</ToggleButton>
+        <ToggleButton value="network-first">Network First</ToggleButton>
+      </ToggleButtonGroup>
+
       {error.length > 0 && (
         <Box sx={{ marginY: 2 }}>
           {error.map((error) => (
@@ -235,13 +258,19 @@ export const TryPage = () => {
         </Box>
       )}
 
+      <Divider
+        sx={{
+          my: 4,
+        }}
+      />
+
       <LoadingButton
         startIcon={<PhotoCameraIcon />}
         fullWidth
         size="large"
         variant="contained"
         sx={{
-          mt: 2,
+          mb: 2,
         }}
         onClick={submit}
         loading={query.type === 'loading'}
@@ -255,10 +284,6 @@ export const TryPage = () => {
         size="large"
         variant="contained"
         disabled={query.type !== 'loading'}
-        sx={{
-          mt: 2,
-          mb: 4,
-        }}
         onClick={onCancel}
       >
         cancel
@@ -266,7 +291,7 @@ export const TryPage = () => {
 
       <Divider
         sx={{
-          marginBottom: 4,
+          my: 4,
         }}
       />
 

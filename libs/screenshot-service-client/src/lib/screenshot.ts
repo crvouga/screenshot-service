@@ -4,7 +4,7 @@
  *
  */
 
-import { isUuid, Uuid } from './uuid';
+import { generateUuid, isUuid, Uuid } from './uuid';
 
 type ICastResult<T> =
   | { type: 'success'; data: T }
@@ -22,6 +22,10 @@ export const resultToErrors = <T>(result: ICastResult<T>) => {
 
 export type IRequestId = Uuid & { tag: 'IRequestId' };
 
+export const generateRequestId = () => {
+  return generateUuid() as IRequestId;
+};
+
 export const castRequestId = (id: unknown): ICastResult<IRequestId> => {
   if (isUuid(id)) {
     return {
@@ -33,6 +37,35 @@ export const castRequestId = (id: unknown): ICastResult<IRequestId> => {
   return {
     type: 'error',
     errors: [{ message: 'request id must be a valid uuid' }],
+  };
+};
+
+/**
+ *
+ *
+ *
+ */
+
+export type IStrategy = 'cache-first' | 'network-first';
+
+export const isStrategy = (strategy: unknown): strategy is IStrategy => {
+  return (
+    typeof strategy === 'string' &&
+    (strategy === 'cache-first' || strategy === 'network-first')
+  );
+};
+
+export const castStrategy = (strategy: unknown): ICastResult<IStrategy> => {
+  if (isStrategy(strategy)) {
+    return {
+      type: 'success',
+      data: strategy,
+    };
+  }
+
+  return {
+    type: 'error',
+    errors: [{ message: `invalid strategy: ${String(strategy)}` }],
   };
 };
 
