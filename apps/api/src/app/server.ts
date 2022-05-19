@@ -13,8 +13,8 @@ import express, { Application, ErrorRequestHandler, Router } from 'express';
 import morgan from 'morgan';
 import path from 'path';
 import { Browser } from 'puppeteer';
-import { requestScreenshotStorageFirst } from './screenshot';
-import * as WebBrowser from './web-browser';
+import { requestScreenshotStorageFirst } from './features/request-screenshot';
+import * as WebBrowser from './data-access/web-browser';
 
 // ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗
 // ██╔════╝██╔════╝██╔══██╗██║   ██║██╔════╝██╔══██╗
@@ -78,9 +78,9 @@ export const createServer = async () => {
 // ╚═╝  ╚═╝╚═╝     ╚═╝
 
 export const useApi = async (app: Application) => {
-  const webBrowser = await WebBrowser.create();
-
   const router = Router();
+
+  const webBrowser = await WebBrowser.create();
 
   await useGetScreenshot(webBrowser, router);
 

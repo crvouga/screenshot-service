@@ -11,7 +11,7 @@ import {
 } from '@crvouga/screenshot-service';
 import { definitions } from '@screenshot-service/shared';
 import { supabaseClient } from './supabase';
-import { IScreenshot, IScreenshotData } from './types';
+import { IScreenshot, IScreenshotData } from '../types';
 
 /**
  *

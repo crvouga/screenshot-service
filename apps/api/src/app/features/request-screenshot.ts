@@ -5,10 +5,10 @@ import {
   ITargetUrl,
 } from '@crvouga/screenshot-service';
 import { randomUUID } from 'crypto';
-import * as ProjectStorage from './project-storage';
-import * as ScreenshotStorage from './screenshot-storage';
-import { IScreenshotData } from './types';
-import * as WebBrowser from './web-browser';
+import * as ProjectStorage from '../data-access/project-storage';
+import * as ScreenshotStorage from '../data-access/screenshot-storage';
+import { IScreenshotData } from '../types';
+import * as WebBrowser from '../data-access/web-browser';
 
 type IRequest = {
   projectId: string;

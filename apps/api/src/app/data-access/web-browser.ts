@@ -1,6 +1,6 @@
 import { IDelaySec, IImageType, ITargetUrl } from '@crvouga/screenshot-service';
 import puppeteer, { Browser } from 'puppeteer';
-import { IScreenshotData } from './types';
+import { IScreenshotData } from '../types';
 
 export type WebBrowser = puppeteer.Browser;
 
