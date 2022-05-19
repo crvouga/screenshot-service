@@ -1,29 +1,17 @@
 import {
-  API_ENDPOINT,
-  castDelaySec,
-  castImageType,
-  castProjectId,
-  castTargetUrl,
   ClientToServerEvents,
-  GET_SCREENSHOT_ENDPOINT,
   IApiErrorBody,
-  IGetScreenshotQueryParams,
   ILogLevel,
   InterServerEvents,
-  IProjectId,
-  resultToErrors,
   ServerToClientEvents,
   SocketData,
 } from '@crvouga/screenshot-service';
-import cors from 'cors';
-import express, { Application, ErrorRequestHandler, Router } from 'express';
-import morgan from 'morgan';
-import path from 'path';
-import { Browser } from 'puppeteer';
-import { requestScreenshotStorageFirst } from './features/request-screenshot';
-import * as WebBrowser from './data-access/web-browser';
+import express, { ErrorRequestHandler } from 'express';
 import http from 'http';
+import path from 'path';
 import socket from 'socket.io';
+import * as WebBrowser from './data-access/web-browser';
+import { requestScreenshotStorageFirst } from './features/request-screenshot';
 
 /**
  *

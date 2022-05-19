@@ -276,7 +276,9 @@ export const TryPage = () => {
         )}
 
         {query.type !== 'idle' && (
-          <Typography>{query.logs.at(-1)?.message ?? 'no logs yet'}</Typography>
+          <Typography>
+            {query.logs[query.logs.length - 1]?.message ?? 'no logs yet'}
+          </Typography>
         )}
       </Box>
 
