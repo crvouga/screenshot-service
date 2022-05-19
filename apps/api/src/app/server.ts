@@ -13,7 +13,7 @@ import express, { Application, ErrorRequestHandler, Router } from 'express';
 import morgan from 'morgan';
 import path from 'path';
 import { Browser } from 'puppeteer';
-import { requestScreenshotFromStorageFirst } from './screenshot';
+import { requestScreenshotStorageFirst } from './screenshot';
 import * as WebBrowser from './web-browser';
 
 // ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗
@@ -32,7 +32,21 @@ export const createServer = async () => {
 
   await useApi(app);
 
-  useServeClientBuild(app);
+  const clientBuildPath = path.join(
+    __dirname,
+    '..',
+    '..',
+    '..',
+    'dist',
+    'apps',
+    'client'
+  );
+
+  app.use(express.static(clientBuildPath));
+
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  });
 
   const errorHandler: ErrorRequestHandler = (err, _req, res, next) => {
     if (err) {
@@ -115,7 +129,7 @@ const useGetScreenshot = async (browser: Browser, router: Router) => {
       return;
     }
 
-    const result = await requestScreenshotFromStorageFirst(browser)({
+    const result = await requestScreenshotStorageFirst(browser)({
       imageType: imageTypeResult.data,
       delaySec: delaySecResult.data,
       targetUrl: targetUrlResult.data,
@@ -137,30 +151,5 @@ const useGetScreenshot = async (browser: Browser, router: Router) => {
         'Content-Length': result.data.length,
       })
       .end(result.data);
-  });
-};
-
-//  ██████╗██╗     ██╗███████╗███╗   ██╗████████╗    ██████╗ ██╗   ██╗██╗██╗     ██████╗
-// ██╔════╝██║     ██║██╔════╝████╗  ██║╚══██╔══╝    ██╔══██╗██║   ██║██║██║     ██╔══██╗
-// ██║     ██║     ██║█████╗  ██╔██╗ ██║   ██║       ██████╔╝██║   ██║██║██║     ██║  ██║
-// ██║     ██║     ██║██╔══╝  ██║╚██╗██║   ██║       ██╔══██╗██║   ██║██║██║     ██║  ██║
-// ╚██████╗███████╗██║███████╗██║ ╚████║   ██║       ██████╔╝╚██████╔╝██║███████╗██████╔╝
-//  ╚═════╝╚══════╝╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝       ╚═════╝  ╚═════╝ ╚═╝╚══════╝╚═════╝
-
-const clientBuildPath = path.join(
-  __dirname,
-  '..',
-  '..',
-  '..',
-  'dist',
-  'apps',
-  'client'
-);
-
-export const useServeClientBuild = (router: Router) => {
-  router.use(express.static(clientBuildPath));
-
-  router.get('*', (_req, res) => {
-    res.sendFile(path.join(clientBuildPath, 'index.html'));
   });
 };

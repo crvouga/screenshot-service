@@ -4,7 +4,6 @@ import {
   ILogLevel,
   ITargetUrl,
 } from '@crvouga/screenshot-service';
-
 import { randomUUID } from 'crypto';
 import * as ProjectStorage from './project-storage';
 import * as ScreenshotStorage from './screenshot-storage';
@@ -18,7 +17,7 @@ type IRequest = {
   targetUrl: ITargetUrl;
 };
 
-type IResult =
+type IResponse =
   | {
       type: 'success';
       source: 'WebBrowser' | 'Storage';
@@ -30,14 +29,14 @@ type IResult =
       errors: { message: string }[];
     };
 
-export const requestScreenshotFromStorageFirst =
+export const requestScreenshotStorageFirst =
   (browser: WebBrowser.WebBrowser) =>
   async ({
     projectId,
     delaySec,
     targetUrl,
     imageType,
-  }: IRequest): Promise<IResult> => {
+  }: IRequest): Promise<IResponse> => {
     const requestId = randomUUID();
 
     const log = async (logLevel: ILogLevel, message: string) => {
