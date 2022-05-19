@@ -175,13 +175,7 @@ export const TryPage = () => {
         project
       </Typography>
 
-      <ProjectInput
-        onChange={(project) => {
-          if (project) {
-            setProjectId(project.projectId);
-          }
-        }}
-      />
+      <ProjectInput projectId={projectId} onChange={setProjectId} />
 
       <Typography sx={{ mt: 2 }} gutterBottom color="text.secondary">
         target url
