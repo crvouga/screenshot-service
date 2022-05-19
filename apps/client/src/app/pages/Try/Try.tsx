@@ -2,15 +2,15 @@ import {
   All_DELAY_SEC,
   castTargetUrl,
   generateUuid,
-  IApiErrorBody,
   IDelaySec,
+  IErrors,
   IImageType,
   ILogLevel,
   IProjectId,
   IScreenshotId,
   toDelaySec,
 } from '@crvouga/screenshot-service';
-import { Cancel, SettingsInputAntennaTwoTone } from '@mui/icons-material';
+import { Cancel } from '@mui/icons-material';
 import BrokenImageIcon from '@mui/icons-material/BrokenImage';
 import DownloadIcon from '@mui/icons-material/Download';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
@@ -44,7 +44,7 @@ type ILog = { level: ILogLevel; message: string };
 type IQueryState =
   | { type: 'idle' }
   | { type: 'loading'; logs: ILog[] }
-  | { type: 'error'; errors: IApiErrorBody; logs: ILog[] }
+  | { type: 'error'; errors: IErrors; logs: ILog[] }
   | { type: 'success'; src: string; logs: ILog[] };
 
 export const TryPage = () => {

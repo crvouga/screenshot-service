@@ -1,6 +1,6 @@
 import {
   ClientToServerEvents,
-  IApiErrorBody,
+  IErrors,
   ILogLevel,
   InterServerEvents,
   ServerToClientEvents,
@@ -125,7 +125,7 @@ const errorHandler: ErrorRequestHandler = (err, _req, res, next) => {
   if (err) {
     const errorString = String(err?.toString?.() ?? "I don't know why >:{");
 
-    const apiErrorBody: IApiErrorBody = [
+    const apiErrorBody: IErrors = [
       {
         message: `Something wen wrong. ${errorString}`,
       },
