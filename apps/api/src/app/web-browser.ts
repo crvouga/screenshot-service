@@ -1,5 +1,5 @@
 import { IImageType, ITargetUrl, ITimeoutMs } from '@screenshot-service/shared';
-import puppeteer from 'puppeteer';
+import puppeteer, { Browser } from 'puppeteer';
 import { IScreenshotData } from './types';
 
 export type WebBrowser = puppeteer.Browser;
@@ -11,9 +11,12 @@ type Result =
       data: IScreenshotData;
       imageType: IImageType;
     }
-  | { type: 'error'; errors: [{ message: string }] };
+  | {
+      type: 'error';
+      errors: [{ message: string }];
+    };
 
-export const takeScreenshot = async (
+export const captureScreenshot = async (
   browser: puppeteer.Browser,
   {
     imageType,
@@ -79,8 +82,15 @@ export const takeScreenshot = async (
 //
 //
 
+let browser: Browser | null = null;
+
 export const create = async () => {
-  const browser = await puppeteer.launch({
+  //
+  if (browser) {
+    return browser;
+  }
+
+  browser = await puppeteer.launch({
     //why?: https://www.bannerbear.com/blog/ways-to-speed-up-puppeteer-screenshots/
     args: [
       '--autoplay-policy=user-gesture-required',

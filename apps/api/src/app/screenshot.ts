@@ -99,7 +99,7 @@ export const requestScreenshotFromStorageFirst =
     await log('notice', 'started taking screenshot from web browser');
 
     const screenshotResult = await Promise.race([
-      WebBrowser.takeScreenshot(browser, {
+      WebBrowser.captureScreenshot(browser, {
         imageType,
         timeoutMs,
         targetUrl,
