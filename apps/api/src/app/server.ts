@@ -36,7 +36,7 @@ import socket from 'socket.io';
  */
 
 export const startServer = async ({ port }: { port: number }) => {
-  const app = await createApp();
+  const app = createApp();
 
   const server = http.createServer(app);
 
@@ -109,14 +109,8 @@ export const startServer = async ({ port }: { port: number }) => {
  *
  */
 
-const createApp = async () => {
+const createApp = () => {
   const app = express();
-
-  app.use(morgan('dev'));
-
-  app.use(cors());
-
-  await useApi(app);
 
   const clientBuildPath = path.join(
     __dirname,
@@ -154,81 +148,4 @@ const errorHandler: ErrorRequestHandler = (err, _req, res, next) => {
   }
 
   next();
-};
-
-export const useApi = async (app: Application) => {
-  const router = Router();
-
-  const webBrowser = await WebBrowser.create();
-
-  await useGetScreenshot(webBrowser, router);
-
-  const errorHandler: ErrorRequestHandler = (_err, _req, _res, next) => {
-    webBrowser.close();
-    next();
-  };
-
-  router.use(errorHandler);
-
-  router.use(errorHandler);
-
-  app.use(API_ENDPOINT, router);
-};
-
-const useGetScreenshot = async (browser: Browser, router: Router) => {
-  router.get(GET_SCREENSHOT_ENDPOINT, async (req, res) => {
-    const queryParams: Partial<IGetScreenshotQueryParams> = req.query;
-
-    const delaySecResult = castDelaySec(queryParams.delaySec);
-    const targetUrlResult = castTargetUrl(queryParams.targetUrl);
-    const imageTypeResult = castImageType(queryParams.imageType);
-    const projectIdResult = castProjectId(queryParams.projectId);
-
-    if (
-      delaySecResult.type === 'error' ||
-      targetUrlResult.type === 'error' ||
-      imageTypeResult.type === 'error' ||
-      projectIdResult.type === 'error'
-    ) {
-      const apiErrorBody: IApiErrorBody = [
-        ...resultToErrors(delaySecResult),
-        ...resultToErrors(targetUrlResult),
-        ...resultToErrors(imageTypeResult),
-      ];
-
-      res.status(400).json(apiErrorBody);
-      return;
-    }
-
-    const result = await requestScreenshotStorageFirst(
-      {
-        webBrowser: browser,
-        log: async (level, message) => {
-          console.log(level, message);
-        },
-      },
-      {
-        imageType: imageTypeResult.data,
-        delaySec: delaySecResult.data,
-        targetUrl: targetUrlResult.data,
-        projectId: projectIdResult.data,
-      }
-    );
-
-    if (result.type === 'error') {
-      const apiErrorBody: IApiErrorBody = result.errors;
-
-      res.status(400).json(apiErrorBody).end();
-      return;
-    }
-
-    const statusCode = result.source === 'WebBrowser' ? 201 : 200;
-
-    res
-      .writeHead(statusCode, {
-        'Content-Type': result.imageType,
-        'Content-Length': result.data.length,
-      })
-      .end(result.data);
-  });
 };
