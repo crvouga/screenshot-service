@@ -1,12 +1,7 @@
-import { ContentPaste, History } from '@mui/icons-material';
-import {
-  Autocomplete,
-  IconButton,
-  TextField,
-  TextFieldProps,
-} from '@mui/material';
-import useLocalStorage from 'apps/client/src/lib/use-local-storage';
+import { ContentPaste } from '@mui/icons-material';
+import { Autocomplete, IconButton, TextField } from '@mui/material';
 import * as React from 'react';
+import useLocalStorage from '../../../lib/use-local-storage';
 
 const isValidUrl = (url: string) => {
   try {
@@ -45,7 +40,7 @@ export const TargetUrlInput = ({
   const handlePaste = async () => {
     const text = await navigator.clipboard.readText();
     console.log('PASTE', text);
-    setTargetUrl(text);
+
     addToHistory(text);
   };
 

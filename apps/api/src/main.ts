@@ -1,13 +1,18 @@
-import { createServer } from './app/server';
+import { startServer } from './app/server';
 
-const main = async () => {
-  const server = await createServer();
+const defaultPort = 8000;
 
-  const port = process.env.PORT ?? process.env.port ?? 8000;
+const getPort = (): number => {
+  const port =
+    Number(process.env.PORT) ?? Number(process.env.port) ?? defaultPort;
 
-  server.listen(port, () => {
-    console.log(`Server is listening on http://localhost:${port}/`);
-  });
+  if (isNaN(port)) {
+    return defaultPort;
+  }
+
+  return port;
 };
 
-main();
+startServer({
+  port: getPort(),
+});

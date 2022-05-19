@@ -63,7 +63,7 @@ export const TryPage = () => {
         overrides: environment.production
           ? {}
           : {
-              baseUrl: 'http://localhost:8000',
+              baseUrl: environment.devServerBaseUrl,
             },
       }
     );

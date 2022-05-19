@@ -1,5 +1,8 @@
 import { Box } from '@mui/material';
+import { useSnackbar } from 'notistack';
+import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { screenshotClient } from './screenshot-service';
 import { AuthUserContext, useAuthState, useAuthUser } from './authentication';
 import { AccountPage } from './pages/Account';
 import { AccountCreatePage } from './pages/AccountCreate';
@@ -19,6 +22,16 @@ import * as Profiles from './profiles';
 import { routes } from './routes';
 
 export const App = () => {
+  const snackbar = useSnackbar();
+
+  useEffect(() => {
+    screenshotClient.socket.on('connect', () => {
+      snackbar.enqueueSnackbar('connected', {
+        autoHideDuration: 2000,
+      });
+    });
+  }, [snackbar]);
+
   return (
     <Box
       sx={{

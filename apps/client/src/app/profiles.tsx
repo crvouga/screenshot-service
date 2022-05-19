@@ -2,7 +2,7 @@ import { definitions } from '@screenshot-service/shared';
 import constate from 'constate';
 import { useEffect } from 'react';
 import { useQuery } from 'react-query';
-import { appEventEmitter } from './event-emitter';
+import { appEventEmitter } from './app-event-emitter';
 import { supabaseClient } from './supabase';
 import { IThemeMode } from './theme';
 

@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import constate from 'constate';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
-import { useAppEventListener } from './event-emitter';
+import { useAppEventListener } from './app-event-emitter';
 import useLocalStorage from '../lib/use-local-storage';
 
 /**

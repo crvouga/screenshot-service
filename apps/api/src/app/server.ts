@@ -3,10 +3,14 @@ import {
   castDelaySec,
   castImageType,
   castTargetUrl,
+  ClientToServerEvents,
   GET_SCREENSHOT_ENDPOINT,
   IApiErrorBody,
   IGetScreenshotQueryParams,
+  InterServerEvents,
   resultToErrors,
+  ServerToClientEvents,
+  SocketData,
 } from '@crvouga/screenshot-service';
 import cors from 'cors';
 import express, { Application, ErrorRequestHandler, Router } from 'express';
@@ -15,6 +19,8 @@ import path from 'path';
 import { Browser } from 'puppeteer';
 import { requestScreenshotStorageFirst } from './features/request-screenshot';
 import * as WebBrowser from './data-access/web-browser';
+import http from 'http';
+import socket from 'socket.io';
 
 /**
  *
@@ -26,7 +32,67 @@ import * as WebBrowser from './data-access/web-browser';
  *
  */
 
-export const createServer = async () => {
+export const startServer = async ({ port }: { port: number }) => {
+  const app = await createApp();
+
+  const server = http.createServer(app);
+
+  const io = new socket.Server<
+    ClientToServerEvents,
+    ServerToClientEvents,
+    InterServerEvents,
+    SocketData
+  >(server, {
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST'],
+    },
+  });
+
+  io.on('connection', (socket) => {
+    console.log('client connected');
+
+    socket.on('requestScreenshot', async (request) => {
+      // const result = await requestScreenshotStorageFirst({
+      //   webBrowser: browser,
+      //   log: async (level, message) => {
+      //     console.log(level, message);
+      //   },
+      // })({
+      //   imageType: imageTypeResult.data,
+      //   delaySec: delaySecResult.data,
+      //   targetUrl: targetUrlResult.data,
+      //   projectId: projectIdResult.data,
+      // });
+    });
+  });
+
+  server.listen(port, () => {
+    console.log(`Server is listening on http://localhost:${port}/`);
+  });
+};
+
+/**
+ *
+ *
+ *
+ * socket app
+ *
+ *
+ *
+ */
+
+/**
+ *
+ *
+ *
+ * http app
+ *
+ *
+ *
+ */
+
+const createApp = async () => {
   const app = express();
 
   app.use(morgan('dev'));
@@ -51,37 +117,27 @@ export const createServer = async () => {
     res.sendFile(path.join(clientBuildPath, 'index.html'));
   });
 
-  const errorHandler: ErrorRequestHandler = (err, _req, res, next) => {
-    if (err) {
-      const errorString = String(err?.toString?.() ?? "I don't know why >:{");
-
-      const apiErrorBody: IApiErrorBody = [
-        {
-          message: `Something wen wrong. ${errorString}`,
-        },
-      ];
-
-      res.status(500).json(apiErrorBody).end();
-      return;
-    }
-
-    next();
-  };
-
   app.use(errorHandler);
 
   return app;
 };
 
-/**
- *
- *
- *
- * api
- *
- *
- *
- */
+const errorHandler: ErrorRequestHandler = (err, _req, res, next) => {
+  if (err) {
+    const errorString = String(err?.toString?.() ?? "I don't know why >:{");
+
+    const apiErrorBody: IApiErrorBody = [
+      {
+        message: `Something wen wrong. ${errorString}`,
+      },
+    ];
+
+    res.status(500).json(apiErrorBody).end();
+    return;
+  }
+
+  next();
+};
 
 export const useApi = async (app: Application) => {
   const router = Router();

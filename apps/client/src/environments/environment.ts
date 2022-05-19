@@ -3,4 +3,5 @@
 
 export const environment = {
   production: false,
+  devServerBaseUrl: 'http://localhost:8000',
 };

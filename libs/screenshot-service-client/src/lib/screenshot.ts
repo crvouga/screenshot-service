@@ -292,3 +292,10 @@ export const toFilename = ({
 }) => {
   return `${screenshotId}.${imageType}`;
 };
+
+/**
+ *
+ *
+ *
+ *
+ */

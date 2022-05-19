@@ -1,7 +1,7 @@
 import { CameraAlt, Close } from '@mui/icons-material';
 import { Box, Button, Divider, Drawer, Toolbar } from '@mui/material';
 import { useState } from 'react';
-import { appEventEmitter, useAppEventListener } from '../../event-emitter';
+import { appEventEmitter, useAppEventListener } from '../../app-event-emitter';
 import { TryPage } from '.';
 
 export const TryDrawerButton = () => {
