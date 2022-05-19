@@ -16,12 +16,15 @@ import { Browser } from 'puppeteer';
 import { requestScreenshotStorageFirst } from './features/request-screenshot';
 import * as WebBrowser from './data-access/web-browser';
 
-// ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗
-// ██╔════╝██╔════╝██╔══██╗██║   ██║██╔════╝██╔══██╗
-// ███████╗█████╗  ██████╔╝██║   ██║█████╗  ██████╔╝
-// ╚════██║██╔══╝  ██╔══██╗╚██╗ ██╔╝██╔══╝  ██╔══██╗
-// ███████║███████╗██║  ██║ ╚████╔╝ ███████╗██║  ██║
-// ╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝
+/**
+ *
+ *
+ *
+ * sever
+ *
+ *
+ *
+ */
 
 export const createServer = async () => {
   const app = express();
@@ -70,12 +73,15 @@ export const createServer = async () => {
   return app;
 };
 
-//  █████╗ ██████╗ ██╗
-// ██╔══██╗██╔══██╗██║
-// ███████║██████╔╝██║
-// ██╔══██║██╔═══╝ ██║
-// ██║  ██║██║     ██║
-// ╚═╝  ╚═╝╚═╝     ╚═╝
+/**
+ *
+ *
+ *
+ * api
+ *
+ *
+ *
+ */
 
 export const useApi = async (app: Application) => {
   const router = Router();
