@@ -1,9 +1,9 @@
-import { IImageType, ITargetUrl, ITimeoutMs } from '@screenshot-service/shared';
+import { IDelaySec, IImageType, ITargetUrl } from '@crvouga/screenshot-service';
 
 export type IScreenshot = {
   screenshotId: string;
   imageType: IImageType;
-  timeoutMs: ITimeoutMs;
+  delaySec: IDelaySec;
   targetUrl: ITargetUrl;
   projectId: string;
 };

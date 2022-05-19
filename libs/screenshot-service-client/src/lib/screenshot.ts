@@ -66,59 +66,102 @@ export const castTargetUrl = (
  *
  */
 
-export const validateTimeoutMs = (
-  timeoutMs: unknown,
+export const validateDelaySec = (
+  delaySecUnknown: unknown,
   options?: { name?: string }
 ) => {
-  const name = options?.name ?? 'timeout';
+  const name = options?.name ?? 'delaySec';
 
   const errors = [];
 
-  if (!timeoutMs) {
+  if (!delaySecUnknown) {
     errors.push({
       message: `${name} can not be undefined`,
     });
   }
 
-  if (isNaN(Number(timeoutMs))) {
+  const delaySec = Number(delaySecUnknown);
+
+  if (isNaN(delaySec)) {
     errors.push({
       message: `${name} must be a valid number`,
     });
   }
 
-  if (Number(timeoutMs) < 0) {
+  if (delaySec < 0) {
     errors.push({
-      message: `${name} must be a greater than 0`,
+      message: `${name} must be greater than 0`,
     });
   }
 
-  if (Number(timeoutMs) > 10000) {
+  if (delaySec > 10) {
     errors.push({
-      message: `${name} must be a less than 10,000`,
+      message: `${name} must be less than 10`,
+    });
+  }
+
+  if (Math.floor(delaySec) !== delaySec) {
+    errors.push({
+      message: `${name} must be an integer`,
     });
   }
 
   return errors;
 };
 
-export type ITimeoutMs = number & { type: 'ITimeoutMs' };
+export type IDelaySec = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
-export const castTimeoutMs = (
-  timeoutMs: unknown,
-  name = 'timeoutMs'
-): ICastResult<ITimeoutMs> => {
-  const errors = validateTimeoutMs(timeoutMs, { name });
+const isDelaySec = (delaySec: unknown): delaySec is IDelaySec => {
+  return (
+    delaySec === 0 ||
+    delaySec === 1 ||
+    delaySec === 2 ||
+    delaySec === 3 ||
+    delaySec === 4 ||
+    delaySec === 5 ||
+    delaySec === 6 ||
+    delaySec === 7 ||
+    delaySec === 8 ||
+    delaySec === 9 ||
+    delaySec === 10
+  );
+};
 
-  if (errors.length === 0) {
+export const All_DELAY_SEC: IDelaySec[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+export const toDelaySec = (sec: number): IDelaySec => {
+  const delaySec = Math.max(0, Math.min(10, Math.trunc(sec)));
+  if (isDelaySec(delaySec)) {
+    return delaySec;
+  }
+  return 0;
+};
+
+export const castDelaySec = (
+  delaySec: unknown,
+  name = 'delaySec'
+): ICastResult<IDelaySec> => {
+  const errors = validateDelaySec(delaySec, { name });
+
+  if (errors.length > 0) {
+    return {
+      type: 'error',
+      errors,
+    };
+  }
+
+  const num = Number(delaySec);
+
+  if (isDelaySec(num)) {
     return {
       type: 'success',
-      data: Number(timeoutMs) as ITimeoutMs,
+      data: num,
     };
   }
 
   return {
     type: 'error',
-    errors,
+    errors: [{ message: `delaySec is invalid: ${num} is a ${typeof num}` }],
   };
 };
 

@@ -321,7 +321,7 @@ export interface paths {
           updated_at?: parameters["rowFilter.screenshots.updated_at"];
           project_id?: parameters["rowFilter.screenshots.project_id"];
           image_type?: parameters["rowFilter.screenshots.image_type"];
-          timeout_ms?: parameters["rowFilter.screenshots.timeout_ms"];
+          delay_sec?: parameters["rowFilter.screenshots.delay_sec"];
           target_url?: parameters["rowFilter.screenshots.target_url"];
           /** Filtering Columns */
           select?: parameters["select"];
@@ -378,7 +378,7 @@ export interface paths {
           updated_at?: parameters["rowFilter.screenshots.updated_at"];
           project_id?: parameters["rowFilter.screenshots.project_id"];
           image_type?: parameters["rowFilter.screenshots.image_type"];
-          timeout_ms?: parameters["rowFilter.screenshots.timeout_ms"];
+          delay_sec?: parameters["rowFilter.screenshots.delay_sec"];
           target_url?: parameters["rowFilter.screenshots.target_url"];
         };
         header: {
@@ -399,7 +399,7 @@ export interface paths {
           updated_at?: parameters["rowFilter.screenshots.updated_at"];
           project_id?: parameters["rowFilter.screenshots.project_id"];
           image_type?: parameters["rowFilter.screenshots.image_type"];
-          timeout_ms?: parameters["rowFilter.screenshots.timeout_ms"];
+          delay_sec?: parameters["rowFilter.screenshots.delay_sec"];
           target_url?: parameters["rowFilter.screenshots.target_url"];
         };
         body: {
@@ -521,7 +521,7 @@ export interface definitions {
     /** Format: text */
     image_type: string;
     /** Format: numeric */
-    timeout_ms: number;
+    delay_sec: number;
     /** Format: text */
     target_url: string;
   };
@@ -611,7 +611,7 @@ export interface parameters {
   /** Format: text */
   "rowFilter.screenshots.image_type": string;
   /** Format: numeric */
-  "rowFilter.screenshots.timeout_ms": string;
+  "rowFilter.screenshots.delay_sec": string;
   /** Format: text */
   "rowFilter.screenshots.target_url": string;
 }

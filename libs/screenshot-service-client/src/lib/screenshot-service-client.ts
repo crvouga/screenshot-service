@@ -4,7 +4,7 @@ export const API_ENDPOINT = '/api';
 
 export type IGetScreenshotQueryParams = {
   projectId: string;
-  timeoutMs: string;
+  delaySec: string;
   imageType: string;
   targetUrl: string;
 };

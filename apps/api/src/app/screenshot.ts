@@ -1,11 +1,11 @@
 import {
+  IDelaySec,
   IImageType,
   ILogLevel,
   ITargetUrl,
-  ITimeoutMs,
-} from '@screenshot-service/shared';
+} from '@crvouga/screenshot-service';
+
 import { randomUUID } from 'crypto';
-import * as ProjectLogStorage from './project-log-storage';
 import * as ProjectStorage from './project-storage';
 import * as ScreenshotStorage from './screenshot-storage';
 import { IScreenshotData } from './types';
@@ -14,7 +14,7 @@ import * as WebBrowser from './web-browser';
 type IRequest = {
   projectId: string;
   imageType: IImageType;
-  timeoutMs: ITimeoutMs;
+  delaySec: IDelaySec;
   targetUrl: ITargetUrl;
 };
 
@@ -34,7 +34,7 @@ export const requestScreenshotFromStorageFirst =
   (browser: WebBrowser.WebBrowser) =>
   async ({
     projectId,
-    timeoutMs,
+    delaySec,
     targetUrl,
     imageType,
   }: IRequest): Promise<IResult> => {
@@ -75,7 +75,7 @@ export const requestScreenshotFromStorageFirst =
     await log('info', 'checking if screenshot is in storage');
 
     const getResult = await ScreenshotStorage.get({
-      timeoutMs,
+      delaySec,
       targetUrl,
       imageType,
       projectId,
@@ -98,13 +98,11 @@ export const requestScreenshotFromStorageFirst =
 
     await log('notice', 'started taking screenshot from web browser');
 
-    const screenshotResult = await Promise.race([
-      WebBrowser.captureScreenshot(browser, {
-        imageType,
-        timeoutMs,
-        targetUrl,
-      }),
-    ]);
+    const screenshotResult = await WebBrowser.captureScreenshot(browser, {
+      imageType,
+      delaySec,
+      targetUrl,
+    });
 
     if (screenshotResult.type === 'error') {
       await log('error', 'failed to take screenshot from web browser');
@@ -120,7 +118,12 @@ export const requestScreenshotFromStorageFirst =
     await log('info', 'putting screenshot in storage');
 
     const putResult = await ScreenshotStorage.put(
-      { imageType, timeoutMs, targetUrl, projectId },
+      {
+        imageType,
+        delaySec,
+        targetUrl,
+        projectId,
+      },
       screenshotResult.data
     );
 

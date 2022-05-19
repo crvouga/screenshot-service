@@ -1,11 +1,13 @@
 import {
   BUCKET_NAME,
   castImageType,
-  definitions,
+  IDelaySec,
   IImageType,
   resultToErrors,
+  toDelaySec,
   toFilename,
-} from '@screenshot-service/shared';
+} from '@crvouga/screenshot-service';
+import { definitions } from '@screenshot-service/shared';
 import { useQuery } from 'react-query';
 import { supabaseClient } from './supabase';
 
@@ -13,7 +15,7 @@ export type IScreenshot = {
   screenshotId: string;
   projectId: string;
   imageType: IImageType;
-  timeoutMs: number;
+  delaySec: IDelaySec;
   targetUrl: string;
 };
 
@@ -45,7 +47,7 @@ const fromRow = (
     projectId: row.id,
     screenshotId: row.id,
     imageType: imageTypeResult.data,
-    timeoutMs: row.timeout_ms,
+    delaySec: toDelaySec(row.delay_sec),
     targetUrl: row.target_url,
   };
 

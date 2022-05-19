@@ -1,15 +1,13 @@
 import {
   API_ENDPOINT,
+  castDelaySec,
+  castImageType,
+  castTargetUrl,
   GET_SCREENSHOT_ENDPOINT,
   IApiErrorBody,
   IGetScreenshotQueryParams,
-} from '@crvouga/screenshot-service';
-import {
-  castImageType,
-  castTargetUrl,
-  castTimeoutMs,
   resultToErrors,
-} from '@screenshot-service/shared';
+} from '@crvouga/screenshot-service';
 import cors from 'cors';
 import express, { Application, ErrorRequestHandler, Router } from 'express';
 import morgan from 'morgan';
@@ -88,7 +86,7 @@ const useGetScreenshot = async (browser: Browser, router: Router) => {
   router.get(GET_SCREENSHOT_ENDPOINT, async (req, res) => {
     const queryParams: Partial<IGetScreenshotQueryParams> = req.query;
 
-    const timeoutMsResult = castTimeoutMs(queryParams.timeoutMs);
+    const delaySecResult = castDelaySec(queryParams.delaySec);
     const targetUrlResult = castTargetUrl(queryParams.targetUrl);
     const imageTypeResult = castImageType(queryParams.imageType);
     const projectIdResult =
@@ -102,13 +100,13 @@ const useGetScreenshot = async (browser: Browser, router: Router) => {
           };
 
     if (
-      timeoutMsResult.type === 'error' ||
+      delaySecResult.type === 'error' ||
       targetUrlResult.type === 'error' ||
       imageTypeResult.type === 'error' ||
       projectIdResult.type === 'error'
     ) {
       const apiErrorBody: IApiErrorBody = [
-        ...resultToErrors(timeoutMsResult),
+        ...resultToErrors(delaySecResult),
         ...resultToErrors(targetUrlResult),
         ...resultToErrors(imageTypeResult),
       ];
@@ -119,7 +117,7 @@ const useGetScreenshot = async (browser: Browser, router: Router) => {
 
     const result = await requestScreenshotFromStorageFirst(browser)({
       imageType: imageTypeResult.data,
-      timeoutMs: timeoutMsResult.data,
+      delaySec: delaySecResult.data,
       targetUrl: targetUrlResult.data,
       projectId: projectIdResult.data,
     });

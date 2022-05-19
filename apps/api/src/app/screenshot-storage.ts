@@ -1,15 +1,15 @@
 import {
+  BUCKET_NAME,
+  castDelaySec,
   castImageType,
   castTargetUrl,
-  castTimeoutMs,
-  definitions,
+  IDelaySec,
   IImageType,
   ITargetUrl,
-  ITimeoutMs,
-  BUCKET_NAME,
-  toFilename,
   resultToErrors,
-} from '@screenshot-service/shared';
+  toFilename,
+} from '@crvouga/screenshot-service';
+import { definitions } from '@screenshot-service/shared';
 import { supabaseClient } from './supabase';
 import { IScreenshot, IScreenshotData } from './types';
 
@@ -50,12 +50,12 @@ type IPutResult =
 export const put = async (
   {
     targetUrl,
-    timeoutMs,
+    delaySec,
     projectId,
     imageType,
   }: {
     targetUrl: ITargetUrl;
-    timeoutMs: ITimeoutMs;
+    delaySec: IDelaySec;
     projectId: string;
     imageType: IImageType;
   },
@@ -63,7 +63,7 @@ export const put = async (
 ): Promise<IPutResult> => {
   const getResult = await getElseInsertRow({
     targetUrl,
-    timeoutMs,
+    delaySec,
     projectId,
     imageType,
   });
@@ -111,18 +111,18 @@ export const put = async (
 
 export const get = async ({
   projectId,
-  timeoutMs,
+  delaySec,
   targetUrl,
   imageType,
 }: {
   projectId: string;
-  timeoutMs: ITimeoutMs;
+  delaySec: IDelaySec;
   targetUrl: ITargetUrl;
   imageType: IImageType;
 }): Promise<IGetResult> => {
   const gotResult = await getOne({
     projectId,
-    timeoutMs,
+    delaySec,
     targetUrl,
     imageType,
   });
@@ -190,12 +190,12 @@ const rowToScreenshot = (
 ):
   | { type: 'success'; screenshot: IScreenshot }
   | { type: 'error'; errors: { message: string }[] } => {
-  const timeoutMsResult = castTimeoutMs(row.timeout_ms);
+  const delaySecResult = castDelaySec(row.delay_sec);
   const targetUrlResult = castTargetUrl(row.target_url);
   const imageTypeResult = castImageType(row.image_type);
 
   if (
-    timeoutMsResult.type === 'success' &&
+    delaySecResult.type === 'success' &&
     targetUrlResult.type === 'success' &&
     imageTypeResult.type === 'success'
   ) {
@@ -203,7 +203,7 @@ const rowToScreenshot = (
       screenshotId: row.id,
       projectId: row.project_id,
       targetUrl: targetUrlResult.data,
-      timeoutMs: timeoutMsResult.data,
+      delaySec: delaySecResult.data,
       imageType: imageTypeResult.data,
     };
     return { type: 'success', screenshot };
@@ -213,7 +213,7 @@ const rowToScreenshot = (
     type: 'error',
     errors: [
       ...resultToErrors(imageTypeResult),
-      ...resultToErrors(timeoutMsResult),
+      ...resultToErrors(delaySecResult),
       ...resultToErrors(targetUrlResult),
     ],
   };
@@ -221,12 +221,12 @@ const rowToScreenshot = (
 
 const getOne = async ({
   targetUrl,
-  timeoutMs,
+  delaySec,
   projectId,
   imageType,
 }: {
   targetUrl: ITargetUrl;
-  timeoutMs: ITimeoutMs;
+  delaySec: IDelaySec;
   projectId: string;
   imageType: IImageType;
 }): Promise<
@@ -240,7 +240,7 @@ const getOne = async ({
       project_id: projectId,
       target_url: targetUrl,
       image_type: imageType,
-      timeout_ms: timeoutMs,
+      delay_sec: delaySec,
     })
     .single();
 
@@ -273,12 +273,12 @@ const getOne = async ({
 const insertOne = async ({
   projectId,
   targetUrl,
-  timeoutMs,
+  delaySec,
   imageType,
 }: {
   projectId: string;
   targetUrl: ITargetUrl;
-  timeoutMs: ITimeoutMs;
+  delaySec: IDelaySec;
   imageType: IImageType;
 }): Promise<{ type: 'success' } | { type: 'error'; error: string }> => {
   const result = await supabaseClient
@@ -286,7 +286,7 @@ const insertOne = async ({
     .insert({
       project_id: projectId,
       target_url: targetUrl,
-      timeout_ms: timeoutMs,
+      delay_sec: delaySec,
       image_type: imageType,
     });
 
@@ -300,12 +300,12 @@ const insertOne = async ({
 const getElseInsertRow = async ({
   projectId,
   targetUrl,
-  timeoutMs,
+  delaySec,
   imageType,
 }: {
   projectId: string;
   targetUrl: ITargetUrl;
-  timeoutMs: ITimeoutMs;
+  delaySec: IDelaySec;
   imageType: IImageType;
 }): Promise<
   | {
@@ -314,18 +314,18 @@ const getElseInsertRow = async ({
     }
   | { type: 'error'; error: string }
 > => {
-  const got = await getOne({ projectId, targetUrl, timeoutMs, imageType });
+  const got = await getOne({ projectId, targetUrl, delaySec, imageType });
 
   if (got.type === 'success') {
     return { type: 'success', screenshot: got.screenshot };
   }
 
-  await insertOne({ projectId, targetUrl, timeoutMs, imageType });
+  await insertOne({ projectId, targetUrl, delaySec, imageType });
 
   const gotAfterCreated = await getOne({
     projectId,
     targetUrl,
-    timeoutMs,
+    delaySec,
     imageType,
   });
 

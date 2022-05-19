@@ -1,7 +1,7 @@
-import { Box, Alert, Container, Typography } from '@mui/material';
-import { definitions, IProjectLog } from '@screenshot-service/shared';
+import { IProjectLog } from '@crvouga/screenshot-service';
+import { Alert, Box, Container, Typography } from '@mui/material';
+import { definitions } from '@screenshot-service/shared';
 import { useEffect, useState } from 'react';
-import { useQuery } from 'react-query';
 import { supabaseClient } from '../../../supabase';
 import { useProfileSingleOutletContext } from '../Project';
 

@@ -1,4 +1,5 @@
-import { definitions, IProjectLog } from '@screenshot-service/shared';
+import { IProjectLog } from '@crvouga/screenshot-service';
+import { definitions } from '@screenshot-service/shared';
 import { supabaseClient } from './supabase';
 
 export type IAppend = (

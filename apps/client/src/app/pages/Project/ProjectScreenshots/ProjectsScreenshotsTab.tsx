@@ -1,3 +1,4 @@
+import { IImageType } from '@crvouga/screenshot-service';
 import { Info } from '@mui/icons-material';
 import {
   Alert,
@@ -11,8 +12,6 @@ import {
   Skeleton,
   Typography,
 } from '@mui/material';
-import { IImageType } from '@screenshot-service/shared';
-import { useQuery } from 'react-query';
 import {
   useScreenshotsQuery,
   useScreenshotSrcQuery,

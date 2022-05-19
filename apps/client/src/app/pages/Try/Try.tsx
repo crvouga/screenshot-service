@@ -1,4 +1,11 @@
-import { fetchScreenshot, IApiErrorBody } from '@crvouga/screenshot-service';
+import {
+  All_DELAY_SEC,
+  fetchScreenshot,
+  IApiErrorBody,
+  IDelaySec,
+  IImageType,
+  toDelaySec,
+} from '@crvouga/screenshot-service';
 import { Cancel } from '@mui/icons-material';
 import BrokenImageIcon from '@mui/icons-material/BrokenImage';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -10,8 +17,11 @@ import {
   Box,
   Button,
   Divider,
+  ListItemText,
+  MenuItem,
   Paper,
   PaperProps,
+  Select,
   Skeleton,
   ToggleButton,
   ToggleButtonGroup,
@@ -33,8 +43,8 @@ type IQueryState =
 
 export const TryPage = () => {
   const [targetUrl, setTargetUrl] = useState('');
-  const [imageType, setImageType] = useState<'png' | 'jpeg'>('jpeg');
-  const [timeoutMs, setTimeoutMs] = useState('1000');
+  const [imageType, setImageType] = useState<IImageType>('jpeg');
+  const [delaySec, setDelaySec] = useState<IDelaySec>(0);
   const [projectId, setProjectId] = useState('');
 
   const [query, setQuery] = useState<IQueryState>({ type: 'idle' });
@@ -46,7 +56,7 @@ export const TryPage = () => {
       {
         targetUrl,
         imageType,
-        timeoutMs,
+        delaySec: String(delaySec),
         projectId,
       },
       {
@@ -92,7 +102,7 @@ export const TryPage = () => {
       />
 
       <Typography sx={{ mt: 2 }} gutterBottom color="text.secondary">
-        targetUrl
+        target url
       </Typography>
 
       <TargetUrlInput
@@ -102,7 +112,7 @@ export const TryPage = () => {
       />
 
       <Typography sx={{ mt: 2 }} gutterBottom color="text.secondary">
-        imageType
+        image type
       </Typography>
 
       <ToggleButtonGroup
@@ -122,17 +132,21 @@ export const TryPage = () => {
       </ToggleButtonGroup>
 
       <Typography gutterBottom color="text.secondary">
-        timeoutMs
+        delay
       </Typography>
 
-      <TextFieldInput
-        id="timeoutMs"
-        placeholder="3000"
-        type="number"
-        value={timeoutMs}
-        onChange={setTimeoutMs}
-        sx={{ marginBottom: 2 }}
-      />
+      <Select
+        value={delaySec}
+        onChange={(event) =>
+          setDelaySec(toDelaySec(Number(event?.target.value ?? 0)))
+        }
+      >
+        {All_DELAY_SEC.map((delaySec) => (
+          <MenuItem value={delaySec} key={delaySec}>
+            <ListItemText primary={`${delaySec} seconds`} />
+          </MenuItem>
+        ))}
+      </Select>
 
       {error.length > 0 && (
         <Box sx={{ marginY: 2 }}>

@@ -1,4 +1,4 @@
-import { IImageType, ITargetUrl, ITimeoutMs } from '@screenshot-service/shared';
+import { IDelaySec, IImageType, ITargetUrl } from '@crvouga/screenshot-service';
 import puppeteer, { Browser } from 'puppeteer';
 import { IScreenshotData } from './types';
 
@@ -20,11 +20,11 @@ export const captureScreenshot = async (
   browser: puppeteer.Browser,
   {
     imageType,
-    timeoutMs,
+    delaySec,
     targetUrl,
   }: {
     targetUrl: ITargetUrl;
-    timeoutMs: ITimeoutMs;
+    delaySec: IDelaySec;
     imageType: IImageType;
   }
 ): Promise<Result> => {
@@ -35,7 +35,7 @@ export const captureScreenshot = async (
       waitUntil: 'networkidle2',
     });
 
-    await setTimeoutPromise(timeoutMs);
+    await createDelay({ seconds: delaySec });
 
     const screenshotData = await page.screenshot({
       type: imageType,
@@ -138,8 +138,10 @@ export const create = async () => {
   return browser;
 };
 
-const setTimeoutPromise = (timeout: number) => {
+const secToMs = (secs: number) => secs * 1000;
+
+const createDelay = ({ seconds }: { seconds: number }) => {
   return new Promise((resolve) => {
-    setTimeout(resolve, timeout);
+    setTimeout(resolve, secToMs(seconds));
   });
 };
