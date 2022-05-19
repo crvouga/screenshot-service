@@ -29,27 +29,16 @@ type IResponse =
       errors: { message: string }[];
     };
 
+type Log = (logLevel: ILogLevel, message: string) => Promise<void>;
+
 export const requestScreenshotStorageFirst =
-  (browser: WebBrowser.WebBrowser) =>
+  ({ webBrowser, log }: { webBrowser: WebBrowser.WebBrowser; log: Log }) =>
   async ({
     projectId,
     delaySec,
     targetUrl,
     imageType,
   }: IRequest): Promise<IResponse> => {
-    const requestId = randomUUID();
-
-    const log = async (logLevel: ILogLevel, message: string) => {
-      const entry = {
-        requestId,
-        projectId,
-        logLevel,
-        message,
-      };
-      console.log(entry);
-      // await ProjectLogStorage.append(entry);
-    };
-
     await log('notice', 'screenshot request started');
 
     await log('info', 'finding associated project');
@@ -97,7 +86,7 @@ export const requestScreenshotStorageFirst =
 
     await log('notice', 'started taking screenshot from web browser');
 
-    const screenshotResult = await WebBrowser.captureScreenshot(browser, {
+    const screenshotResult = await WebBrowser.captureScreenshot(webBrowser, {
       imageType,
       delaySec,
       targetUrl,

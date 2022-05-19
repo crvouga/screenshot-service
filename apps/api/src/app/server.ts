@@ -129,7 +129,12 @@ const useGetScreenshot = async (browser: Browser, router: Router) => {
       return;
     }
 
-    const result = await requestScreenshotStorageFirst(browser)({
+    const result = await requestScreenshotStorageFirst({
+      webBrowser: browser,
+      log: async (level, message) => {
+        console.log(level, message);
+      },
+    })({
       imageType: imageTypeResult.data,
       delaySec: delaySecResult.data,
       targetUrl: targetUrlResult.data,
