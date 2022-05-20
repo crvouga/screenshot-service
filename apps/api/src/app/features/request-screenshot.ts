@@ -70,7 +70,7 @@ export const requestScreenshot = async (
 };
 
 const handleCacheFirst = async (
-  { webBrowser, log }: { webBrowser: WebBrowser.WebBrowser; log: Log },
+  { webBrowser, log }: IDependencies,
   {
     projectId,
     delaySec,
@@ -178,7 +178,7 @@ const handleCacheFirst = async (
 };
 
 const handleNetworkFirst = async (
-  { webBrowser, log }: { webBrowser: WebBrowser.WebBrowser; log: Log },
+  { webBrowser, log }: IDependencies,
   {
     projectId,
     delaySec,
