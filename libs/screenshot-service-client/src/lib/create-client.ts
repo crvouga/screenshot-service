@@ -23,6 +23,7 @@ type ScreenshotRequest = {
 
 export interface ClientToServerEvents {
   requestScreenshot: (request: ScreenshotRequest) => void;
+  cancelScreenshotRequest: () => void;
 }
 
 export interface ServerToClientEvents {
@@ -31,6 +32,8 @@ export interface ServerToClientEvents {
     screenshotId: IScreenshotId;
     imageType: IImageType;
   }) => void;
+  cancelScreenshotRequestFailed: () => void;
+  cancelScreenshotRequestSucceeded: () => void;
   log: (logLevel: ILogLevel, message: string) => void;
 }
 

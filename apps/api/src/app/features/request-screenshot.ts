@@ -37,6 +37,9 @@ type IResponse =
       imageType: IImageType;
     }
   | {
+      type: 'aborted';
+    }
+  | {
       type: 'error';
       errors: { message: string }[];
     };
@@ -212,7 +215,10 @@ const handleNetworkFirst = async (
   await WebBrowser.goTo(page, targetUrl);
 
   for (let elapsed = 0; elapsed < delaySec; elapsed++) {
-    await log('info', `delaying for ${delaySec - elapsed} seconds...`);
+    await log(
+      'info',
+      `delaying for ${pluralize(delaySec - elapsed, 'second', 'seconds')}...`
+    );
     await timeout(1000);
   }
 
@@ -293,4 +299,12 @@ helpers
 
 const timeout = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+const pluralize = (count: number, singular: string, plural: string) => {
+  if (count === 1) {
+    return `${count} ${singular}`;
+  }
+
+  return `${count} ${plural}`;
 };

@@ -55,9 +55,22 @@ export const startServer = async ({ port }: { port: number }) => {
         console.log(level, message);
       };
 
+      const abortController = new AbortController();
+
+      socket.once('cancelScreenshotRequest', () => {
+        console.log('ABORT');
+        abortController.abort();
+      });
+
       const result = await requestScreenshot({ webBrowser, log }, request);
 
       socket.leave(request.requestId);
+
+      if (result.type === 'aborted') {
+        socket.emit('cancelScreenshotRequestSucceeded');
+
+        return;
+      }
 
       if (result.type === 'error') {
         socket.emit('requestScreenshotFailed', result.errors);
@@ -124,7 +137,7 @@ const errorHandler: ErrorRequestHandler = (err, _req, res, next) => {
 
     const apiErrorBody: IErrors = [
       {
-        message: `Something wen wrong. ${errorString}`,
+        message: `Something went wrong. ${errorString}`,
       },
     ];
 

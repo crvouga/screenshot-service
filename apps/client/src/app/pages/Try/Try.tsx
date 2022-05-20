@@ -161,15 +161,7 @@ export const TryPage = () => {
   const snackbar = useSnackbar();
 
   const onCancel = () => {
-    if (query.type === 'loading') {
-      try {
-        // this throws an error
-        // query.abortController.abort();
-      } finally {
-        setQuery({ type: 'idle' });
-        snackbar.enqueueSnackbar('cancelled screenshot request');
-      }
-    }
+    screenshotClient.socket.emit('cancelScreenshotRequest');
   };
 
   const error = query.type === 'error' ? query.errors : [];
