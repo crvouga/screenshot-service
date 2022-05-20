@@ -62,64 +62,6 @@ export const takeScreenshot = async (
   }
 };
 
-export const captureScreenshot = async (
-  browser: puppeteer.Browser,
-  {
-    imageType,
-    delaySec,
-    targetUrl,
-  }: {
-    targetUrl: ITargetUrl;
-    delaySec: IDelaySec;
-    imageType: IImageType;
-  }
-): Promise<Result> => {
-  const page = await browser.newPage();
-
-  try {
-    await page.goto(targetUrl, {
-      waitUntil: 'networkidle2',
-    });
-
-    await createDelay({ seconds: delaySec });
-
-    const screenshotData = await page.screenshot({
-      type: imageType,
-    });
-
-    if (typeof screenshotData !== 'string' && !screenshotData) {
-      return {
-        type: 'error',
-        errors: [
-          {
-            message: 'puppeteer did not return an image',
-          },
-        ],
-      };
-    }
-
-    return {
-      type: 'success',
-      updatedAtMs: Date.now(),
-      imageType: imageType,
-      data: screenshotData,
-    };
-  } catch (error) {
-    const message = String(error?.toString?.() ?? 'puppeteer threw an error');
-
-    return {
-      type: 'error',
-      errors: [
-        {
-          message,
-        },
-      ],
-    };
-  } finally {
-    await page.close();
-  }
-};
-
 //
 //
 //
