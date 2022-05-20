@@ -12,6 +12,14 @@ import * as ScreenshotStorage from '../data-access/screenshot-storage';
 import * as WebBrowser from '../data-access/web-browser';
 import { IScreenshotData } from '../types';
 
+/* 
+
+
+
+
+
+*/
+
 type IRequest = {
   strategy: IStrategy;
   projectId: IProjectId;
@@ -33,10 +41,21 @@ type IResponse =
       errors: { message: string }[];
     };
 
-type Log = (logLevel: ILogLevel, message: string) => Promise<void>;
+type IDependencies = {
+  webBrowser: WebBrowser.WebBrowser;
+  log: (logLevel: ILogLevel, message: string) => Promise<void>;
+};
+
+/* 
+
+
+
+
+
+*/
 
 export const requestScreenshot = async (
-  dependencies: { webBrowser: WebBrowser.WebBrowser; log: Log },
+  dependencies: IDependencies,
   request: IRequest
 ): Promise<IResponse> => {
   const { strategy } = request;

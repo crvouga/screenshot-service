@@ -27,7 +27,10 @@ export const ProjectInput = ({
           setProjectId(null);
         }}
       >
-        <ListItemText primary={'No project selected'} />
+        <ListItemText
+          primaryTypographyProps={{ color: 'text.secondary' }}
+          primary={'No project selected'}
+        />
       </MenuItem>
       {options.map((project) => (
         <MenuItem
