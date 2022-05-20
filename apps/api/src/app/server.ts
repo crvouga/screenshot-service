@@ -11,7 +11,7 @@ import http from 'http';
 import path from 'path';
 import socket from 'socket.io';
 import * as WebBrowser from './data-access/web-browser';
-import { requestScreenshotStorageFirst } from './features/request-screenshot';
+import { requestScreenshot } from './features/request-screenshot';
 
 /**
  *
@@ -55,10 +55,7 @@ export const startServer = async ({ port }: { port: number }) => {
         console.log(level, message);
       };
 
-      const result = await requestScreenshotStorageFirst(
-        { webBrowser, log },
-        request
-      );
+      const result = await requestScreenshot({ webBrowser, log }, request);
 
       socket.leave(request.requestId);
 
