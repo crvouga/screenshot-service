@@ -58,7 +58,7 @@ export const put = async (
   }: {
     targetUrl: ITargetUrl;
     delaySec: IDelaySec;
-    projectId: string;
+    projectId: IProjectId;
     imageType: IImageType;
   },
   screenshotData: IScreenshotData
@@ -279,7 +279,7 @@ const insertOne = async ({
   delaySec,
   imageType,
 }: {
-  projectId: string;
+  projectId: IProjectId;
   targetUrl: ITargetUrl;
   delaySec: IDelaySec;
   imageType: IImageType;
@@ -298,6 +298,8 @@ const insertOne = async ({
     .single();
 
   if (response.error) {
+    console.log('insertOne error', { delaySec });
+
     return { type: 'error', errors: [{ message: String(response.error) }] };
   }
 
@@ -316,7 +318,7 @@ const getElseInsertRow = async ({
   delaySec,
   imageType,
 }: {
-  projectId: string;
+  projectId: IProjectId;
   targetUrl: ITargetUrl;
   delaySec: IDelaySec;
   imageType: IImageType;

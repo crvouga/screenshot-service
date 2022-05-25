@@ -181,9 +181,9 @@ export const validateDelaySec = (
 
   const errors = [];
 
-  if (!delaySecUnknown) {
+  if (typeof delaySecUnknown !== 'number') {
     errors.push({
-      message: `${name} can not be undefined`,
+      message: `${name} mus be a number`,
     });
   }
 
@@ -197,13 +197,13 @@ export const validateDelaySec = (
 
   if (delaySec < 0) {
     errors.push({
-      message: `${name} must be greater than 0`,
+      message: `${name} must be greater than or equal to 0`,
     });
   }
 
   if (delaySec > 10) {
     errors.push({
-      message: `${name} must be less than 10`,
+      message: `${name} must be less than or equal to 10`,
     });
   }
 

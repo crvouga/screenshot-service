@@ -235,7 +235,7 @@ const handleNetworkFirst = async (
     });
 
     if (getResult.type === 'success') {
-      await log('info', 'found screenshot cache');
+      await log('info', 'found cached screenshot');
 
       return {
         type: 'success',
@@ -252,7 +252,7 @@ const handleNetworkFirst = async (
     };
   }
 
-  await log('info', 'storing screenshot');
+  await log('info', 'caching screenshot');
 
   const putResult = await ScreenshotStorage.put(
     {
@@ -267,7 +267,7 @@ const handleNetworkFirst = async (
   if (putResult.type === 'error') {
     await log(
       'error',
-      `failed to put screenshot in storage. ${putResult.errors
+      `failed to put screenshot in cache. ${putResult.errors
         .map((error) => error.message)
         .join(' & ')}`
     );
