@@ -1,14 +1,14 @@
 import { Create } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
-import { Box, Container, TextField, Typography } from '@mui/material';
+import { Container, TextField, Typography } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 import { useMutation } from 'react-query';
 import { useNavigate } from 'react-router-dom';
-import { useAuthUser } from '../authentication';
-import { Header } from '../Header';
-import * as Projects from '../projects';
-import { Link, routes } from '../routes';
+import { useAuthUser } from '../../authentication';
+import { Header } from '../../Header';
+import * as Projects from '../../projects';
+import { routes } from '../../routes';
 
 export const ProjectsCreatePage = () => {
   const authUser = useAuthUser();

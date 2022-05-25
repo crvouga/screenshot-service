@@ -13,7 +13,7 @@ import {
 } from './pages/Project';
 import { ProjectLogsTab } from './pages/Project/ProjectLogs';
 import { ProjectsPage } from './pages/Projects';
-import { ProjectsCreatePage } from './pages/ProjectsCreate';
+import { ProjectsCreatePage } from './pages/ProjectCreate';
 import { TryDrawer } from './pages/Try';
 import * as Profiles from './profiles';
 import { routes } from './routes';
