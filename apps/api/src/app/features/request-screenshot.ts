@@ -31,7 +31,6 @@ type IRequest = {
 type IResponse =
   | {
       type: 'success';
-      source: 'WebBrowser' | 'Storage';
       data: IScreenshotData;
       screenshotId: IScreenshotId;
       imageType: IImageType;
@@ -49,168 +48,184 @@ type IDependencies = {
   log: (logLevel: ILogLevel, message: string) => Promise<void>;
 };
 
-/* 
-
-
-
-
-
-*/
+//
+//
+//
+//
+//
+//
+//
 
 export const requestScreenshot = async (
   dependencies: IDependencies,
   request: IRequest
 ): Promise<IResponse> => {
-  const { strategy } = request;
+  const { log } = dependencies;
+  const { strategy, projectId } = request;
 
-  switch (strategy) {
-    case 'cache-first':
-      return handleCacheFirst(dependencies, { ...request, strategy });
-
-    case 'network-first':
-      return handleNetworkFirst(dependencies, { ...request, strategy });
-  }
-};
-
-const handleCacheFirst = async (
-  { webBrowser, log }: IDependencies,
-  {
-    projectId,
-    delaySec,
-    targetUrl,
-    imageType,
-  }: IRequest & { strategy: 'cache-first' }
-): Promise<IResponse> => {
-  await log('info', 'finding project');
+  await log('info', 'loading project');
 
   const projectResult = await ProjectStorage.getOneById({ projectId });
 
   if (projectResult.type === 'error') {
-    await log('error', 'failed to find project');
+    await log('error', 'failed to load project');
 
     return {
       type: 'error',
       errors: [
         {
-          message: `failed to find a project`,
+          message: `failed to load project`,
         },
       ],
     };
   }
 
+  switch (strategy) {
+    case 'cache-first':
+      return tryCacheFirst(dependencies, { ...request, strategy });
+
+    case 'network-first':
+      return tryNetworkFirst(dependencies, { ...request, strategy });
+  }
+};
+
+const tryCacheFirst = async (
+  dependencies: IDependencies,
+  request: IRequest & { strategy: 'cache-first' }
+): Promise<IResponse> => {
+  const { log } = dependencies;
+
   await log('info', 'trying cache first');
 
-  const getResult = await ScreenshotStorage.get({
-    delaySec,
-    targetUrl,
-    imageType,
-    projectId,
-  });
+  const getResult = await ScreenshotStorage.get(request);
 
   if (getResult.type === 'success') {
-    await log('info', 'found screenshot cache');
+    await log('info', 'returning cached screenshot');
 
     return {
       type: 'success',
-      source: 'Storage',
       data: getResult.data,
-      imageType: imageType,
+      imageType: request.imageType,
       screenshotId: getResult.screenshot.screenshotId,
     };
   }
 
-  await log('info', 'opening new page');
+  const captureResult = await captureScreenshot(dependencies, request);
 
-  const page = await WebBrowser.openNewPage(webBrowser);
-
-  await log('info', 'going to url');
-
-  await WebBrowser.goTo(page, targetUrl);
-
-  for (let elapsed = 0; elapsed < delaySec; elapsed++) {
-    await log('info', `delaying for ${delaySec - elapsed} seconds...`);
-    await timeout(1000);
-  }
-
-  const screenshotResult = await WebBrowser.takeScreenshot(page, imageType);
-
-  if (screenshotResult.type === 'error') {
+  if (captureResult.type === 'error') {
     await log('error', 'failed to capture screenshot');
 
     return {
       type: 'error',
-      errors: [...screenshotResult.errors, ...getResult.errors],
+      errors: [...captureResult.errors, ...getResult.errors],
     };
   }
 
-  await log('info', 'storing screenshot');
-
-  const putResult = await ScreenshotStorage.put(
-    {
-      imageType,
-      delaySec,
-      targetUrl,
-      projectId,
-    },
-    screenshotResult.buffer
+  const cacheResponse = await cacheScreenshot(
+    dependencies,
+    request,
+    captureResult.buffer
   );
 
-  if (putResult.type === 'error') {
-    await log(
-      'error',
-      `failed to put screenshot in storage. ${putResult.errors
-        .map((error) => error.message)
-        .join(' & ')}`
-    );
+  return cacheResponse;
+};
+
+const tryNetworkFirst = async (
+  dependencies: IDependencies,
+  request: IRequest & { strategy: 'network-first' }
+): Promise<IResponse> => {
+  const { log } = dependencies;
+
+  await log('info', 'trying network first');
+
+  const captureResult = await captureScreenshot(dependencies, request);
+
+  if (captureResult.type === 'error') {
+    await log('error', 'failed to captured screenshot. trying cache...');
+
+    const getResult = await ScreenshotStorage.get(request);
+
+    if (getResult.type === 'success') {
+      await log('info', 'returing cached screenshot');
+
+      return {
+        type: 'success',
+        data: getResult.data,
+        imageType: request.imageType,
+        screenshotId: getResult.screenshot.screenshotId,
+      };
+    }
 
     return {
       type: 'error',
-      errors: [{ message: 'failed to put screenshot in storage' }],
+      errors: [...captureResult.errors, ...getResult.errors],
     };
   }
 
-  await log('notice', 'screenshot request suceeded ');
+  const cacheResponse = await cacheScreenshot(
+    dependencies,
+    request,
+    captureResult.buffer
+  );
+
+  return cacheResponse;
+};
+
+//
+//
+//
+//
+//
+//
+//
+
+const cacheScreenshot = async (
+  { log }: IDependencies,
+  request: IRequest,
+  screenshotData: IScreenshotData
+): Promise<IResponse> => {
+  await log('info', 'caching screenshot');
+
+  const putResult = await ScreenshotStorage.put(request, screenshotData);
+
+  if (putResult.type === 'error') {
+    const putErrorMessage = putResult.errors
+      .map((error) => error.message)
+      .join(' & ');
+
+    await log('error', `failed to cache screenshot. ${putErrorMessage}`);
+
+    return {
+      type: 'error',
+      errors: [{ message: 'failed to cache screenshot' }, ...putResult.errors],
+    };
+  }
+
+  await log('notice', 'returning screenshot');
 
   return {
     type: 'success',
-    source: 'WebBrowser',
-    data: screenshotResult.buffer,
-    imageType: imageType,
+    data: screenshotData,
+    imageType: request.imageType,
     screenshotId: putResult.screenshotId,
   };
 };
 
-const handleNetworkFirst = async (
+//
+//
+//
+//
+//
+//
+//
+
+const captureScreenshot = async (
   { webBrowser, log }: IDependencies,
-  {
-    projectId,
-    delaySec,
-    targetUrl,
-    imageType,
-  }: IRequest & { strategy: 'network-first' }
-): Promise<IResponse> => {
-  await log('info', 'finding project');
-
-  const projectResult = await ProjectStorage.getOneById({ projectId });
-
-  if (projectResult.type === 'error') {
-    await log('error', 'failed to find project');
-
-    return {
-      type: 'error',
-      errors: [
-        {
-          message: `failed to find a project`,
-        },
-      ],
-    };
-  }
-
-  await log('info', 'trying network first');
-
+  { delaySec, targetUrl, imageType }: IRequest
+) => {
   const page = await WebBrowser.openNewPage(webBrowser);
 
-  await log('info', 'going to url');
+  await log('info', 'opening web page...');
 
   await WebBrowser.goTo(page, targetUrl);
 
@@ -219,87 +234,25 @@ const handleNetworkFirst = async (
       'info',
       `delaying for ${pluralize(delaySec - elapsed, 'second', 'seconds')}...`
     );
-    await timeout(1000);
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
-  const screenshotResult = await WebBrowser.takeScreenshot(page, imageType);
+  await log('info', 'capturing screenshot');
 
-  if (screenshotResult.type === 'error') {
-    await log('error', 'failed to capture screenshot. trying cache...');
+  const result = await WebBrowser.takeScreenshot(page, imageType);
 
-    const getResult = await ScreenshotStorage.get({
-      delaySec,
-      targetUrl,
-      imageType,
-      projectId,
-    });
-
-    if (getResult.type === 'success') {
-      await log('info', 'found cached screenshot');
-
-      return {
-        type: 'success',
-        source: 'Storage',
-        data: getResult.data,
-        imageType: imageType,
-        screenshotId: getResult.screenshot.screenshotId,
-      };
-    }
-
-    return {
-      type: 'error',
-      errors: [...screenshotResult.errors, ...getResult.errors],
-    };
-  }
-
-  await log('info', 'caching screenshot');
-
-  const putResult = await ScreenshotStorage.put(
-    {
-      imageType,
-      delaySec,
-      targetUrl,
-      projectId,
-    },
-    screenshotResult.buffer
-  );
-
-  if (putResult.type === 'error') {
-    await log(
-      'error',
-      `failed to put screenshot in cache. ${putResult.errors
-        .map((error) => error.message)
-        .join(' & ')}`
-    );
-
-    return {
-      type: 'error',
-      errors: [{ message: 'failed to put screenshot in storage' }],
-    };
-  }
-
-  await log('notice', 'screenshot request suceeded ');
-
-  return {
-    type: 'success',
-    source: 'WebBrowser',
-    data: screenshotResult.buffer,
-    imageType: imageType,
-    screenshotId: putResult.screenshotId,
-  };
+  return result;
 };
 
-/* 
-
-
-helpers
-
-
-*/
-
-const timeout = (ms: number) => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-};
+//
+//
+//
+//
+//
+//
+//
+//
 
 const pluralize = (count: number, singular: string, plural: string) => {
   if (count === 1) {

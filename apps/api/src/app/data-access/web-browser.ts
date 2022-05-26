@@ -30,13 +30,16 @@ export const goTo = async (page: puppeteer.Page, url: ITargetUrl) => {
 export const takeScreenshot = async (
   page: puppeteer.Page,
   imageType: IImageType
-) => {
+): Promise<
+  | { type: 'success'; buffer: Buffer }
+  | { type: 'error'; errors: { message: string }[] }
+> => {
   try {
     const buffer = await page.screenshot({
       type: imageType,
     });
 
-    if (typeof buffer !== 'string' && !buffer) {
+    if (typeof buffer === 'string' || !buffer) {
       return {
         type: 'error',
         errors: [
@@ -47,7 +50,10 @@ export const takeScreenshot = async (
       };
     }
 
-    return { type: 'success', buffer };
+    return {
+      type: 'success',
+      buffer,
+    };
   } catch (error) {
     const message = String(error?.toString?.() ?? 'puppeteer threw an error');
 
