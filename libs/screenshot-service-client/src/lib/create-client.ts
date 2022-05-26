@@ -46,9 +46,17 @@ export interface SocketData {
   age: number;
 }
 
-export const createClient = ({ url }: { url: string }) => {
+const BASE_URL = 'https://crvouga-screenshot-service.herokuapp.com/';
+
+export const createClient = ({
+  overrides,
+}: {
+  overrides?: { baseUrl?: string };
+}) => {
+  const baseUrl = overrides?.baseUrl ? overrides.baseUrl : BASE_URL;
+
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
-    socketClient(url);
+    socketClient(baseUrl);
 
   return {
     socket,

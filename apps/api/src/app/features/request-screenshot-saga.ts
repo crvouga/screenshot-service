@@ -55,31 +55,6 @@ type IDependencies = {
 //
 //
 
-type StartRequestMsg = {
-  type: 'startRequest';
-  request: IRequest;
-};
-
-type Msg =
-  | {
-      type: 'log';
-      level: ILogLevel;
-      message: string;
-    }
-  | {
-      type: 'success';
-      buffer: IScreenshotBuffer;
-      screenshotId: IScreenshotId;
-      imageType: IImageType;
-    }
-  | {
-      type: 'aborted';
-    }
-  | {
-      type: 'error';
-      errors: { message: string }[];
-    };
-
 export const actions = {
   log: createAction('Log', (level: ILogLevel, message: string) => ({
     payload: {
@@ -88,16 +63,17 @@ export const actions = {
     },
   })),
 
-  startScreenshotRequest: createAction(
-    'StartScreenshotRequest',
-    (request: IRequest) => ({ payload: request })
-  ),
+  fetchScreenshot: createAction('FetchScreenshot', (request: IRequest) => ({
+    payload: request,
+  })),
 };
 
-export function* saga() {
-  yield takeEvery(actions.startScreenshotRequest, function* (action) {
-    yield call(() => {
-      console.log(action);
-    });
-  });
+export function* fetchScreenshot() {
+  yield takeEvery(actions.fetchScreenshot, fetchScreenshotFlow);
+}
+
+function* fetchScreenshotFlow(
+  action: ReturnType<typeof actions.fetchScreenshot>
+) {
+  yield console.log(action);
 }

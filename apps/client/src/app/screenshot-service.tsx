@@ -4,5 +4,5 @@ import { environment } from '../environments/environment';
 const devServerBaseUrl = 'http://localhost:8000';
 
 export const screenshotClient = createClient({
-  url: environment.production ? '' : devServerBaseUrl,
+  overrides: environment.production ? {} : { baseUrl: devServerBaseUrl },
 });
