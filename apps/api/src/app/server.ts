@@ -12,7 +12,6 @@ import path from 'path';
 import socket from 'socket.io';
 import * as WebBrowser from './data-access/web-browser';
 import { requestScreenshot } from './features/request-screenshot';
-
 /**
  *
  *
