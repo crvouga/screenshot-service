@@ -10,15 +10,16 @@ import {
 import * as ProjectStorage from '../data-access/project-storage';
 import * as ScreenshotStorage from '../data-access/screenshot-storage';
 import * as WebBrowser from '../data-access/web-browser';
-import { IScreenshotData } from '../types';
+import { IScreenshotBuffer } from '../types';
 
-/* 
-
-
-
-
-
-*/
+//
+//
+//
+//
+//
+//
+//
+//
 
 type IRequest = {
   strategy: IStrategy;
@@ -31,7 +32,7 @@ type IRequest = {
 type IResponse =
   | {
       type: 'success';
-      data: IScreenshotData;
+      buffer: IScreenshotBuffer;
       screenshotId: IScreenshotId;
       imageType: IImageType;
     }
@@ -63,19 +64,18 @@ export const requestScreenshot = async (
   const { log } = dependencies;
   const { strategy, projectId } = request;
 
-  await log('info', 'loading project');
+  await log('info', 'loading project...');
 
-  const projectResult = await ProjectStorage.getOneById({ projectId });
+  const getResult = await ProjectStorage.getOneById({ projectId });
 
-  if (projectResult.type === 'error') {
-    await log('error', 'failed to load project');
+  if (getResult.type === 'error') {
+    await log('error', `failed to load project. ${getResult.error}`);
 
     return {
       type: 'error',
       errors: [
-        {
-          message: `failed to load project`,
-        },
+        { message: `failed to load project.` },
+        { message: getResult.error },
       ],
     };
   }
@@ -104,7 +104,7 @@ const tryCacheFirst = async (
 
     return {
       type: 'success',
-      data: getResult.data,
+      buffer: getResult.buffer,
       imageType: request.imageType,
       screenshotId: getResult.screenshot.screenshotId,
     };
@@ -150,7 +150,7 @@ const tryNetworkFirst = async (
 
       return {
         type: 'success',
-        data: getResult.data,
+        buffer: getResult.buffer,
         imageType: request.imageType,
         screenshotId: getResult.screenshot.screenshotId,
       };
@@ -182,11 +182,11 @@ const tryNetworkFirst = async (
 const cacheScreenshot = async (
   { log }: IDependencies,
   request: IRequest,
-  screenshotData: IScreenshotData
+  buffer: IScreenshotBuffer
 ): Promise<IResponse> => {
   await log('info', 'caching screenshot');
 
-  const putResult = await ScreenshotStorage.put(request, screenshotData);
+  const putResult = await ScreenshotStorage.put(request, buffer);
 
   if (putResult.type === 'error') {
     const putErrorMessage = putResult.errors
@@ -205,7 +205,7 @@ const cacheScreenshot = async (
 
   return {
     type: 'success',
-    data: screenshotData,
+    buffer: buffer,
     imageType: request.imageType,
     screenshotId: putResult.screenshotId,
   };

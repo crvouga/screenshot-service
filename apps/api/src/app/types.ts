@@ -14,7 +14,7 @@ export type IScreenshot = {
   projectId: IProjectId;
 };
 
-export type IScreenshotData = Buffer | string;
+export type IScreenshotBuffer = Buffer & { _tag: 'ScreenshotBuffer' };
 
 export type IProject = {
   projectId: string;

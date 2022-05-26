@@ -13,7 +13,7 @@ import {
 } from '@crvouga/screenshot-service';
 import { definitions } from '@screenshot-service/shared';
 import { supabaseClient } from './supabase';
-import { IScreenshot, IScreenshotData } from '../types';
+import { IScreenshot, IScreenshotBuffer } from '../types';
 
 /**
  *
@@ -25,19 +25,12 @@ import { IScreenshot, IScreenshotData } from '../types';
  */
 
 type IGetResult =
-  | { type: 'success'; screenshot: IScreenshot; data: IScreenshotData }
+  | { type: 'success'; screenshot: IScreenshot; buffer: IScreenshotBuffer }
   | { type: 'error'; errors: { message: string }[] };
 
 type IPutResult =
   | { type: 'success'; screenshotId: IScreenshotId }
   | { type: 'error'; errors: { message: string }[] };
-
-/**
- *
- *
- *
- *
- */
 
 /**
  *
@@ -61,7 +54,7 @@ export const put = async (
     projectId: IProjectId;
     imageType: IImageType;
   },
-  screenshotData: IScreenshotData
+  buffer: IScreenshotBuffer
 ): Promise<IPutResult> => {
   const getResult = await getElseInsertRow({
     targetUrl,
@@ -83,7 +76,7 @@ export const put = async (
 
   const uploadResponse = await supabaseClient.storage
     .from(BUCKET_NAME)
-    .upload(filename, screenshotData, { upsert: true });
+    .upload(filename, buffer, { upsert: true });
 
   if (uploadResponse.error) {
     return {
@@ -169,12 +162,12 @@ export const get = async ({
 
   const arrayBuffer = await blob.arrayBuffer();
 
-  const screenshotData = Buffer.from(arrayBuffer);
+  const buffer = Buffer.from(arrayBuffer);
 
   return {
     type: 'success',
     screenshot: screenshot,
-    data: screenshotData,
+    buffer: buffer as IScreenshotBuffer,
   };
 };
 

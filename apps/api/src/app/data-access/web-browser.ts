@@ -1,20 +1,8 @@
-import { IDelaySec, IImageType, ITargetUrl } from '@crvouga/screenshot-service';
+import { IImageType, ITargetUrl } from '@crvouga/screenshot-service';
 import puppeteer, { Browser } from 'puppeteer';
-import { IScreenshotData } from '../types';
+import { IScreenshotBuffer } from '../types';
 
 export type WebBrowser = puppeteer.Browser;
-
-type Result =
-  | {
-      type: 'success';
-      updatedAtMs: number;
-      data: IScreenshotData;
-      imageType: IImageType;
-    }
-  | {
-      type: 'error';
-      errors: [{ message: string }];
-    };
 
 export const openNewPage = async (browser: puppeteer.Browser) => {
   const page = await browser.newPage();
@@ -31,7 +19,7 @@ export const takeScreenshot = async (
   page: puppeteer.Page,
   imageType: IImageType
 ): Promise<
-  | { type: 'success'; buffer: Buffer }
+  | { type: 'success'; buffer: IScreenshotBuffer }
   | { type: 'error'; errors: { message: string }[] }
 > => {
   try {
@@ -52,7 +40,7 @@ export const takeScreenshot = async (
 
     return {
       type: 'success',
-      buffer,
+      buffer: buffer as IScreenshotBuffer,
     };
   } catch (error) {
     const message = String(error?.toString?.() ?? 'puppeteer threw an error');
