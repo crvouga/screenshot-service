@@ -9,8 +9,16 @@ import {
   IStrategy,
   ITargetUrl,
 } from './screenshot';
+import { Action, createAction } from '@reduxjs/toolkit';
+import { InferActionMap, InferActionUnion } from './utils';
 
-type ScreenshotRequest = {
+//
+//
+//
+//
+//
+
+export type ScreenshotRequest = {
   requestId: IRequestId;
   projectId: IProjectId;
   strategy: IStrategy;
@@ -19,22 +27,83 @@ type ScreenshotRequest = {
   targetUrl: ITargetUrl;
 };
 
+export const ToServer = {
+  RequestScreenshot: createAction(
+    'RequestScreenshot',
+    (request: ScreenshotRequest) => ({
+      payload: { request },
+    })
+  ),
+
+  CancelRequestScreenshot: createAction(
+    'CancelRequestScreenshot',
+    (requestId: IRequestId) => ({
+      payload: { requestId },
+    })
+  ),
+};
+
+export const ToClient = {
+  CancelRequestSucceeded: createAction(
+    'CancelRequestScreenshotSucceeded',
+    (clientId: string) => ({
+      payload: {
+        clientId,
+      },
+    })
+  ),
+
+  RequestScreenshotSucceeded: createAction(
+    'RequestScreenshotSucceeded',
+    (payload: {
+      clientId: string;
+      screenshotId: IScreenshotId;
+      imageType: IImageType;
+    }) => ({
+      payload,
+    })
+  ),
+
+  RequestScreenshotFailed: createAction(
+    'RequestScreenshotFailed',
+    (clientId: string) => ({
+      payload: {
+        clientId,
+      },
+    })
+  ),
+
+  Log: createAction('Log', (clientId: string, level: ILogLevel, message) => ({
+    payload: { clientId, level, message },
+  })),
+};
+
+export const isToClient = (action: Action): action is IToClient => {
+  return Object.values(ToClient).some((actionCreator) =>
+    actionCreator.match(action)
+  );
+};
+
+//
+//
+//
+//
+//
+
+export type IToClient = InferActionUnion<typeof ToClient>;
+export type IToClientMap = InferActionMap<typeof ToClient>;
+
+export type IToServer = InferActionUnion<typeof ToServer>;
+export type IToServerMap = InferActionMap<typeof ToServer>;
+
 // docs: https://socket.io/docs/v4/typescript/
 
 export interface ClientToServerEvents {
-  requestScreenshot: (request: ScreenshotRequest) => void;
-  cancelScreenshotRequest: () => void;
+  ToServer: (action: IToServer) => void;
 }
 
 export interface ServerToClientEvents {
-  requestScreenshotFailed: (errors: { message: string }[]) => void;
-  requestScreenshotSucceeded: (response: {
-    screenshotId: IScreenshotId;
-    imageType: IImageType;
-  }) => void;
-  cancelScreenshotRequestFailed: () => void;
-  cancelScreenshotRequestSucceeded: () => void;
-  log: (logLevel: ILogLevel, message: string) => void;
+  ToClient: (action: IToClient) => void;
 }
 
 export interface InterServerEvents {
@@ -48,6 +117,24 @@ export interface SocketData {
 
 const BASE_URL = 'https://crvouga-screenshot-service.herokuapp.com/';
 
+type IScreenshotRequestState =
+  | { type: 'Idle' }
+  | { type: 'Loading' }
+  | { type: 'Failed' }
+  | { type: 'Succeeded' };
+
+type ScreenshotClientState = {
+  connection: { type: 'Connecting' } | { type: 'Connected' };
+  requests: {
+    [requestId: string]:
+      | { type: 'Idle' }
+      | { type: 'Cancelled ' }
+      | { type: 'Loading' }
+      | { type: 'Failed' }
+      | { type: 'Succeeded' };
+  };
+};
+
 export const createClient = ({
   overrides,
 }: {
@@ -58,7 +145,19 @@ export const createClient = ({
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
     socketClient(baseUrl);
 
+  const toServer = (action: IToServer) => {
+    return socket.emit('ToServer', action);
+  };
+
+  const fromServer = (callback: (action: IToClient) => void): (() => void) => {
+    socket.on('ToClient', callback);
+    return () => {
+      socket.off('ToClient', callback);
+    };
+  };
+
   return {
-    socket,
+    toServer,
+    fromServer,
   };
 };

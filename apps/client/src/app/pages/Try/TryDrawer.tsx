@@ -3,6 +3,7 @@ import { Box, Button, Divider, Drawer, Toolbar } from '@mui/material';
 import { useState } from 'react';
 import { appEventEmitter, useAppEventListener } from '../../app-event-emitter';
 import { TryPage } from '.';
+import useLocalStorage from '../../../lib/use-local-storage';
 
 export const TryDrawerButton = () => {
   return (
@@ -19,7 +20,10 @@ export const TryDrawerButton = () => {
 };
 
 export const TryDrawer = () => {
-  const [state, setState] = useState<'opened' | 'closed'>('closed');
+  const [state, setState] = useLocalStorage<'opened' | 'closed'>(
+    'tryDrawerState',
+    'closed'
+  );
 
   useAppEventListener('OpenedTryDrawer', () => {
     setState('opened');

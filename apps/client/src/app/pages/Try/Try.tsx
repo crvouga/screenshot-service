@@ -2,16 +2,17 @@ import {
   All_DELAY_SEC,
   castTargetUrl,
   generateRequestId,
-  generateUuid,
   IDelaySec,
   IErrors,
   IImageType,
   ILogLevel,
   IProjectId,
-  IScreenshotId,
+  IRequestId,
   isStrategy,
   IStrategy,
+  ScreenshotRequest,
   toDelaySec,
+  ToServer,
 } from '@crvouga/screenshot-service';
 import { Cancel } from '@mui/icons-material';
 import BrokenImageIcon from '@mui/icons-material/BrokenImage';
@@ -37,6 +38,7 @@ import {
 import { useSnackbar } from 'notistack';
 import * as React from 'react';
 import { useState } from 'react';
+import useLocalStorage from '../../../lib/use-local-storage';
 import { screenshotClient } from '../../screenshot-service';
 import { getScreenshotSrc } from '../../screenshots';
 import { ProjectInput } from './ProjectInput';
@@ -46,15 +48,18 @@ type ILog = { level: ILogLevel; message: string };
 
 type IQueryState =
   | { type: 'idle' }
-  | { type: 'loading'; logs: ILog[] }
+  | { type: 'loading'; logs: ILog[]; requestId: IRequestId }
   | { type: 'error'; errors: IErrors; logs: ILog[] }
   | { type: 'success'; src: string; logs: ILog[] };
 
 export const TryPage = () => {
-  const [targetUrl, setTargetUrl] = useState<string>('');
+  const [targetUrl, setTargetUrl] = useLocalStorage<string>('targetUrl', '');
   const [imageType, setImageType] = useState<IImageType>('jpeg');
   const [delaySec, setDelaySec] = useState<IDelaySec>(0);
-  const [projectId, setProjectId] = useState<IProjectId | null>(null);
+  const [projectId, setProjectId] = useLocalStorage<IProjectId | null>(
+    'projectId',
+    null
+  );
   const [strategy, setStrategy] = useState<IStrategy>('cache-first');
   const [query, setQuery] = useState<IQueryState>({ type: 'idle' });
 
@@ -74,8 +79,6 @@ export const TryPage = () => {
   const submit = async () => {
     const requestId = generateRequestId();
 
-    setQuery({ type: 'loading', logs: [] });
-
     if (!projectId) {
       setQuery({
         type: 'error',
@@ -92,7 +95,7 @@ export const TryPage = () => {
       return;
     }
 
-    const request = {
+    const request: ScreenshotRequest = {
       strategy: strategy,
       requestId: requestId,
       projectId: projectId,
@@ -101,67 +104,46 @@ export const TryPage = () => {
       delaySec: delaySec,
     };
 
-    console.log('EMIT requestScreenshot', request);
+    setQuery({ type: 'loading', logs: [], requestId: request.requestId });
 
-    screenshotClient.socket.emit('requestScreenshot', request);
-
-    const logs: ILog[] = [];
-
-    const onLog = (level: ILogLevel, message: string) => {
-      const log: ILog = { level, message };
-      console.log(log);
-      logs.push(log);
-      appendLog(log);
-    };
-
-    screenshotClient.socket.on('log', onLog);
-
-    type IResponse =
-      | { type: 'failed'; errors: { message: string }[] }
-      | {
-          type: 'succeeded';
-          screenshotId: IScreenshotId;
-          imageType: IImageType;
-        };
-
-    const response = await new Promise<IResponse>((resolve) => {
-      screenshotClient.socket.once('requestScreenshotFailed', (errors) => {
-        resolve({ type: 'failed', errors });
-      });
-
-      screenshotClient.socket.once('requestScreenshotSucceeded', (payload) => {
-        resolve({ type: 'succeeded', ...payload });
-      });
-    });
-
-    screenshotClient.socket.off('log', onLog);
-
-    if (response.type === 'failed') {
-      console.log('requestScreenshotFailed', response);
-      setQuery({ logs, type: 'error', errors: response.errors });
-      return;
-    }
-
-    console.log('requestScreenshotSucceeded');
-
-    const screenshotSrcResult = await getScreenshotSrc(response);
-
-    if (screenshotSrcResult.type === 'error') {
-      setQuery({
-        type: 'error',
-        logs,
-        errors: [{ message: screenshotSrcResult.error }],
-      });
-      return;
-    }
-
-    setQuery({ type: 'success', logs, src: screenshotSrcResult.src });
+    screenshotClient.toServer(ToServer.RequestScreenshot(request));
   };
+
+  React.useEffect(() => {
+    const unsub = screenshotClient.fromServer(async (action) => {
+      if (action.type === 'Log') {
+        appendLog(action.payload);
+        return;
+      }
+
+      if (action.type === 'RequestScreenshotSucceeded') {
+        const result = await getScreenshotSrc({
+          screenshotId: action.payload.screenshotId,
+          imageType: action.payload.imageType,
+        });
+        if (result.type === 'success') {
+          setQuery({ type: 'success', logs: [], src: result.src });
+        }
+        return;
+      }
+
+      if (action.type === 'CancelRequestScreenshotSucceeded') {
+        setQuery({ type: 'idle' });
+      }
+    });
+    return () => {
+      unsub();
+    };
+  }, []);
 
   const snackbar = useSnackbar();
 
   const onCancel = () => {
-    screenshotClient.socket.emit('cancelScreenshotRequest');
+    if (query.type === 'loading') {
+      screenshotClient.toServer(
+        ToServer.CancelRequestScreenshot(query.requestId)
+      );
+    }
   };
 
   const error = query.type === 'error' ? query.errors : [];
@@ -267,7 +249,7 @@ export const TryPage = () => {
         onClick={submit}
         loading={query.type === 'loading'}
       >
-        take screenshot
+        capture screenshot
       </LoadingButton>
 
       <LoadingButton

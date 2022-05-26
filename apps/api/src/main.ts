@@ -1,7 +1,5 @@
 import { main } from './app/main';
 
-// import { startServer } from './app/server';
-
 const defaultPort = 8000;
 
 const getPort = (): number => {
@@ -16,7 +14,3 @@ const getPort = (): number => {
 };
 
 main({ port: getPort() });
-
-// startServer({
-//   port: getPort(),
-// });

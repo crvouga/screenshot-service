@@ -1,14 +1,18 @@
-import createSagaMiddleware from 'redux-saga';
 import { configureStore } from '@reduxjs/toolkit';
-import { rootSaga } from './root-saga';
+import createSagaMiddleware from 'redux-saga';
+import { mainSaga } from './main-saga';
 
 const sagaMiddleware = createSagaMiddleware();
 
+const noopReducer = <TState>(state: TState): TState => {
+  return state;
+};
+
 export const store = configureStore({
-  reducer: {},
+  reducer: noopReducer,
   middleware: [sagaMiddleware],
 });
 
 export const main = ({ port }: { port: number }) => {
-  sagaMiddleware.run(rootSaga, { port });
+  sagaMiddleware.run(mainSaga, { port });
 };
