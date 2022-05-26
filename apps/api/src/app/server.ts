@@ -62,7 +62,10 @@ export const startServer = async ({ port }: { port: number }) => {
         abortController.abort();
       });
 
-      const result = await requestScreenshot({ webBrowser, log }, request);
+      const result = await requestScreenshot(
+        { abortSignal: abortController.signal, webBrowser, log },
+        request
+      );
 
       socket.leave(request.requestId);
 

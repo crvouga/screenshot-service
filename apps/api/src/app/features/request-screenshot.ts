@@ -46,6 +46,7 @@ type IResponse =
 
 type IDependencies = {
   webBrowser: WebBrowser.WebBrowser;
+  abortSignal: AbortSignal;
   log: (logLevel: ILogLevel, message: string) => Promise<void>;
 };
 
@@ -58,6 +59,15 @@ type IDependencies = {
 //
 
 export const requestScreenshot = async (
+  dependencies: IDependencies,
+  request: IRequest
+): Promise<IResponse> => {
+  const response = Promise.race([requestScreenshotMain(dependencies, request)]);
+
+  return response;
+};
+
+const requestScreenshotMain = async (
   dependencies: IDependencies,
   request: IRequest
 ): Promise<IResponse> => {
