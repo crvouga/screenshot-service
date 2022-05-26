@@ -62,7 +62,13 @@ export const requestScreenshot = async (
   dependencies: IDependencies,
   request: IRequest
 ): Promise<IResponse> => {
-  const response = Promise.race([requestScreenshotMain(dependencies, request)]);
+  const { abortSignal, log } = dependencies;
+
+  abortSignal.onabort = function () {
+    log('notice', 'aborted request');
+  };
+
+  const response = await requestScreenshotMain(dependencies, request);
 
   return response;
 };

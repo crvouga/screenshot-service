@@ -62,26 +62,26 @@ export const startServer = async ({ port }: { port: number }) => {
         abortController.abort();
       });
 
-      const result = await requestScreenshot(
+      const response = await requestScreenshot(
         { abortSignal: abortController.signal, webBrowser, log },
         request
       );
 
       socket.leave(request.requestId);
 
-      if (result.type === 'aborted') {
+      if (response.type === 'aborted') {
         socket.emit('cancelScreenshotRequestSucceeded');
 
         return;
       }
 
-      if (result.type === 'error') {
-        socket.emit('requestScreenshotFailed', result.errors);
+      if (response.type === 'error') {
+        socket.emit('requestScreenshotFailed', response.errors);
 
         return;
       }
 
-      socket.emit('requestScreenshotSucceeded', result);
+      socket.emit('requestScreenshotSucceeded', response);
     });
   });
 
