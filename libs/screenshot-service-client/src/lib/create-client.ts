@@ -29,14 +29,14 @@ export type ScreenshotRequest = {
 
 export const ToServer = {
   RequestScreenshot: createAction(
-    'RequestScreenshot',
+    'ToServer/RequestScreenshot',
     (request: ScreenshotRequest) => ({
       payload: { request },
     })
   ),
 
   CancelRequestScreenshot: createAction(
-    'CancelRequestScreenshot',
+    'ToServer/CancelRequestScreenshot',
     (requestId: IRequestId) => ({
       payload: { requestId },
     })
@@ -45,7 +45,7 @@ export const ToServer = {
 
 export const ToClient = {
   CancelRequestSucceeded: createAction(
-    'CancelRequestScreenshotSucceeded',
+    'ToClient/CancelRequestScreenshotSucceeded',
     (clientId: string) => ({
       payload: {
         clientId,
@@ -54,7 +54,7 @@ export const ToClient = {
   ),
 
   RequestScreenshotSucceeded: createAction(
-    'RequestScreenshotSucceeded',
+    'ToClient/RequestScreenshotSucceeded',
     (payload: {
       clientId: string;
       screenshotId: IScreenshotId;
@@ -65,10 +65,11 @@ export const ToClient = {
   ),
 
   RequestScreenshotFailed: createAction(
-    'RequestScreenshotFailed',
-    (clientId: string) => ({
+    'ToClient/RequestScreenshotFailed',
+    (clientId: string, errors: { message: string }[]) => ({
       payload: {
         clientId,
+        errors,
       },
     })
   ),

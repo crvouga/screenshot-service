@@ -11,6 +11,7 @@ import {
   isStrategy,
   IStrategy,
   ScreenshotRequest,
+  ToClient,
   toDelaySec,
   ToServer,
 } from '@crvouga/screenshot-service';
@@ -109,6 +110,8 @@ export const TryPage = () => {
     screenshotClient.toServer(ToServer.RequestScreenshot(request));
   };
 
+  const snackbar = useSnackbar();
+
   React.useEffect(() => {
     const unsub = screenshotClient.fromServer(async (action) => {
       if (action.type === 'Log') {
@@ -116,7 +119,7 @@ export const TryPage = () => {
         return;
       }
 
-      if (action.type === 'RequestScreenshotSucceeded') {
+      if (ToClient.RequestScreenshotSucceeded.match(action)) {
         const result = await getScreenshotSrc({
           screenshotId: action.payload.screenshotId,
           imageType: action.payload.imageType,
@@ -127,8 +130,12 @@ export const TryPage = () => {
         return;
       }
 
-      if (action.type === 'CancelRequestScreenshotSucceeded') {
-        setQuery({ type: 'idle' });
+      if (ToClient.CancelRequestSucceeded.match(action)) {
+        snackbar.enqueueSnackbar('Cancelled request');
+      }
+
+      if (ToClient.RequestScreenshotFailed.match(action)) {
+        setQuery({ type: 'error', errors: action.payload.errors, logs: [] });
       }
     });
     return () => {
@@ -136,9 +143,8 @@ export const TryPage = () => {
     };
   }, []);
 
-  const snackbar = useSnackbar();
-
   const onCancel = () => {
+    setQuery({ type: 'idle' });
     if (query.type === 'loading') {
       screenshotClient.toServer(
         ToServer.CancelRequestScreenshot(query.requestId)
@@ -270,13 +276,11 @@ export const TryPage = () => {
       />
 
       <Box sx={{ mb: 4 }}>
-        {query.type === 'idle' && (
-          <Typography color="disabled">no logs to show</Typography>
-        )}
+        {query.type === 'idle' && <Typography color="disabled">...</Typography>}
 
         {query.type !== 'idle' && (
           <Typography>
-            {query.logs[query.logs.length - 1]?.message ?? 'no logs yet'}
+            {query.logs[query.logs.length - 1]?.message ?? '...'}
           </Typography>
         )}
       </Box>

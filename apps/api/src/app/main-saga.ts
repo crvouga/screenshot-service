@@ -41,6 +41,20 @@ export const Action = {
       clientId,
     },
   })),
+
+  ClientDisconnecting: createAction(
+    'ClientDisconnecting',
+    (clientId: string) => ({ payload: { clientId } })
+  ),
+
+  ClientDisconnected: createAction(
+    'ClientDisconnected',
+    (clientId: string) => ({ payload: { clientId } })
+  ),
+
+  SocketError: createAction('SocketError', (clientId: string) => ({
+    payload: { clientId },
+  })),
 };
 
 type IAction = InferActionUnion<typeof Action>;
@@ -99,10 +113,14 @@ const requestScreenshotMainFlow = function* (
   webBrowser: DataAccess.WebBrowser.WebBrowser,
   request: ScreenshotRequest
 ) {
-  const getProfileResult = yield* call(DataAccess.Project.getOneById, request);
+  const projectResult = yield* call(DataAccess.Project.getOneById, request);
 
-  if (getProfileResult.type === 'error') {
-    yield put(ToClient.RequestScreenshotFailed(clientId));
+  if (projectResult.type === 'error') {
+    yield put(
+      ToClient.RequestScreenshotFailed(clientId, [
+        { message: projectResult.error },
+      ])
+    );
     return;
   }
 
@@ -111,14 +129,21 @@ const requestScreenshotMainFlow = function* (
   }
 
   if (request.strategy === 'cache-first') {
-    yield* cacheFirstFlow(request);
+    yield* cacheFirstFlow(clientId, request);
   }
 };
 
-const cacheFirstFlow = function* (request: ScreenshotRequest) {
+const cacheFirstFlow = function* (
+  clientId: string,
+  request: ScreenshotRequest
+) {
   console.log('cacheFirstFlow, ', request);
 
-  yield;
+  yield put(
+    ToClient.RequestScreenshotFailed(clientId, [
+      { message: 'cache strat is unimplemented' },
+    ])
+  );
 };
 
 const networkFirstFlow = function* (
@@ -142,14 +167,14 @@ const networkFirstFlow = function* (
 
   yield put(ToClient.Log(clientId, 'info', `Capturing screenshot...`));
 
-  const captureScreenshotResult = yield* call(
+  const captureResult = yield* call(
     DataAccess.WebBrowser.takeScreenshot,
     page,
     request.imageType
   );
 
-  if (captureScreenshotResult.type === 'error') {
-    yield put(ToClient.RequestScreenshotFailed(clientId));
+  if (captureResult.type === 'error') {
+    yield put(ToClient.RequestScreenshotFailed(clientId, captureResult.errors));
     return;
   }
 
@@ -158,11 +183,13 @@ const networkFirstFlow = function* (
   const putCacheResult = yield* call(
     DataAccess.Screenshot.put,
     request,
-    captureScreenshotResult.buffer
+    captureResult.buffer
   );
 
   if (putCacheResult.type === 'error') {
-    yield put(ToClient.RequestScreenshotFailed(clientId));
+    yield put(
+      ToClient.RequestScreenshotFailed(clientId, putCacheResult.errors)
+    );
     return;
   }
 
@@ -214,6 +241,18 @@ const createToServerChan = ({ port }: { port: number }) =>
     io.on('connection', (socket) => {
       emit(Action.ClientConnected(socket.id));
       socket.on('ToServer', emit);
+
+      socket.on('disconnecting', () => {
+        emit(Action.ClientDisconnecting(socket.id));
+      });
+
+      socket.on('disconnect', () => {
+        emit(Action.ClientDisconnected(socket.id));
+      });
+
+      socket.on('error', () => {
+        emit(Action.SocketError(socket.id));
+      });
     });
 
     server.listen(port, () => {
@@ -251,7 +290,7 @@ const startServerFlow = function* ({ port }: { port: number }) {
 
 function* startLoggerFlow() {
   yield takeEvery('*', function* (action) {
-    console.log('Action:', action);
+    console.log('Action:', JSON.stringify(action, null, 8));
 
     if (Action.ServerListening.match(action)) {
       console.log(
