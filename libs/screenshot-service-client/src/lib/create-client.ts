@@ -86,11 +86,19 @@ export const isToClient = (action: Action): action is IToClient => {
   );
 };
 
+const ClientAction = {
+  ConnectionError: createAction('ConnectionError'),
+  Connected: createAction('Connected'),
+  Disconnected: createAction('Disconnected'),
+};
+
 //
 //
 //
 //
 //
+
+export type IClientAction = InferActionUnion<typeof ClientAction>;
 
 export type IToClient = InferActionUnion<typeof ToClient>;
 export type IToClientMap = InferActionMap<typeof ToClient>;
@@ -147,11 +155,22 @@ export const createClient = ({
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
     socketClient(baseUrl);
 
-  const toServer = (action: IToServer) => {
+  const emit = (action: IToServer) => {
     return socket.emit('ToServer', action);
   };
 
-  const fromServer = (callback: (action: IToClient) => void): (() => void) => {
+  const on = (
+    callback: (action: IToClient | IClientAction) => void
+  ): (() => void) => {
+    socket.on('connect', () => {
+      callback(ClientAction.Connected());
+    });
+    socket.on('disconnect', () => {
+      callback(ClientAction.Disconnected());
+    });
+    socket.on('connect_error', () => {
+      callback(ClientAction.ConnectionError());
+    });
     socket.on('ToClient', callback);
     return () => {
       socket.off('ToClient', callback);
@@ -159,7 +178,7 @@ export const createClient = ({
   };
 
   return {
-    toServer,
-    fromServer,
+    emit,
+    on,
   };
 };

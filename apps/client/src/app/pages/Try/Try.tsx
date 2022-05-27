@@ -107,13 +107,25 @@ export const TryPage = () => {
 
     setQuery({ type: 'loading', logs: [], requestId: request.requestId });
 
-    screenshotClient.toServer(ToServer.RequestScreenshot(request));
+    screenshotClient.emit(ToServer.RequestScreenshot(request));
   };
 
   const snackbar = useSnackbar();
 
   React.useEffect(() => {
-    const unsub = screenshotClient.fromServer(async (action) => {
+    const unsub = screenshotClient.on(async (action) => {
+      if (action.type === 'Connected') {
+        snackbar.enqueueSnackbar('connected to screenshot service');
+      }
+
+      // if (action.type === 'ConnectionError') {
+      //   snackbar.enqueueSnackbar('connection error');
+      // }
+
+      if (action.type === 'Disconnected') {
+        snackbar.enqueueSnackbar('disconnected from screenshot service');
+      }
+
       if (action.type === 'Log') {
         appendLog(action.payload);
         return;
@@ -146,9 +158,7 @@ export const TryPage = () => {
   const onCancel = () => {
     setQuery({ type: 'idle' });
     if (query.type === 'loading') {
-      screenshotClient.toServer(
-        ToServer.CancelRequestScreenshot(query.requestId)
-      );
+      screenshotClient.emit(ToServer.CancelRequestScreenshot(query.requestId));
     }
   };
 

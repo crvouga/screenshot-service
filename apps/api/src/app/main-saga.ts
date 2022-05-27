@@ -73,18 +73,26 @@ type IAction = InferActionUnion<typeof Action>;
 //
 //
 
-export function* mainSaga({ port }: { port: number }) {
+export const mainSaga = function* ({ port }: { port: number }) {
   yield fork(loggingSaga);
   yield fork(serverSaga, { port });
 
-  const webBrowser = yield* call(DataAccess.WebBrowser.create);
+  const webBrowser = yield* call(createWebBrowser);
 
   yield takeEvery(Action.ClientConnected, function* (action) {
     yield* clientFlow(action.payload.clientId, webBrowser);
   });
-}
+};
 
-function* clientFlow(
+const createWebBrowser = function* () {
+  const webBrowser = yield* call(DataAccess.WebBrowser.create);
+
+  yield put(Action.Log('info', 'created web browser'));
+
+  return webBrowser;
+};
+
+const clientFlow = function* (
   clientId: string,
   webBrowser: DataAccess.WebBrowser.WebBrowser
 ) {
@@ -101,18 +109,18 @@ function* clientFlow(
   yield put(
     Action.Log('info', `Cancelled client sagas for clientId: ${clientId}`)
   );
-}
+};
 
-function* clientFlowMain(
+const clientFlowMain = function* (
   clientId: string,
   webBrowser: DataAccess.WebBrowser.WebBrowser
 ) {
   yield takeLatest(ToServer.RequestScreenshot, function* (action) {
     yield* requestScreenshotFlow(clientId, webBrowser, action.payload.request);
   });
-}
+};
 
-function* takeClientDisconnected(clientId: string) {
+const takeClientDisconnected = function* (clientId: string) {
   while (true) {
     const action: ReturnType<typeof Action.ClientDisconnected> = yield take(
       Action.ClientDisconnected
@@ -122,7 +130,7 @@ function* takeClientDisconnected(clientId: string) {
       return action;
     }
   }
-}
+};
 
 const requestScreenshotFlow = function* (
   clientId: string,
