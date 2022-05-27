@@ -59,6 +59,7 @@ export const ToClient = {
       clientId: string;
       screenshotId: IScreenshotId;
       imageType: IImageType;
+      source: 'Network' | 'Cache';
     }) => ({
       payload,
     })

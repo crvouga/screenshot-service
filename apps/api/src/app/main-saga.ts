@@ -1,14 +1,15 @@
 import {
   ClientToServerEvents,
+  ILogLevel,
   InferActionUnion,
   InterServerEvents,
   IRequestId,
+  isToClient,
   IToServer,
   IToServerMap,
   ScreenshotRequest,
   ServerToClientEvents,
   SocketData,
-  isToClient,
   ToClient,
   ToServer,
 } from '@crvouga/screenshot-service';
@@ -17,11 +18,12 @@ import express from 'express';
 import http from 'http';
 import { eventChannel } from 'redux-saga';
 import {
-  race,
-  take,
+  cancel,
   delay,
   fork,
   put,
+  race,
+  take,
   takeEvery,
   takeLatest,
 } from 'redux-saga/effects';
@@ -55,6 +57,10 @@ export const Action = {
   SocketError: createAction('SocketError', (clientId: string) => ({
     payload: { clientId },
   })),
+
+  Log: createAction('Log', (level: ILogLevel, message: string) => ({
+    payload: { level, message },
+  })),
 };
 
 type IAction = InferActionUnion<typeof Action>;
@@ -68,23 +74,47 @@ type IAction = InferActionUnion<typeof Action>;
 //
 
 export function* mainSaga({ port }: { port: number }) {
-  yield fork(startLoggerFlow);
-  yield fork(startServerFlow, { port });
+  yield fork(loggingSaga);
+  yield fork(serverSaga, { port });
 
   const webBrowser = yield* call(DataAccess.WebBrowser.create);
 
   yield takeEvery(Action.ClientConnected, function* (action) {
-    yield* clientConnectedFlow(action.payload.clientId, webBrowser);
+    yield* clientFlow(action.payload.clientId, webBrowser);
   });
 }
 
-function* clientConnectedFlow(
+function* clientFlow(
   clientId: string,
   webBrowser: DataAccess.WebBrowser.WebBrowser
 ) {
-  yield takeLatest(ToServer.RequestScreenshot, function* (action) {
+  yield put(
+    Action.Log('info', `Starting client sagas for clientId: ${clientId}`)
+  );
+
+  const task = yield takeLatest(ToServer.RequestScreenshot, function* (action) {
     yield* requestScreenshotFlow(clientId, webBrowser, action.payload.request);
   });
+
+  yield takeClientDisconnected(clientId);
+
+  yield cancel(task);
+
+  yield put(
+    Action.Log('info', `Cancelled client sagas for clientId: ${clientId}`)
+  );
+}
+
+function* takeClientDisconnected(clientId: string) {
+  while (true) {
+    const action: ReturnType<typeof Action.ClientDisconnected> = yield take(
+      Action.ClientDisconnected
+    );
+
+    if (action.payload.clientId === clientId) {
+      return action;
+    }
+  }
 }
 
 const requestScreenshotFlow = function* (
@@ -129,21 +159,35 @@ const requestScreenshotMainFlow = function* (
   }
 
   if (request.strategy === 'cache-first') {
-    yield* cacheFirstFlow(clientId, request);
+    yield* cacheFirstFlow(clientId, webBrowser, request);
   }
 };
 
 const cacheFirstFlow = function* (
   clientId: string,
+  webBrowser: DataAccess.WebBrowser.WebBrowser,
   request: ScreenshotRequest
 ) {
-  console.log('cacheFirstFlow, ', request);
+  yield put(ToClient.Log(clientId, 'info', 'Checking cache...'));
 
-  yield put(
-    ToClient.RequestScreenshotFailed(clientId, [
-      { message: 'cache strat is unimplemented' },
-    ])
-  );
+  const cacheResult = yield* call(DataAccess.Screenshot.get, request);
+
+  if (cacheResult.type === 'success') {
+    yield put(
+      ToClient.RequestScreenshotSucceeded({
+        source: 'Cache',
+        clientId,
+        screenshotId: cacheResult.screenshot.screenshotId,
+        imageType: cacheResult.screenshot.imageType,
+      })
+    );
+
+    return;
+  }
+
+  yield put(ToClient.Log(clientId, 'info', 'Not cached'));
+
+  yield* networkFirstFlow(clientId, webBrowser, request);
 };
 
 const networkFirstFlow = function* (
@@ -196,6 +240,7 @@ const networkFirstFlow = function* (
   yield put(
     ToClient.RequestScreenshotSucceeded({
       clientId,
+      source: 'Network',
       screenshotId: putCacheResult.screenshotId,
       imageType: request.imageType,
     })
@@ -265,7 +310,7 @@ const createToServerChan = ({ port }: { port: number }) =>
     };
   });
 
-const startServerFlow = function* ({ port }: { port: number }) {
+const serverSaga = function* ({ port }: { port: number }) {
   const serverChan = createToServerChan({ port });
 
   yield takeEvery(serverChan, function* (action) {
@@ -288,16 +333,13 @@ const startServerFlow = function* ({ port }: { port: number }) {
 //
 //
 
-function* startLoggerFlow() {
+function* loggingSaga() {
   yield takeEvery('*', function* (action) {
-    console.log('Action:', JSON.stringify(action, null, 8));
-
     if (Action.ServerListening.match(action)) {
       console.log(
         `Notice: Server is listening on http://localhost:${action.payload.port}/`
       );
     }
-
     yield;
   });
 }
