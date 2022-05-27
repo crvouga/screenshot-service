@@ -92,9 +92,7 @@ function* clientFlow(
     Action.Log('info', `Starting client sagas for clientId: ${clientId}`)
   );
 
-  const task = yield takeLatest(ToServer.RequestScreenshot, function* (action) {
-    yield* requestScreenshotFlow(clientId, webBrowser, action.payload.request);
-  });
+  const task = yield fork(clientFlowMain, clientId, webBrowser);
 
   yield takeClientDisconnected(clientId);
 
@@ -103,6 +101,15 @@ function* clientFlow(
   yield put(
     Action.Log('info', `Cancelled client sagas for clientId: ${clientId}`)
   );
+}
+
+function* clientFlowMain(
+  clientId: string,
+  webBrowser: DataAccess.WebBrowser.WebBrowser
+) {
+  yield takeLatest(ToServer.RequestScreenshot, function* (action) {
+    yield* requestScreenshotFlow(clientId, webBrowser, action.payload.request);
+  });
 }
 
 function* takeClientDisconnected(clientId: string) {
