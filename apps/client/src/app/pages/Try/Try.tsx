@@ -1,6 +1,7 @@
 import {
   All_DELAY_SEC,
   castTargetUrl,
+  ClientAction,
   generateRequestId,
   IDelaySec,
   IErrors,
@@ -114,19 +115,15 @@ export const TryPage = () => {
 
   React.useEffect(() => {
     const unsub = screenshotClient.on(async (action) => {
-      if (action.type === 'Connected') {
+      if (ClientAction.Connected.match(action)) {
         snackbar.enqueueSnackbar('connected to screenshot service');
       }
 
-      // if (action.type === 'ConnectionError') {
-      //   snackbar.enqueueSnackbar('connection error');
-      // }
-
-      if (action.type === 'Disconnected') {
+      if (ClientAction.Disconnected.match(action)) {
         snackbar.enqueueSnackbar('disconnected from screenshot service');
       }
 
-      if (action.type === 'Log') {
+      if (ToClient.Log.match(action)) {
         appendLog(action.payload);
         return;
       }
@@ -136,6 +133,7 @@ export const TryPage = () => {
           screenshotId: action.payload.screenshotId,
           imageType: action.payload.imageType,
         });
+
         if (result.type === 'success') {
           setQuery({ type: 'success', logs: [], src: result.src });
         }

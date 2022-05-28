@@ -11,6 +11,7 @@ import {
 } from './screenshot';
 import { Action, createAction } from '@reduxjs/toolkit';
 import { InferActionMap, InferActionUnion } from './utils';
+import { BASE_URL } from './env';
 
 //
 //
@@ -86,17 +87,11 @@ export const isToClient = (action: Action): action is IToClient => {
   );
 };
 
-const ClientAction = {
-  ConnectionError: createAction('ConnectionError'),
-  Connected: createAction('Connected'),
-  Disconnected: createAction('Disconnected'),
+export const ClientAction = {
+  ConnectionError: createAction('Client/ConnectionError'),
+  Connected: createAction('Client/Connected'),
+  Disconnected: createAction('Client/Disconnected'),
 };
-
-//
-//
-//
-//
-//
 
 export type IClientAction = InferActionUnion<typeof ClientAction>;
 
@@ -106,54 +101,13 @@ export type IToClientMap = InferActionMap<typeof ToClient>;
 export type IToServer = InferActionUnion<typeof ToServer>;
 export type IToServerMap = InferActionMap<typeof ToServer>;
 
-// docs: https://socket.io/docs/v4/typescript/
-
-export interface ClientToServerEvents {
-  ToServer: (action: IToServer) => void;
-}
-
-export interface ServerToClientEvents {
-  ToClient: (action: IToClient) => void;
-}
-
-export interface InterServerEvents {
-  ping: () => void;
-}
-
-export interface SocketData {
-  name: string;
-  age: number;
-}
-
-const BASE_URL = 'https://crvouga-screenshot-service.herokuapp.com/';
-
-type IScreenshotRequestState =
-  | { type: 'Idle' }
-  | { type: 'Loading' }
-  | { type: 'Failed' }
-  | { type: 'Succeeded' };
-
-type ScreenshotClientState = {
-  connection: { type: 'Connecting' } | { type: 'Connected' };
-  requests: {
-    [requestId: string]:
-      | { type: 'Idle' }
-      | { type: 'Cancelled ' }
-      | { type: 'Loading' }
-      | { type: 'Failed' }
-      | { type: 'Succeeded' };
-  };
-};
-
 export const createClient = ({
   overrides,
 }: {
   overrides?: { baseUrl?: string };
 }) => {
   const baseUrl = overrides?.baseUrl ? overrides.baseUrl : BASE_URL;
-
-  const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
-    socketClient(baseUrl);
+  const socket = createSocket(baseUrl);
 
   const emit = (action: IToServer) => {
     return socket.emit('ToServer', action);
@@ -182,3 +136,36 @@ export const createClient = ({
     on,
   };
 };
+
+//
+//
+//
+// Client Socket
+// docs: https://socket.io/docs/v4/typescript/
+//
+//
+//
+
+const createSocket = (baseUrl: string) => {
+  const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
+    socketClient(baseUrl);
+
+  return socket;
+};
+
+export interface ClientToServerEvents {
+  ToServer: (action: IToServer) => void;
+}
+
+export interface ServerToClientEvents {
+  ToClient: (action: IToClient) => void;
+}
+
+export interface InterServerEvents {
+  ping: () => void;
+}
+
+export interface SocketData {
+  name: string;
+  age: number;
+}
