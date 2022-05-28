@@ -4,7 +4,6 @@ import {
   ClientAction,
   generateRequestId,
   IDelaySec,
-  IErrors,
   IImageType,
   ILogLevel,
   IProjectId,
@@ -51,7 +50,7 @@ type ILog = { level: ILogLevel; message: string };
 type IQueryState =
   | { type: 'idle' }
   | { type: 'loading'; logs: ILog[]; requestId: IRequestId }
-  | { type: 'error'; errors: IErrors; logs: ILog[] }
+  | { type: 'error'; errors: { message: string }[]; logs: ILog[] }
   | { type: 'success'; src: string; logs: ILog[] };
 
 export const TryPage = () => {

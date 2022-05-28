@@ -1,16 +1,16 @@
+import { generateUuid, isUuid, Uuid } from './utils';
+
 /**
  *
  *
  *
  */
 
-import { generateUuid, isUuid, Uuid } from './uuid';
-
-type ICastResult<T> =
+type IResult<T> =
   | { type: 'success'; data: T }
   | { type: 'error'; errors: { message: string }[] };
 
-export const resultToErrors = <T>(result: ICastResult<T>) => {
+export const resultToErrors = <T>(result: IResult<T>) => {
   return result.type === 'error' ? result.errors : [];
 };
 
@@ -26,7 +26,7 @@ export const generateRequestId = () => {
   return generateUuid() as IRequestId;
 };
 
-export const castRequestId = (id: unknown): ICastResult<IRequestId> => {
+export const castRequestId = (id: unknown): IResult<IRequestId> => {
   if (isUuid(id)) {
     return {
       type: 'success',
@@ -55,7 +55,7 @@ export const isStrategy = (strategy: unknown): strategy is IStrategy => {
   );
 };
 
-export const castStrategy = (strategy: unknown): ICastResult<IStrategy> => {
+export const castStrategy = (strategy: unknown): IResult<IStrategy> => {
   if (isStrategy(strategy)) {
     return {
       type: 'success',
@@ -77,7 +77,7 @@ export const castStrategy = (strategy: unknown): ICastResult<IStrategy> => {
 
 export type IProjectId = Uuid & { tag: 'IProjectId' };
 
-export const castProjectId = (id: unknown): ICastResult<IProjectId> => {
+export const castProjectId = (id: unknown): IResult<IProjectId> => {
   if (isUuid(id)) {
     return {
       type: 'success',
@@ -99,7 +99,7 @@ export const castProjectId = (id: unknown): ICastResult<IProjectId> => {
 
 export type IScreenshotId = Uuid & { tag: 'IScreenshotId' };
 
-export const castScreenshotId = (id: unknown): ICastResult<IScreenshotId> => {
+export const castScreenshotId = (id: unknown): IResult<IScreenshotId> => {
   if (isUuid(id)) {
     return {
       type: 'success',
@@ -151,7 +151,7 @@ export type ITargetUrl = string & { type: 'ITargetUrl' };
 export const castTargetUrl = (
   url: unknown,
   name = 'targetUrl'
-): ICastResult<ITargetUrl> => {
+): IResult<ITargetUrl> => {
   const errors = validateTargetUrl(url, { name });
 
   if (errors.length === 0) {
@@ -247,7 +247,7 @@ export const toDelaySec = (sec: number): IDelaySec => {
 export const castDelaySec = (
   delaySec: unknown,
   name = 'delaySec'
-): ICastResult<IDelaySec> => {
+): IResult<IDelaySec> => {
   const errors = validateDelaySec(delaySec, { name });
 
   if (errors.length > 0) {
@@ -312,7 +312,7 @@ export type IMaxAgeMs = number & { type: 'IMaxAgeMs' };
 export const castMaxAgeMs = (
   maxAgeMs: unknown,
   name = 'maxAgeMs'
-): ICastResult<IMaxAgeMs> => {
+): IResult<IMaxAgeMs> => {
   const maxAgeMsElseDefault = maxAgeMs || Infinity;
 
   const errors = validateMaxAgeMs(maxAgeMsElseDefault, { name });
@@ -364,7 +364,7 @@ export type IImageType = 'jpeg' | 'png';
 export const castImageType = (
   imageType: unknown,
   name = 'imageType'
-): ICastResult<IImageType> => {
+): IResult<IImageType> => {
   const errors = validateImageType(imageType, { name });
 
   if (errors.length === 0) {
