@@ -1,2 +1,2 @@
 export * from './action';
-export * from './uuid';
+export * from './either';

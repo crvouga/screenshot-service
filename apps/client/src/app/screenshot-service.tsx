@@ -1,8 +1,12 @@
-import { createClient } from '@crvouga/screenshot-service';
+import { Client } from '@crvouga/screenshot-service';
 import { environment } from '../environments/environment';
 
 const devServerBaseUrl = 'http://localhost:8000';
 
-export const screenshotClient = createClient({
-  overrides: environment.production ? {} : { baseUrl: devServerBaseUrl },
-});
+const config = environment.production
+  ? {}
+  : {
+      overrides: { baseUrl: devServerBaseUrl },
+    };
+
+export const screenshotClient = Client.create(config);

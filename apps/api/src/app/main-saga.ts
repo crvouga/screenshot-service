@@ -1,17 +1,15 @@
 import {
   ClientToServerEvents,
-  ILogLevel,
-  InferActionUnion,
+  Data,
   InterServerEvents,
-  IRequestId,
   isToClient,
-  IToServer,
-  IToServerMap,
   ScreenshotRequest,
   ServerToClientEvents,
   SocketData,
   ToClient,
   ToServer,
+  ToServerMap,
+  Utils,
 } from '@crvouga/screenshot-service';
 import { createAction } from '@reduxjs/toolkit';
 import express from 'express';
@@ -58,12 +56,15 @@ export const Action = {
     payload: { clientId },
   })),
 
-  Log: createAction('Log', (level: ILogLevel, message: string) => ({
-    payload: { level, message },
-  })),
+  Log: createAction(
+    'Log',
+    (level: Data.LogLevel.LogLevel, message: string) => ({
+      payload: { level, message },
+    })
+  ),
 };
 
-type IAction = InferActionUnion<typeof Action>;
+type IAction = Utils.InferActionUnion<typeof Action>;
 
 //
 //
@@ -227,7 +228,7 @@ const networkFirstFlow = function* (
   yield put(ToClient.Log(clientId, 'info', `Capturing screenshot...`));
 
   const captureResult = yield* call(
-    DataAccess.WebBrowser.takeScreenshot,
+    DataAccess.WebBrowser.captureScreenshot,
     page,
     request.imageType
   );
@@ -262,9 +263,11 @@ const networkFirstFlow = function* (
   );
 };
 
-const takeCancelScreenshotRequest = function* (requestId: IRequestId) {
+const takeCancelScreenshotRequest = function* (
+  requestId: Data.RequestId.RequestId
+) {
   while (true) {
-    const action: IToServerMap['CancelRequestScreenshot'] = yield take(
+    const action: ToServerMap['CancelRequestScreenshot'] = yield take(
       ToServer.CancelRequestScreenshot
     );
 
@@ -297,7 +300,7 @@ const io = new socket.Server<
 });
 
 const createToServerChan = ({ port }: { port: number }) =>
-  eventChannel<IToServer | IAction>((emit) => {
+  eventChannel<ToServer | IAction>((emit) => {
     io.on('connection', (socket) => {
       emit(Action.ClientConnected(socket.id));
       socket.on('ToServer', emit);

@@ -1,7 +1,7 @@
 import {
-  All_DELAY_SEC,
   castTargetUrl,
   ClientAction,
+  Data,
   generateRequestId,
   IDelaySec,
   IImageType,
@@ -41,7 +41,6 @@ import * as React from 'react';
 import { useState } from 'react';
 import useLocalStorage from '../../../lib/use-local-storage';
 import { screenshotClient } from '../../screenshot-service';
-import { getScreenshotSrc } from '../../screenshots';
 import { ProjectInput } from './ProjectInput';
 import { TargetUrlInput } from './TargetUrlInput';
 
@@ -205,7 +204,7 @@ export const TryPage = () => {
           setDelaySec(toDelaySec(Number(event?.target.value ?? 0)))
         }
       >
-        {All_DELAY_SEC.map((delaySec) => (
+        {Data.DelaySec.delaySecs.map((delaySec) => (
           <MenuItem value={delaySec} key={delaySec}>
             <ListItemText primary={`${delaySec} seconds`} />
           </MenuItem>

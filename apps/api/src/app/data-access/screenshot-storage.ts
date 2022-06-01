@@ -1,19 +1,7 @@
-import {
-  BUCKET_NAME,
-  castDelaySec,
-  castImageType,
-  castTargetUrl,
-  IDelaySec,
-  IImageType,
-  IProjectId,
-  IScreenshotId,
-  ITargetUrl,
-  resultToErrors,
-  toFilename,
-} from '@crvouga/screenshot-service';
+import { Config, Data, toFilename, Utils } from '@crvouga/screenshot-service';
 import { definitions } from '@screenshot-service/shared';
+import { IScreenshot } from '../types';
 import { supabaseClient } from './supabase';
-import { IScreenshot, IScreenshotBuffer } from '../types';
 
 /**
  *
@@ -25,11 +13,11 @@ import { IScreenshot, IScreenshotBuffer } from '../types';
  */
 
 type IGetResult =
-  | { type: 'success'; screenshot: IScreenshot; buffer: IScreenshotBuffer }
+  | { type: 'success'; screenshot: IScreenshot; buffer: Buffer }
   | { type: 'error'; errors: { message: string }[] };
 
 type IPutResult =
-  | { type: 'success'; screenshotId: IScreenshotId }
+  | { type: 'success'; screenshotId: Data.ScreenshotId.ScreenshotId }
   | { type: 'error'; errors: { message: string }[] };
 
 /**
@@ -186,33 +174,15 @@ const rowToScreenshot = (
 ):
   | { type: 'success'; screenshot: IScreenshot }
   | { type: 'error'; errors: { message: string }[] } => {
-  const delaySecResult = castDelaySec(row.delay_sec);
-  const targetUrlResult = castTargetUrl(row.target_url);
-  const imageTypeResult = castImageType(row.image_type);
+  const result = Utils.Result.combine({
+    delaySec: Data.DelaySec.decode(row.delay_sec),
+    targetUrl: Data.TargetUrl.decode(row.target_url),
+    imageType: Data.ImageType.decode(row.image_type),
+    projectId: Data.ProjectId.decode(row.project_id),
+    screenshotId: Data.ScreenshotId.decode(row.screenshotId),
+  });
 
-  if (
-    delaySecResult.type === 'success' &&
-    targetUrlResult.type === 'success' &&
-    imageTypeResult.type === 'success'
-  ) {
-    const screenshot: IScreenshot = {
-      screenshotId: row.id as IScreenshotId,
-      projectId: row.project_id as IProjectId,
-      targetUrl: targetUrlResult.data,
-      delaySec: delaySecResult.data,
-      imageType: imageTypeResult.data,
-    };
-    return { type: 'success', screenshot };
-  }
-
-  return {
-    type: 'error',
-    errors: [
-      ...resultToErrors(imageTypeResult),
-      ...resultToErrors(delaySecResult),
-      ...resultToErrors(targetUrlResult),
-    ],
-  };
+  return result;
 };
 
 const getOne = async ({
@@ -272,10 +242,10 @@ const insertOne = async ({
   delaySec,
   imageType,
 }: {
-  projectId: IProjectId;
-  targetUrl: ITargetUrl;
-  delaySec: IDelaySec;
-  imageType: IImageType;
+  projectId: Data.ProjectId.ProjectId;
+  targetUrl: Data.TargetUrl.TargetUrl;
+  delaySec: Data.DelaySec.DelaySec;
+  imageType: Data.ImageType.ImageType;
 }): Promise<
   | { type: 'success'; screenshot: IScreenshot }
   | { type: 'error'; errors: { message: string }[] }
@@ -311,10 +281,10 @@ const getElseInsertRow = async ({
   delaySec,
   imageType,
 }: {
-  projectId: IProjectId;
-  targetUrl: ITargetUrl;
-  delaySec: IDelaySec;
-  imageType: IImageType;
+  projectId: Data.ProjectId.ProjectId;
+  targetUrl: Data.TargetUrl.TargetUrl;
+  delaySec: Data.DelaySec.DelaySec;
+  imageType: Data.ImageType.ImageType;
 }): Promise<
   | {
       type: 'success';
