@@ -1,11 +1,11 @@
+import { DataAccess } from '@crvouga/screenshot-service';
 import { Box, Paper, Typography } from '@mui/material';
 import { CopyToClipboardField } from '../../../../lib/Clipboard';
-import * as Projects from '../../../projects';
 
 export const ProjectIdSection = ({
   project,
 }: {
-  project: Projects.IProject;
+  project: DataAccess.Projects.Project;
 }) => {
   return (
     <Paper

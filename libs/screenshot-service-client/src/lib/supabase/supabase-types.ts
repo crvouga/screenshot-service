@@ -492,7 +492,7 @@ export interface definitions {
     /** Format: uuid */
     owner_id: string;
     /** Format: ARRAY */
-    whitelisted_urls?: unknown[];
+    whitelisted_urls: unknown[];
   };
   screenshots: {
     /**

@@ -1,22 +1,28 @@
+import { Data } from '@crvouga/screenshot-service';
 import { Session } from '@supabase/supabase-js';
 import constate from 'constate';
+import { either } from 'fp-ts';
 import { useEffect, useState } from 'react';
 import { supabaseClient } from './supabase';
 
 type IAuthState =
   | { type: 'Loading' }
-  | { type: 'LoggedIn'; userId: string; defaultName: string }
+  | { type: 'LoggedIn'; userId: Data.UserId.UserId; defaultName: string }
   | { type: 'LoggedOut' };
 
 const toAuthState = (session: Session | null): IAuthState => {
-  const userId = session?.user?.id;
+  const decodedUserId = Data.UserId.decode(session?.user?.id);
   const defaultName =
     session?.user?.user_metadata?.['name'] ??
     session?.user?.user_metadata?.['full_name'] ??
     '';
 
-  if (userId) {
-    return { type: 'LoggedIn', userId: userId, defaultName: defaultName };
+  if (either.isRight(decodedUserId)) {
+    return {
+      type: 'LoggedIn',
+      userId: decodedUserId.right,
+      defaultName: defaultName,
+    };
   }
 
   return { type: 'LoggedOut' };
@@ -40,7 +46,13 @@ export const useAuthState = () => {
 };
 
 export const [AuthUserContext, useAuthUser] = constate(
-  ({ userId, defaultName }: { userId: string; defaultName: string }) => {
+  ({
+    userId,
+    defaultName,
+  }: {
+    userId: Data.UserId.UserId;
+    defaultName: string;
+  }) => {
     return {
       userId,
       defaultName,

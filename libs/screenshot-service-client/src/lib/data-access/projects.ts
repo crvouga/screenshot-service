@@ -17,7 +17,6 @@ const decodeRow = (
   const projectId = Data.ProjectId.decode(row.id);
   const ownerId = Data.UserId.decode(row.owner_id);
   const projectName = Data.ProjectName.decode(row.name);
-
   const whitelistedUrls = pipe(
     row.whitelisted_urls,
     array.map(Data.Url.decode),
@@ -71,7 +70,7 @@ export const findMany = async ({
 export const findOne = async ({
   projectId,
 }: {
-  projectId: string;
+  projectId: Data.ProjectId.ProjectId;
 }): Promise<either.Either<Error[], Project>> => {
   const response = await supabaseClient
     .from<definitions['projects']>('projects')
@@ -91,7 +90,7 @@ export const findOne = async ({
 export const deleteForever = async ({
   projectId,
 }: {
-  projectId: string;
+  projectId: Data.ProjectId.ProjectId;
 }): Promise<either.Either<Error[], Project>> => {
   const response = await supabaseClient
     .from<definitions['projects']>('projects')
@@ -112,8 +111,8 @@ export const insert = async ({
   ownerId,
   projectName,
 }: {
-  ownerId: string;
-  projectName: string;
+  ownerId: Data.UserId.UserId;
+  projectName: Data.ProjectName.ProjectName;
 }): Promise<either.Either<Error[], Project>> => {
   const response = await supabaseClient
     .from<definitions['projects']>('projects')

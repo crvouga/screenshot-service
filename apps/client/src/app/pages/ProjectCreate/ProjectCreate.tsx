@@ -1,24 +1,23 @@
+import { Data } from '@crvouga/screenshot-service';
 import { Create } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import { Container, TextField, Typography } from '@mui/material';
+import { either } from 'fp-ts';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
-import { useMutation } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 import { useAuthUser } from '../../authentication';
 import { Header } from '../../Header';
-import * as Projects from '../../projects';
+import { useCreateProjectMutation } from '../../projects';
 import { routes } from '../../routes';
 
 export const ProjectsCreatePage = () => {
   const authUser = useAuthUser();
-
-  const mutation = useMutation(Projects.create);
-
-  const [projectName, setProjectName] = useState('My Cool Project');
-
+  const mutation = useCreateProjectMutation();
+  const [projectName, setProjectName] = useState<Data.ProjectName.ProjectName>(
+    Data.ProjectName.fromString('My Cool Project')
+  );
   const navigate = useNavigate();
-
   const snackbar = useSnackbar();
 
   const onCreate = async () => {
@@ -27,17 +26,15 @@ export const ProjectsCreatePage = () => {
       projectName,
     });
 
-    switch (result.type) {
-      case 'error':
-        snackbar.enqueueSnackbar('failed to create project', {
-          variant: 'error',
-        });
-        return;
+    if (either.isLeft(result)) {
+      snackbar.enqueueSnackbar('failed to create project', {
+        variant: 'error',
+      });
+    }
 
-      case 'success':
-        snackbar.enqueueSnackbar('project created', { variant: 'default' });
-        navigate(routes['/projects/:id'].make(result.projectId));
-        return;
+    if (either.isRight(result)) {
+      snackbar.enqueueSnackbar('project created');
+      navigate(routes['/projects/:id'].make(result.right.projectId));
     }
   };
 
@@ -49,7 +46,11 @@ export const ProjectsCreatePage = () => {
       <Container maxWidth="sm">
         <TextField
           value={projectName}
-          onChange={(event) => setProjectName(event.currentTarget.value)}
+          onChange={(event) => {
+            const value = event.currentTarget.value;
+            const projectName = Data.ProjectName.fromString(value);
+            setProjectName(projectName);
+          }}
           fullWidth
           label="Project Name"
           sx={{ mt: 2, mb: 4 }}

@@ -1,42 +1,46 @@
+import { Data, DataAccess } from '@crvouga/screenshot-service';
 import { LoadingButton } from '@mui/lab';
 import { Box, Paper, TextField, Typography } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
-import { useMutation, useQueryClient } from 'react-query';
-import * as Projects from '../../../projects';
+import { useQueryClient } from 'react-query';
+import {
+  projectsQueryFilter,
+  useUpdateProjectMutation,
+} from '../../../projects';
 
 export const ProjectNameSection = ({
   project,
 }: {
-  project: Projects.IProject;
+  project: DataAccess.Projects.Project;
 }) => {
   const queryClient = useQueryClient();
 
-  const [name, setName] = useState(project.name);
+  const [projectName, setProjectName] = useState(project.projectName);
 
-  const mutation = useMutation(Projects.update);
+  const mutation = useUpdateProjectMutation();
 
   const snackbar = useSnackbar();
 
   const onSave = async () => {
     const result = await mutation.mutateAsync({
       projectId: project.projectId,
-      name,
+      projectName,
     });
 
-    switch (result.type) {
-      case 'error':
+    switch (result._tag) {
+      case 'Left':
         snackbar.enqueueSnackbar('failed to update project name', {
           variant: 'error',
         });
         return;
 
-      case 'success':
+      case 'Right':
         snackbar.enqueueSnackbar('project updated', {
           variant: 'default',
         });
 
-        queryClient.invalidateQueries(Projects.queryFilter);
+        queryClient.invalidateQueries(projectsQueryFilter);
 
         return;
     }
@@ -54,9 +58,13 @@ export const ProjectNameSection = ({
         project name
       </Typography>
       <TextField
-        label="name"
-        value={name}
-        onChange={(e) => setName(e.currentTarget.value)}
+        label="project name"
+        value={projectName}
+        onChange={(event) => {
+          const value = event.currentTarget.value;
+          const projectName = Data.ProjectName.fromString(value);
+          setProjectName(projectName);
+        }}
         fullWidth
         sx={{ marginBottom: 2 }}
       />
@@ -64,7 +72,7 @@ export const ProjectNameSection = ({
         <LoadingButton
           variant="contained"
           onClick={onSave}
-          disabled={project.name === name}
+          disabled={project.projectName === projectName}
           loading={mutation.status === 'loading'}
         >
           save

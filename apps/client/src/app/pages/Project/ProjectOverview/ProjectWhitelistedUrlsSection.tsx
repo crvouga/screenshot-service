@@ -1,4 +1,4 @@
-import { IProjectId } from '@crvouga/screenshot-service';
+import { Data, DataAccess } from '@crvouga/screenshot-service';
 import { DeleteForever } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import {
@@ -16,16 +16,20 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { either } from 'fp-ts';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
-import { useMutation, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
 import { CopyToClipboardField } from '../../../../lib/Clipboard';
-import * as Projects from '../../../projects';
+import {
+  projectsQueryFilter,
+  useUpdateProjectMutation,
+} from '../../../projects';
 
 export const ProjectWhitelistedUrlsSection = ({
   project,
 }: {
-  project: Projects.IProject;
+  project: DataAccess.Projects.Project;
 }) => {
   const [whitelistedUrls, setWhitelistedUrls] = useState(
     project.whitelistedUrls
@@ -75,44 +79,53 @@ const AddToWhitelistInput = ({
   whitelistedUrls,
   setWhitelistedUrls,
 }: {
-  projectId: IProjectId;
-  whitelistedUrls: string[];
-  setWhitelistedUrls: (urls: string[]) => void;
+  projectId: Data.ProjectId.ProjectId;
+  whitelistedUrls: Data.Url.Url[];
+  setWhitelistedUrls: (urls: Data.Url.Url[]) => void;
 }) => {
   const queryClient = useQueryClient();
-  const mutation = useMutation(Projects.update);
+  const mutation = useUpdateProjectMutation();
   const snackbar = useSnackbar();
-  const [url, setUrl] = useState('');
-
-  const isUrlValid = url.length > 0 && !whitelistedUrls.includes(url);
+  const [urlInput, setUrlInput] = useState<string>('');
 
   const onAdd = async () => {
+    const decodedUrl = Data.Url.decode(urlInput);
+
+    if (either.isLeft(decodedUrl)) {
+      return;
+    }
+
+    const url = decodedUrl.right;
+
     const result = await mutation.mutateAsync({
       projectId: projectId,
       whitelistedUrls: [...whitelistedUrls, url],
     });
 
-    switch (result.type) {
-      case 'error':
+    switch (result._tag) {
+      case 'Left':
         snackbar.enqueueSnackbar('failed to update project name', {
           variant: 'error',
         });
         return;
 
-      case 'success':
-        setUrl('');
+      case 'Right':
+        setUrlInput('');
 
-        setWhitelistedUrls([...whitelistedUrls, url]);
+        setWhitelistedUrls(result.right.whitelistedUrls);
 
         snackbar.enqueueSnackbar('project updated', {
           variant: 'default',
         });
 
-        queryClient.invalidateQueries(Projects.queryFilter);
+        queryClient.invalidateQueries(projectsQueryFilter);
 
         return;
     }
   };
+
+  const canAddUrl =
+    Data.Url.is(urlInput) && !whitelistedUrls.includes(urlInput);
 
   return (
     <>
@@ -120,8 +133,10 @@ const AddToWhitelistInput = ({
         <TextField
           placeholder="https://example.com/"
           label="base url"
-          value={url}
-          onChange={(e) => setUrl(e.currentTarget.value)}
+          value={urlInput}
+          onChange={(event) => {
+            setUrlInput(event.currentTarget.value);
+          }}
           fullWidth
           sx={{ flex: 1 }}
         />
@@ -131,7 +146,7 @@ const AddToWhitelistInput = ({
           variant="contained"
           onClick={onAdd}
           loading={mutation.status === 'loading'}
-          disabled={!isUrlValid}
+          disabled={canAddUrl}
         >
           add
         </LoadingButton>
@@ -146,15 +161,15 @@ const WhitelistedUrlField = ({
   setWhitelistedUrls,
   whitelistedUrl,
 }: {
-  projectId: IProjectId;
-  whitelistedUrl: string;
-  whitelistedUrls: string[];
-  setWhitelistedUrls: (urls: string[]) => void;
+  projectId: Data.ProjectId.ProjectId;
+  whitelistedUrl: Data.Url.Url;
+  whitelistedUrls: Data.Url.Url[];
+  setWhitelistedUrls: (urls: Data.Url.Url[]) => void;
 }) => {
   const queryClient = useQueryClient();
   const snackbar = useSnackbar();
   const [open, setOpen] = useState(false);
-  const mutation = useMutation(Projects.update);
+  const mutation = useUpdateProjectMutation();
 
   const onRemove = async () => {
     const nextWhitelistedUrls = whitelistedUrls.filter(
@@ -166,24 +181,25 @@ const WhitelistedUrlField = ({
       whitelistedUrls: nextWhitelistedUrls,
     });
 
-    switch (result.type) {
-      case 'error':
+    switch (result._tag) {
+      case 'Left':
         snackbar.enqueueSnackbar(
-          result.error ?? 'failed to remove url from whitelist',
+          result.left.map((error) => error.message).join(', ') ??
+            'failed to remove url from whitelist',
           {
             variant: 'error',
           }
         );
         return;
 
-      case 'success':
+      case 'Right':
         setWhitelistedUrls(nextWhitelistedUrls);
 
         snackbar.enqueueSnackbar('removed url from whitelist', {
           variant: 'default',
         });
 
-        queryClient.invalidateQueries(Projects.queryFilter);
+        queryClient.invalidateQueries(projectsQueryFilter);
 
         return;
     }

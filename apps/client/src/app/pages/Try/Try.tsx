@@ -43,13 +43,13 @@ export const TryPage = () => {
 
   const screenshotClient = useScreenshotClient();
 
+  const captureState = screenshotClient.state.captureScreenshot;
+
   const submit = async () => {
     const validationResult = validateForm(form);
 
     if (either.isLeft(validationResult)) {
-      setForm({
-        errors: validationResult.left,
-      });
+      setForm(mergeErrors(validationResult.left));
       return;
     }
 
@@ -68,19 +68,16 @@ export const TryPage = () => {
   };
 
   const onCancel = () => {
-    if (screenshotClient.state.captureScreenshot.type === 'Loading') {
+    if (captureState.type === 'Loading') {
       screenshotClient.dispatch(
         CaptureScreenshot.Action.ToServer.CancelRequestScreenshot(
-          screenshotClient.state.captureScreenshot.requestId
+          captureState.requestId
         )
       );
     }
   };
 
-  const errors =
-    screenshotClient.state.captureScreenshot.type === 'Failed'
-      ? screenshotClient.state.captureScreenshot.errors
-      : [];
+  const errors = captureState.type === 'Failed' ? captureState.errors : [];
 
   return (
     <>
@@ -89,15 +86,9 @@ export const TryPage = () => {
       </Typography>
 
       <ProjectInput
-        projectId={projectId}
+        projectId={form.values.projectId}
         setProjectId={(projectId) => {
-          setForm((form) => ({
-            ...form,
-            values: {
-              ...form?.values,
-              projectId: option.fromNullable(projectId),
-            },
-          }));
+          setForm(mergeValues({ projectId }));
         }}
       />
 
@@ -105,17 +96,22 @@ export const TryPage = () => {
         target url
       </Typography>
 
-      <TargetUrlInput targetUrl={targetUrl} setTargetUrl={setTargetUrl} />
+      <TargetUrlInput
+        targetUrl={form.values.targetUrl}
+        setTargetUrl={(targetUrl) => {
+          setForm(mergeValues({ targetUrl }));
+        }}
+      />
 
       <Typography sx={{ mt: 2 }} gutterBottom color="text.secondary">
         image type
       </Typography>
 
       <ToggleButtonGroup
-        value={imageType}
+        value={form.values.imageType}
         onChange={(_event, value) => {
-          if (value === 'png' || value === 'jpeg') {
-            setImageType(value);
+          if (Data.ImageType.is(value)) {
+            setForm(mergeValues({ imageType: value }));
           }
         }}
         exclusive
@@ -132,12 +128,14 @@ export const TryPage = () => {
       </Typography>
 
       <Select
-        value={delaySec}
-        onChange={(event) =>
-          setDelaySec(
-            Data.DelaySec.fromNumber(Number(event?.target.value ?? 0))
-          )
-        }
+        value={form.values.delaySec}
+        onChange={(event) => {
+          const delaySec = Data.DelaySec.fromNumber(
+            Number(event?.target.value ?? 0)
+          );
+
+          setForm(mergeValues({ delaySec }));
+        }}
       >
         {Data.DelaySec.delaySecs.map((delaySec) => (
           <MenuItem value={delaySec} key={delaySec}>
@@ -151,10 +149,10 @@ export const TryPage = () => {
       </Typography>
 
       <ToggleButtonGroup
-        value={strategy}
+        value={form.values.strategy}
         onChange={(_event, value) => {
           if (Data.Strategy.is(value)) {
-            setStrategy(value);
+            setForm(mergeValues({ strategy: value }));
           }
         }}
         exclusive
@@ -164,15 +162,15 @@ export const TryPage = () => {
         <ToggleButton value="network-first">Network First</ToggleButton>
       </ToggleButtonGroup>
 
-      {error.length > 0 && (
+      {errors.length > 0 && (
         <Box sx={{ marginY: 2 }}>
-          {error.map((error) => (
+          {errors.map((error) => (
             <Alert
               key={error.message}
               severity="error"
               sx={{ marginBottom: 2 }}
             >
-              <AlertTitle>Server Error</AlertTitle>
+              <AlertTitle>Error</AlertTitle>
               {error.message}
             </Alert>
           ))}
@@ -194,7 +192,7 @@ export const TryPage = () => {
           mb: 2,
         }}
         onClick={submit}
-        loading={query.type === 'loading'}
+        loading={captureState.type === 'Loading'}
       >
         capture screenshot
       </LoadingButton>
@@ -204,7 +202,8 @@ export const TryPage = () => {
         fullWidth
         size="large"
         variant="contained"
-        disabled={query.type !== 'loading'}
+        loading={captureState.type === 'Cancelling'}
+        disabled={captureState.type !== 'Loading'}
         onClick={onCancel}
       >
         cancel
@@ -218,14 +217,14 @@ export const TryPage = () => {
 
       <Box sx={{ mb: 4 }}>
         <Typography>
-          {query.logs[query.logs.length - 1]?.message ?? '...'}
+          {captureState.logs[captureState.logs.length - 1]?.message ?? '...'}
         </Typography>
       </Box>
 
       <Screenshot
-        state={query.type}
-        alt={`screenshot of ${targetUrl}`}
-        src={query.type === 'success' ? query.src : undefined}
+        stateType={captureState.type}
+        alt={`screenshot of ${form.values.targetUrl}`}
+        src={captureState.type === 'Succeeded' ? captureState.src : undefined}
       />
 
       <Button
@@ -234,12 +233,12 @@ export const TryPage = () => {
         size="large"
         variant="contained"
         startIcon={<DownloadIcon />}
-        title={targetUrl}
-        disabled={query.type !== 'success'}
-        {...(query.type === 'success'
+        title={form.values.targetUrl}
+        disabled={captureState.type !== 'Succeeded'}
+        {...(captureState.type === 'Succeeded'
           ? {
-              href: query.src,
-              download: query.src,
+              href: captureState.src,
+              download: captureState.src,
             }
           : {})}
       >
@@ -252,13 +251,13 @@ export const TryPage = () => {
 const Screenshot = ({
   alt,
   src,
-  state,
+  stateType,
   sx,
   ...props
 }: {
   alt: string;
   src?: string;
-  state: 'loading' | 'error' | 'success' | 'idle';
+  stateType: CaptureScreenshot.State['type'];
 } & PaperProps) => {
   return (
     <Paper
@@ -272,7 +271,7 @@ const Screenshot = ({
       }}
       {...props}
     >
-      {state === 'success' && (
+      {stateType === 'Succeeded' && (
         <img
           src={src ?? ''}
           alt={alt}
@@ -286,7 +285,7 @@ const Screenshot = ({
         />
       )}
 
-      {state === 'loading' && (
+      {stateType === 'Loading' && (
         <Box
           position="absolute"
           top={0}
@@ -307,7 +306,7 @@ const Screenshot = ({
         </Box>
       )}
 
-      {state === 'error' && (
+      {stateType === 'Failed' && (
         <Box
           position="absolute"
           top={0}
@@ -363,6 +362,30 @@ const initialFormState: FormState = {
     projectId: [],
   },
 };
+
+const mergeValues =
+  (valuesNew: Partial<FormState['values']>) =>
+  (formState: FormState = initialFormState): FormState => {
+    return {
+      ...formState,
+      values: {
+        ...formState.values,
+        ...valuesNew,
+      },
+    };
+  };
+
+const mergeErrors =
+  (errorsNew: Partial<FormState['errors']>) =>
+  (formState: FormState = initialFormState): FormState => {
+    return {
+      ...formState,
+      errors: {
+        ...formState.errors,
+        ...errorsNew,
+      },
+    };
+  };
 
 const validateForm = (
   form: FormState

@@ -1,4 +1,4 @@
-import { IImageType } from '@crvouga/screenshot-service';
+import { Data } from '@crvouga/screenshot-service';
 import { Info } from '@mui/icons-material';
 import {
   Alert,
@@ -12,6 +12,7 @@ import {
   Skeleton,
   Typography,
 } from '@mui/material';
+import { either } from 'fp-ts';
 import {
   useScreenshotsQuery,
   useScreenshotSrcQuery,
@@ -43,22 +44,26 @@ export const ProjectScreenshotsTab = () => {
     case 'success': {
       const result = query.data;
 
-      switch (result.type) {
-        case 'error':
+      switch (result._tag) {
+        case 'Left':
           return (
-            <Typography>Failed to load screenshots: {result.error}</Typography>
+            <Typography>
+              Failed to load screenshots:{' '}
+              {result.left.map((error) => error.message).join(', ')}
+            </Typography>
           );
 
-        case 'success':
+        case 'Right':
           return (
             <Container maxWidth="md">
               <ImageList sx={{ width: '100%', height: '100%' }} cols={3}>
-                {result.screenshots.map((screenshot) => (
+                {result.right.map((screenshot) => (
                   <ImageListItem>
                     <ScreenshotImage
                       screenshotId={screenshot.screenshotId}
                       imageType={screenshot.imageType}
                     />
+
                     <ImageListItemBar
                       title={screenshot.targetUrl}
                       actionIcon={
@@ -81,8 +86,8 @@ const ScreenshotImage = ({
   screenshotId,
   imageType,
 }: {
-  screenshotId: string;
-  imageType: IImageType;
+  screenshotId: Data.ScreenshotId.ScreenshotId;
+  imageType: Data.ImageType.ImageType;
 }) => {
   const query = useScreenshotSrcQuery({ screenshotId, imageType });
 
@@ -121,7 +126,7 @@ const ScreenshotImage = ({
 
         {query.status === 'success' && (
           <>
-            {query.data.type === 'error' && (
+            {either.isLeft(query.data) && (
               <Alert
                 sx={{
                   justifyContent: 'center',
@@ -135,12 +140,12 @@ const ScreenshotImage = ({
               </Alert>
             )}
 
-            {query.data.type === 'success' && (
+            {either.isRight(query.data) && (
               <img
                 alt="..."
                 width="100%"
                 height="100%"
-                src={query.data.src}
+                src={query.data.right.src}
                 style={{ objectFit: 'cover' }}
               />
             )}

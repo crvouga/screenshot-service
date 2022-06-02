@@ -1,4 +1,4 @@
-import { either } from 'fp-ts';
+import { either, eq } from 'fp-ts';
 import * as Uuid from './uuid';
 
 export type ProjectId = Uuid.Uuid & { tag: 'IProjectId' };
@@ -9,3 +9,5 @@ export const decode = either.fromPredicate(
   is,
   () => new Error('failed to decode project id')
 );
+
+export const Eq = eq.fromEquals<ProjectId>((a, b) => a === b);

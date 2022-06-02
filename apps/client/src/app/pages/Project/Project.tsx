@@ -1,5 +1,6 @@
+import { Data } from '@crvouga/screenshot-service';
 import { Box, CircularProgress, Tab, Tabs, Typography } from '@mui/material';
-import { useQuery } from 'react-query';
+
 import {
   Outlet,
   useLocation,
@@ -8,12 +9,12 @@ import {
   useParams,
 } from 'react-router-dom';
 import { Header } from '../../Header';
-import * as Projects from '../../projects';
+import { useSingleProjectQuery, Project } from '../../projects';
 import { isMatch, routes } from '../../routes';
 import { ErrorPage } from '../Error';
 import { NotFoundPage } from '../NotFound';
 
-export type IOutletContext = { project: Projects.IProject };
+export type IOutletContext = { project: Project };
 
 export const useProfileSingleOutletContext = () => {
   return useOutletContext<IOutletContext>();
@@ -24,22 +25,23 @@ export const ProjectPage = () => {
 
   const projectId = params['id'];
 
-  if (!projectId) {
-    return <NotFoundPage message="missing project id from url" />;
+  if (Data.ProjectId.is(projectId)) {
+    return <ProjectPageWithParams projectId={projectId} />;
   }
 
-  return <ProjectPageWithParams projectId={projectId} />;
+  return <NotFoundPage message="missing a valid project id in url params" />;
 };
 
-const ProjectPageWithParams = ({ projectId }: { projectId: string }) => {
-  const query = useQuery(Projects.queryKeys.getOne({ projectId }), () =>
-    Projects.getOne({ projectId })
-  );
-
+const ProjectPageWithParams = ({
+  projectId,
+}: {
+  projectId: Data.ProjectId.ProjectId;
+}) => {
+  const query = useSingleProjectQuery({ projectId });
   const location = useLocation();
   const navigate = useNavigate();
 
-  if (!query.data) {
+  if (query.data === undefined) {
     return (
       <>
         <ProjectSingleHeader title="..." />
@@ -52,38 +54,40 @@ const ProjectPageWithParams = ({ projectId }: { projectId: string }) => {
 
   const result = query.data;
 
-  if (result.type === 'error') {
+  if (result._tag === 'Left') {
     return (
       <>
         <ProjectSingleHeader title="..." />
+
         <ErrorPage
-          message={`Something went wrong when loading project. ${result.error}`}
+          message={`Something went wrong when loading project. ${result.left
+            .map((error) => error.message)
+            .join(', ')}`}
         />
       </>
     );
   }
 
-  const { project } = result;
+  const project = result.right;
 
   const tabValues = {
     overview: 'overview',
     screenshots: 'screenshots',
-    logs: 'logs',
-  };
+  } as const;
 
   const tabValue = isMatch(location.pathname, routes['/projects/:id'])
     ? tabValues.overview
     : isMatch(location.pathname, routes['/projects/:id/screenshots'])
     ? tabValues.screenshots
-    : isMatch(location.pathname, routes['/projects/:id/logs'])
-    ? tabValues.logs
-    : tabValues.overview;
+    : // : isMatch(location.pathname, routes['/projects/:id/logs'])
+      // ? tabValues.logs
+      tabValues.overview;
 
   const outletContext: IOutletContext = { project };
 
   return (
     <>
-      <ProjectSingleHeader title={project.name} />
+      <ProjectSingleHeader title={project.projectName} />
 
       <Tabs value={tabValue} sx={{ marginBottom: 4 }}>
         <Tab
@@ -104,13 +108,13 @@ const ProjectPageWithParams = ({ projectId }: { projectId: string }) => {
           }}
         />
 
-        <Tab
+        {/* <Tab
           value={tabValues.logs}
           label="logs"
           onClick={() => {
             navigate(routes['/projects/:id/logs'].make(project.projectId));
           }}
-        />
+        /> */}
       </Tabs>
 
       <Outlet context={outletContext} />

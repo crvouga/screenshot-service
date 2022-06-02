@@ -31,6 +31,8 @@ export type State =
   | { type: 'Cancelled'; logs: Log[] }
   | { type: 'Succeeded'; logs: Log[]; src: string };
 
+const initialState: State = { type: 'Idle', logs: [] };
+
 type Log = { level: Data.LogLevel.LogLevel; message: string };
 
 export type Request = {
@@ -144,7 +146,10 @@ export type Action = ToServer | ToClient;
 //
 //
 
-export const reducer = (state: State, action: Action): State => {
+export const reducer = (
+  state: State = initialState,
+  action: AnyAction
+): State => {
   switch (state.type) {
     case 'Failed':
       if (ToClient.Log.match(action)) {

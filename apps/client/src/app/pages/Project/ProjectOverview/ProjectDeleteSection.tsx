@@ -1,3 +1,4 @@
+import { Data } from '@crvouga/screenshot-service';
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
@@ -10,32 +11,39 @@ import {
 } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
-import { useMutation } from 'react-query';
 import { useNavigate } from 'react-router-dom';
-import * as Projects from '../../../projects';
+import { useDeleteProjectMutation } from '../../../projects';
 import { routes } from '../../../routes';
 
-export const ProjectDeleteSection = ({ projectId }: { projectId: string }) => {
+export const ProjectDeleteSection = ({
+  projectId,
+}: {
+  projectId: Data.ProjectId.ProjectId;
+}) => {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const onCancel = () => {
     setOpen(false);
   };
   const navigate = useNavigate();
-  const mutation = useMutation(Projects.remove);
+  const mutation = useDeleteProjectMutation();
   const snackbar = useSnackbar();
 
   const onDelete = async () => {
-    const response = await mutation.mutateAsync({ projectId });
+    const result = await mutation.mutateAsync({ projectId });
 
-    switch (response.type) {
-      case 'error':
-        snackbar.enqueueSnackbar(response.error || 'failed to delete project', {
-          variant: 'error',
-        });
+    switch (result._tag) {
+      case 'Left':
+        snackbar.enqueueSnackbar(
+          result.left.map((error) => error.message).join(', ') ??
+            'failed to delete project',
+          {
+            variant: 'error',
+          }
+        );
         return;
 
-      case 'success':
+      case 'Right':
         snackbar.enqueueSnackbar('project deleted', { variant: 'default' });
         navigate(routes['/projects'].make());
     }
