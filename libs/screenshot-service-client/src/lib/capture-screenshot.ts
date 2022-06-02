@@ -1,20 +1,19 @@
-import * as WebSocket from './web-socket';
-import { put, call, takeEvery } from 'redux-saga/effects';
-import { eventChannel } from 'redux-saga';
 import { AnyAction, createAction } from '@reduxjs/toolkit';
+import { eventChannel } from 'redux-saga';
+import { call, put, takeEvery } from 'redux-saga/effects';
 import * as Data from './data';
-import {
-  DelaySec,
-  ImageType,
-  LogLevel,
-  ProjectId,
-  RequestId,
-  ScreenshotId,
-  Strategy,
-  TargetUrl,
-  Uuid,
-} from './data';
 import { InferActionMap, InferActionUnion } from './utils';
+import * as WebSocket from './web-socket';
+
+//
+//
+//
+// Namespace
+//
+//
+//
+
+export const namespace = 'captureScreenshot' as const;
 
 //
 //
@@ -26,30 +25,30 @@ import { InferActionMap, InferActionUnion } from './utils';
 
 export type State =
   | { type: 'Idle'; logs: Log[] }
-  | { type: 'Loading'; logs: Log[]; requestId: RequestId.RequestId }
+  | { type: 'Loading'; logs: Log[]; requestId: Data.RequestId.RequestId }
   | { type: 'Failed'; logs: Log[]; errors: Error[] }
   | { type: 'Cancelling'; logs: Log[] }
   | { type: 'Cancelled'; logs: Log[] }
   | { type: 'Succeeded'; logs: Log[]; src: string };
 
-type Log = { level: LogLevel.LogLevel; message: string };
+type Log = { level: Data.LogLevel.LogLevel; message: string };
 
-export type ScreenshotRequest = {
-  requestId: RequestId.RequestId;
-  projectId: ProjectId.ProjectId;
-  strategy: Strategy.Strategy;
-  delaySec: DelaySec.DelaySec;
-  imageType: ImageType.ImageType;
-  targetUrl: TargetUrl.TargetUrl;
+export type Request = {
+  requestId: Data.RequestId.RequestId;
+  projectId: Data.ProjectId.ProjectId;
+  strategy: Data.Strategy.Strategy;
+  delaySec: Data.DelaySec.DelaySec;
+  imageType: Data.ImageType.ImageType;
+  targetUrl: Data.TargetUrl.TargetUrl;
 };
 
-export type ProjectLog = {
-  id: Uuid.Uuid;
-  message: string;
-  projectId: ProjectId.ProjectId;
-  logLevel: LogLevel.LogLevel;
-  requestId: RequestId.RequestId;
-};
+// export type ProjectLog = {
+//   id: Data.Uuid.Uuid;
+//   message: string;
+//   projectId: Data.ProjectId.ProjectId;
+//   logLevel: Data.LogLevel.LogLevel;
+//   requestId: Data.RequestId.RequestId;
+// };
 
 //
 //
@@ -59,17 +58,17 @@ export type ProjectLog = {
 //
 //
 
-export const ToServer = {
+const ToServer = {
   RequestScreenshot: createAction(
     'ToServer/RequestScreenshot',
-    (request: ScreenshotRequest) => ({
+    (request: Request) => ({
       payload: { request },
     })
   ),
 
   CancelRequestScreenshot: createAction(
     'ToServer/CancelRequestScreenshot',
-    (requestId: RequestId.RequestId) => ({
+    (requestId: Data.RequestId.RequestId) => ({
       payload: { requestId },
     })
   ),
@@ -79,7 +78,7 @@ export type ToServer = InferActionUnion<typeof ToServer>;
 
 export type ToServerMap = InferActionMap<typeof ToServer>;
 
-export const ToClient = {
+const ToClient = {
   CancelRequestSucceeded: createAction(
     'ToClient/CancelRequestScreenshotSucceeded',
     (clientId: string) => ({
@@ -93,8 +92,8 @@ export const ToClient = {
     'ToClient/RequestScreenshotSucceeded',
     (payload: {
       clientId: string;
-      screenshotId: ScreenshotId.ScreenshotId;
-      imageType: ImageType.ImageType;
+      screenshotId: Data.ScreenshotId.ScreenshotId;
+      imageType: Data.ImageType.ImageType;
       src: string;
       source: 'Network' | 'Cache';
     }) => ({
@@ -114,7 +113,7 @@ export const ToClient = {
 
   Log: createAction(
     'Log',
-    (clientId: string, level: LogLevel.LogLevel, message) => ({
+    (clientId: string, level: Data.LogLevel.LogLevel, message) => ({
       payload: { clientId, level, message },
     })
   ),
@@ -238,15 +237,26 @@ const initLoading = (state: State): State => {
 //
 //
 //
+// Selectors
+//
+//
+//
+
+export const Selectors = {
+  slice: (parent: { [namespace in typeof namespace]: State }) =>
+    parent[namespace],
+};
+
+//
+//
+//
 // Saga
 //
 //
 //
 
 export function* saga(webSocket: WebSocket.WebSocket) {
-  const chan = eventChannel<ToClient>(webSocket.on);
-
-  yield takeEvery(chan, function* (action) {
+  yield takeEvery(eventChannel(webSocket.onAction), function* (action) {
     yield put(action);
   });
 

@@ -17,6 +17,7 @@ const decodeRow = (
   const projectId = Data.ProjectId.decode(row.id);
   const ownerId = Data.UserId.decode(row.owner_id);
   const projectName = Data.ProjectName.decode(row.name);
+
   const whitelistedUrls = pipe(
     row.whitelisted_urls,
     array.map(Data.Url.decode),

@@ -1,20 +1,4 @@
-import {
-  castTargetUrl,
-  ClientAction,
-  Data,
-  generateRequestId,
-  IDelaySec,
-  IImageType,
-  ILogLevel,
-  IProjectId,
-  IRequestId,
-  isStrategy,
-  IStrategy,
-  ScreenshotRequest,
-  ToClient,
-  toDelaySec,
-  ToServer,
-} from '@crvouga/screenshot-service';
+import { CaptureScreenshot, Data } from '@crvouga/screenshot-service';
 import { Cancel } from '@mui/icons-material';
 import BrokenImageIcon from '@mui/icons-material/BrokenImage';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -36,129 +20,67 @@ import {
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
-import { useSnackbar } from 'notistack';
+import { either, option } from 'fp-ts';
 import * as React from 'react';
-import { useState } from 'react';
 import useLocalStorage from '../../../lib/use-local-storage';
-import { screenshotClient } from '../../screenshot-service';
+import { useScreenshotClient } from '../../screenshot-service';
 import { ProjectInput } from './ProjectInput';
 import { TargetUrlInput } from './TargetUrlInput';
 
-type ILog = { level: ILogLevel; message: string };
-
-type IQueryState =
-  | { type: 'idle' }
-  | { type: 'loading'; logs: ILog[]; requestId: IRequestId }
-  | { type: 'error'; errors: { message: string }[]; logs: ILog[] }
-  | { type: 'success'; src: string; logs: ILog[] };
+//
+//
+//
+//
+//
+//
+//
 
 export const TryPage = () => {
-  const [targetUrl, setTargetUrl] = useLocalStorage<string>('targetUrl', '');
-  const [imageType, setImageType] = useState<IImageType>('jpeg');
-  const [delaySec, setDelaySec] = useState<IDelaySec>(0);
-  const [projectId, setProjectId] = useLocalStorage<IProjectId | null>(
-    'projectId',
-    null
+  const [form, setForm] = useLocalStorage<FormState>(
+    'formState',
+    initialFormState
   );
-  const [strategy, setStrategy] = useState<IStrategy>('cache-first');
-  const [query, setQuery] = useState<IQueryState>({ type: 'idle' });
 
-  const appendLog = (log: ILog) => {
-    setQuery((query) => {
-      if (query.type === 'loading') {
-        return {
-          ...query,
-          logs: [...query.logs, log],
-        };
-      }
-
-      return query;
-    });
-  };
+  const screenshotClient = useScreenshotClient();
 
   const submit = async () => {
-    const requestId = generateRequestId();
+    const validationResult = validateForm(form);
 
-    if (!projectId) {
-      setQuery({
-        type: 'error',
-        logs: [],
-        errors: [{ message: 'project is required' }],
+    if (either.isLeft(validationResult)) {
+      setForm({
+        errors: validationResult.left,
       });
       return;
     }
 
-    const targetUrlResult = castTargetUrl(targetUrl);
-
-    if (targetUrlResult.type === 'error') {
-      setQuery({ type: 'error', logs: [], errors: targetUrlResult.errors });
-      return;
-    }
-
-    const request: ScreenshotRequest = {
-      strategy: strategy,
-      requestId: requestId,
-      projectId: projectId,
-      targetUrl: targetUrlResult.data,
-      imageType: imageType,
-      delaySec: delaySec,
+    const request: CaptureScreenshot.Request = {
+      requestId: Data.RequestId.generate(),
+      delaySec: form.values.delaySec,
+      imageType: form.values.imageType,
+      strategy: form.values.strategy,
+      targetUrl: validationResult.right.targetUrl,
+      projectId: validationResult.right.projectId,
     };
 
-    setQuery({ type: 'loading', logs: [], requestId: request.requestId });
-
-    screenshotClient.emit(ToServer.RequestScreenshot(request));
+    screenshotClient.dispatch(
+      CaptureScreenshot.Action.ToServer.RequestScreenshot(request)
+    );
   };
-
-  const snackbar = useSnackbar();
-
-  React.useEffect(() => {
-    const unsub = screenshotClient.on(async (action) => {
-      if (ClientAction.Connected.match(action)) {
-        snackbar.enqueueSnackbar('connected to screenshot service');
-      }
-
-      if (ClientAction.Disconnected.match(action)) {
-        snackbar.enqueueSnackbar('disconnected from screenshot service');
-      }
-
-      if (ToClient.Log.match(action)) {
-        appendLog(action.payload);
-        return;
-      }
-
-      if (ToClient.RequestScreenshotSucceeded.match(action)) {
-        const result = await getScreenshotSrc({
-          screenshotId: action.payload.screenshotId,
-          imageType: action.payload.imageType,
-        });
-
-        if (result.type === 'success') {
-          setQuery({ type: 'success', logs: [], src: result.src });
-        }
-        return;
-      }
-
-      if (ToClient.CancelRequestSucceeded.match(action)) {
-        snackbar.enqueueSnackbar('Cancelled request');
-      }
-
-      if (ToClient.RequestScreenshotFailed.match(action)) {
-        setQuery({ type: 'error', errors: action.payload.errors, logs: [] });
-      }
-    });
-    return () => {
-      unsub();
-    };
-  }, []);
 
   const onCancel = () => {
-    setQuery({ type: 'idle' });
-    if (query.type === 'loading') {
-      screenshotClient.emit(ToServer.CancelRequestScreenshot(query.requestId));
+    if (screenshotClient.state.captureScreenshot.type === 'Loading') {
+      screenshotClient.dispatch(
+        CaptureScreenshot.Action.ToServer.CancelRequestScreenshot(
+          screenshotClient.state.captureScreenshot.requestId
+        )
+      );
     }
   };
 
-  const error = query.type === 'error' ? query.errors : [];
+  const errors =
+    screenshotClient.state.captureScreenshot.type === 'Failed'
+      ? screenshotClient.state.captureScreenshot.errors
+      : [];
 
   return (
     <>
@@ -166,7 +88,18 @@ export const TryPage = () => {
         project
       </Typography>
 
-      <ProjectInput projectId={projectId} setProjectId={setProjectId} />
+      <ProjectInput
+        projectId={projectId}
+        setProjectId={(projectId) => {
+          setForm((form) => ({
+            ...form,
+            values: {
+              ...form?.values,
+              projectId: option.fromNullable(projectId),
+            },
+          }));
+        }}
+      />
 
       <Typography sx={{ mt: 2 }} gutterBottom color="text.secondary">
         target url
@@ -201,7 +134,9 @@ export const TryPage = () => {
       <Select
         value={delaySec}
         onChange={(event) =>
-          setDelaySec(toDelaySec(Number(event?.target.value ?? 0)))
+          setDelaySec(
+            Data.DelaySec.fromNumber(Number(event?.target.value ?? 0))
+          )
         }
       >
         {Data.DelaySec.delaySecs.map((delaySec) => (
@@ -218,7 +153,7 @@ export const TryPage = () => {
       <ToggleButtonGroup
         value={strategy}
         onChange={(_event, value) => {
-          if (isStrategy(value)) {
+          if (Data.Strategy.is(value)) {
             setStrategy(value);
           }
         }}
@@ -282,13 +217,9 @@ export const TryPage = () => {
       />
 
       <Box sx={{ mb: 4 }}>
-        {query.type === 'idle' && <Typography color="disabled">...</Typography>}
-
-        {query.type !== 'idle' && (
-          <Typography>
-            {query.logs[query.logs.length - 1]?.message ?? '...'}
-          </Typography>
-        )}
+        <Typography>
+          {query.logs[query.logs.length - 1]?.message ?? '...'}
+        </Typography>
       </Box>
 
       <Screenshot
@@ -394,4 +325,71 @@ const Screenshot = ({
       )}
     </Paper>
   );
+};
+
+//
+//
+//
+//
+//
+//
+//
+
+type FormState = {
+  values: {
+    targetUrl: string;
+    imageType: Data.ImageType.ImageType;
+    delaySec: Data.DelaySec.DelaySec;
+    projectId: option.Option<Data.ProjectId.ProjectId>;
+    strategy: Data.Strategy.Strategy;
+  };
+
+  errors: {
+    targetUrl: Error[];
+    projectId: Error[];
+  };
+};
+
+const initialFormState: FormState = {
+  values: {
+    targetUrl: '',
+    imageType: 'jpeg',
+    delaySec: 3,
+    projectId: option.none,
+    strategy: 'network-first',
+  },
+  errors: {
+    targetUrl: [],
+    projectId: [],
+  },
+};
+
+const validateForm = (
+  form: FormState
+): either.Either<
+  FormState['errors'],
+  { targetUrl: Data.TargetUrl.TargetUrl; projectId: Data.ProjectId.ProjectId }
+> => {
+  const decodedTargetUrl = Data.TargetUrl.decode(form.values.targetUrl);
+
+  if (
+    option.isSome(form.values.projectId) &&
+    either.isRight(decodedTargetUrl)
+  ) {
+    return either.right({
+      projectId: form.values.projectId.value,
+      targetUrl: decodedTargetUrl.right,
+    });
+  }
+
+  const errors: FormState['errors'] = {
+    projectId: option.isNone(form.values.projectId)
+      ? [new Error('Must select a project')]
+      : [],
+    targetUrl: either.isLeft(decodedTargetUrl)
+      ? [new Error('Target url must a valid url')]
+      : [],
+  };
+
+  return either.left(errors);
 };

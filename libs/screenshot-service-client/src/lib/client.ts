@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import * as RequestScreenshot from './request-screenshot';
+import * as CaptureScreenshot from './capture-screenshot';
 import * as WebSocket from './web-socket';
 import createSagaMiddleware from 'redux-saga';
 import { fork } from 'redux-saga/effects';
@@ -9,7 +9,7 @@ export const create = ({ overrides }: { overrides?: WebSocket.Overrides }) => {
 
   const store = configureStore({
     reducer: {
-      requestScreenshot: RequestScreenshot.reducer,
+      [CaptureScreenshot.namespace]: CaptureScreenshot.reducer,
     },
     middleware: [sagaMiddleware],
   });
@@ -17,10 +17,12 @@ export const create = ({ overrides }: { overrides?: WebSocket.Overrides }) => {
   const webSocket = WebSocket.create({ overrides });
 
   function* saga() {
-    yield fork(RequestScreenshot.saga, webSocket);
+    yield fork(CaptureScreenshot.saga, webSocket);
   }
 
   sagaMiddleware.run(saga);
 
   return store;
 };
+
+export type Client = ReturnType<typeof create>;

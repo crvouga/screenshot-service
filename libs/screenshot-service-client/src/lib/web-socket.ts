@@ -1,6 +1,6 @@
 import { createAction } from '@reduxjs/toolkit';
 import socketClient, { Socket } from 'socket.io-client';
-import * as RequestScreenshot from './request-screenshot';
+import * as RequestScreenshot from './capture-screenshot';
 import { InferActionUnion } from './utils';
 
 type ToServer = RequestScreenshot.ToServer;
@@ -39,7 +39,9 @@ export const create = ({ overrides }: { overrides?: Overrides }) => {
     return socket.emit('ToServer', action);
   };
 
-  const onInternal = (callback: (action: Action) => void): (() => void) => {
+  const onInternalAction = (
+    callback: (action: Action) => void
+  ): (() => void) => {
     socket.on('connect', () => {
       callback(Action.Connected());
     });
@@ -54,7 +56,7 @@ export const create = ({ overrides }: { overrides?: Overrides }) => {
     };
   };
 
-  const on = (callback: (action: ToClient) => void): (() => void) => {
+  const onAction = (callback: (action: ToClient) => void): (() => void) => {
     socket.on('ToClient', callback);
     return () => {
       socket.off('ToClient', callback);
@@ -63,8 +65,8 @@ export const create = ({ overrides }: { overrides?: Overrides }) => {
 
   return {
     emit,
-    onInternal,
-    on,
+    onInternalAction,
+    onAction,
   };
 };
 
