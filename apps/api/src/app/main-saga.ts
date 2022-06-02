@@ -120,16 +120,9 @@ const clientFlowMain = function* (
   clientId: string,
   webBrowser: WebBrowser.WebBrowser
 ) {
-  yield takeLatest(
-    CaptureScreenshot.Action.ToServer.StartRequest,
-    function* (action) {
-      yield* requestScreenshotFlow(
-        clientId,
-        webBrowser,
-        action.payload.request
-      );
-    }
-  );
+  yield takeLatest(CaptureScreenshot.Action.ToServer.Start, function* (action) {
+    yield* requestScreenshotFlow(clientId, webBrowser, action.payload.request);
+  });
 };
 
 const takeClientDisconnected = function* (clientId: string) {
@@ -163,11 +156,22 @@ const requestScreenshotFlow = function* (
     yield put(
       CaptureScreenshot.Action.ToClient.Log(
         clientId,
+        'info',
+        'Cancelling request...'
+      )
+    );
+
+    yield delay(1000);
+
+    yield put(
+      CaptureScreenshot.Action.ToClient.Log(
+        clientId,
         'notice',
         'Cancelled request'
       )
     );
-    yield put(CaptureScreenshot.Action.ToClient.RequestCancelled(clientId));
+
+    yield put(CaptureScreenshot.Action.ToClient.Cancelled(clientId));
   }
 };
 
@@ -183,10 +187,7 @@ const requestScreenshotMainFlow = function* (
 
   if (either.isLeft(findProjectResult)) {
     yield put(
-      CaptureScreenshot.Action.ToClient.RequestFailed(
-        clientId,
-        findProjectResult.left
-      )
+      CaptureScreenshot.Action.ToClient.Failed(clientId, findProjectResult.left)
     );
     return;
   }
@@ -224,25 +225,22 @@ const cacheFirstFlow = function* (
 
     if (either.isLeft(srcResult)) {
       yield put(
-        CaptureScreenshot.Action.ToClient.RequestFailed(
-          clientId,
-          srcResult.left
-        )
+        CaptureScreenshot.Action.ToClient.Failed(clientId, srcResult.left)
       );
       return;
     }
 
     const { src } = srcResult.right;
 
-    yield put(
-      CaptureScreenshot.Action.ToClient.RequestSucceeded({
-        source: 'Cache',
-        clientId,
-        screenshotId: screenshot.screenshotId,
-        imageType: screenshot.imageType,
-        src,
-      })
-    );
+    const response = {
+      source: 'Cache',
+      clientId,
+      screenshotId: screenshot.screenshotId,
+      imageType: screenshot.imageType,
+      src,
+    } as const;
+
+    yield put(CaptureScreenshot.Action.ToClient.Succeeded(response));
 
     return;
   }
@@ -299,10 +297,7 @@ const networkFirstFlow = function* (
 
   if (either.isLeft(captureResult)) {
     yield put(
-      CaptureScreenshot.Action.ToClient.RequestFailed(
-        clientId,
-        captureResult.left
-      )
+      CaptureScreenshot.Action.ToClient.Failed(clientId, captureResult.left)
     );
     return;
   }
@@ -331,10 +326,7 @@ const networkFirstFlow = function* (
     );
 
     yield put(
-      CaptureScreenshot.Action.ToClient.RequestFailed(
-        clientId,
-        putCacheResult.left
-      )
+      CaptureScreenshot.Action.ToClient.Failed(clientId, putCacheResult.left)
     );
     return;
   }
@@ -355,7 +347,7 @@ const networkFirstFlow = function* (
       )
     );
     yield put(
-      CaptureScreenshot.Action.ToClient.RequestFailed(clientId, srcResult.left)
+      CaptureScreenshot.Action.ToClient.Failed(clientId, srcResult.left)
     );
     return;
   }
@@ -371,7 +363,7 @@ const networkFirstFlow = function* (
   );
 
   yield put(
-    CaptureScreenshot.Action.ToClient.RequestSucceeded({
+    CaptureScreenshot.Action.ToClient.Succeeded({
       clientId,
       source: 'Network',
       screenshotId: screenshot.screenshotId,
@@ -385,8 +377,8 @@ const takeCancelScreenshotRequest = function* (
   requestId: Data.RequestId.RequestId
 ) {
   while (true) {
-    const action: CaptureScreenshot.ToServerMap['CancelRequest'] = yield take(
-      CaptureScreenshot.Action.ToServer.CancelRequest
+    const action: CaptureScreenshot.ToServerMap['Cancel'] = yield take(
+      CaptureScreenshot.Action.ToServer.Cancel
     );
 
     if (action.payload.requestId === requestId) {

@@ -44,14 +44,6 @@ export type Request = {
   targetUrl: Data.TargetUrl.TargetUrl;
 };
 
-// export type ProjectLog = {
-//   id: Data.Uuid.Uuid;
-//   message: string;
-//   projectId: Data.ProjectId.ProjectId;
-//   logLevel: Data.LogLevel.LogLevel;
-//   requestId: Data.RequestId.RequestId;
-// };
-
 //
 //
 //
@@ -61,12 +53,12 @@ export type Request = {
 //
 
 const ToServer = {
-  StartRequest: createAction('ToServer/StartRequest', (request: Request) => ({
+  Start: createAction(`${namespace}/ToServer/Start`, (request: Request) => ({
     payload: { request },
   })),
 
-  CancelRequest: createAction(
-    'ToServer/CancelRequest',
+  Cancel: createAction(
+    `${namespace}/ToServer/Cancel`,
     (requestId: Data.RequestId.RequestId) => ({
       payload: { requestId },
     })
@@ -78,8 +70,8 @@ export type ToServer = InferActionUnion<typeof ToServer>;
 export type ToServerMap = InferActionMap<typeof ToServer>;
 
 const ToClient = {
-  RequestCancelled: createAction(
-    'ToClient/RequestCancelled',
+  Cancelled: createAction(
+    `${namespace}/ToClient/Cancelled`,
     (clientId: string) => ({
       payload: {
         clientId,
@@ -87,8 +79,8 @@ const ToClient = {
     })
   ),
 
-  RequestSucceeded: createAction(
-    'ToClient/RequestSucceeded',
+  Succeeded: createAction(
+    `${namespace}/ToClient/Succeeded`,
     (payload: {
       clientId: string;
       screenshotId: Data.ScreenshotId.ScreenshotId;
@@ -100,8 +92,8 @@ const ToClient = {
     })
   ),
 
-  RequestFailed: createAction(
-    'CaptureScreenshot/ToClient/RequestFailed',
+  Failed: createAction(
+    `${namespace}/ToClient/Failed`,
     (clientId: string, errors: Error[]) => ({
       payload: {
         clientId,
@@ -111,7 +103,7 @@ const ToClient = {
   ),
 
   Log: createAction(
-    'Log',
+    `${namespace}/ToClient/Log`,
     (clientId: string, level: Data.LogLevel.LogLevel, message) => ({
       payload: { clientId, level, message },
     })
@@ -153,8 +145,8 @@ export const reducer = (
         return addLog(action.payload, state);
       }
 
-      if (ToServer.StartRequest.match(action)) {
-        return initLoading(state);
+      if (ToServer.Start.match(action)) {
+        return initLoading(state, action.payload.request.requestId);
       }
 
       return state;
@@ -164,8 +156,8 @@ export const reducer = (
         return addLog(action.payload, state);
       }
 
-      if (ToServer.StartRequest.match(action)) {
-        return initLoading(state);
+      if (ToServer.Start.match(action)) {
+        return initLoading(state, action.payload.request.requestId);
       }
 
       return state;
@@ -175,7 +167,7 @@ export const reducer = (
         return addLog(action.payload, state);
       }
 
-      if (ToClient.RequestCancelled.match(action)) {
+      if (ToClient.Cancelled.match(action)) {
         return { ...state, type: 'Cancelled' };
       }
 
@@ -186,8 +178,8 @@ export const reducer = (
         return addLog(action.payload, state);
       }
 
-      if (ToServer.StartRequest.match(action)) {
-        return initLoading(state);
+      if (ToServer.Start.match(action)) {
+        return initLoading(state, action.payload.request.requestId);
       }
 
       return state;
@@ -197,16 +189,16 @@ export const reducer = (
         return addLog(action.payload, state);
       }
 
-      if (ToClient.RequestFailed.match(action)) {
+      if (ToClient.Failed.match(action)) {
         return { ...state, type: 'Failed', errors: action.payload.errors };
       }
 
-      if (ToClient.RequestSucceeded.match(action)) {
+      if (ToClient.Succeeded.match(action)) {
         return { ...state, type: 'Succeeded', src: action.payload.src };
       }
 
-      if (ToServer.CancelRequest.match(action)) {
-        return { ...state, type: 'Cancelled' };
+      if (ToServer.Cancel.match(action)) {
+        return { ...state, type: 'Cancelling' };
       }
 
       return state;
@@ -216,8 +208,8 @@ export const reducer = (
         return addLog(action.payload, state);
       }
 
-      if (ToServer.StartRequest.match(action)) {
-        return initLoading(state);
+      if (ToServer.Start.match(action)) {
+        return initLoading(state, action.payload.request.requestId);
       }
 
       return state;
@@ -228,11 +220,15 @@ const addLog = (log: Log, state: State): State => {
   return { ...state, logs: [...state.logs, log] };
 };
 
-const initLoading = (state: State): State => {
+const initLoading = (
+  state: State,
+  requestId: Data.RequestId.RequestId
+): State => {
   return {
     ...state,
     type: 'Loading',
-    requestId: Data.RequestId.generate(),
+    logs: [],
+    requestId,
   };
 };
 
@@ -262,11 +258,11 @@ export function* saga(webSocket: WebSocket.WebSocket) {
     yield put(action);
   });
 
-  yield takeEvery(Action.ToServer.CancelRequest, function* (action) {
+  yield takeEvery(Action.ToServer.Cancel, function* (action) {
     yield call(webSocket.emit, action);
   });
 
-  yield takeEvery(Action.ToServer.StartRequest, function* (action) {
+  yield takeEvery(Action.ToServer.Start, function* (action) {
     yield call(webSocket.emit, action);
   });
 }

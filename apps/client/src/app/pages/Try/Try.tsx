@@ -63,15 +63,13 @@ export const TryPage = () => {
       projectId: validationResult.right.projectId,
     };
 
-    screenshotClient.dispatch(
-      CaptureScreenshot.Action.ToServer.StartRequest(request)
-    );
+    screenshotClient.dispatch(CaptureScreenshot.Action.ToServer.Start(request));
   };
 
   const onCancel = () => {
     if (captureState.type === 'Loading') {
       screenshotClient.dispatch(
-        CaptureScreenshot.Action.ToServer.CancelRequest(captureState.requestId)
+        CaptureScreenshot.Action.ToServer.Cancel(captureState.requestId)
       );
     }
   };
