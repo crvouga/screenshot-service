@@ -1,6 +1,7 @@
+import { SupabaseClient } from '@supabase/supabase-js';
 import { either } from 'fp-ts';
 import * as Data from '../data';
-import { definitions, supabaseClient } from '../supabase';
+import { definitions } from '../supabase';
 import { toAllLeft, toAllRight } from '../utils';
 
 //
@@ -67,52 +68,278 @@ const decodeRow = (
   );
 };
 
-export const findManyByProjectId = async ({
-  projectId,
-}: {
-  projectId: string;
-}): Promise<either.Either<Error[], Screenshot[]>> => {
-  const response = await supabaseClient
-    .from<definitions['screenshots']>('screenshots')
-    .select('*')
-    .match({ project_id: projectId })
-    .order('created_at', { ascending: false });
+//
+//
+//
+//
+//
+//
+//
+//
 
-  if (response.error) {
-    return either.left([new Error(response.error.message)]);
-  }
+export const get =
+  (supabaseClient: SupabaseClient) =>
+  async ({
+    projectId,
+    delaySec,
+    targetUrl,
+    imageType,
+  }: {
+    projectId: Data.ProjectId.ProjectId;
+    delaySec: Data.DelaySec.DelaySec;
+    targetUrl: Data.TargetUrl.TargetUrl;
+    imageType: Data.ImageType.ImageType;
+  }): Promise<either.Either<Error[], [Screenshot, Buffer]>> => {
+    const findResult = await findOne(supabaseClient)({
+      projectId,
+      delaySec,
+      targetUrl,
+      imageType,
+    });
 
-  const decodings = response.data.map(decodeRow);
+    if (either.isLeft(findResult)) {
+      return findResult;
+    }
 
-  const allLeft = toAllLeft(decodings).flat();
+    const screenshot = findResult.right;
 
-  if (allLeft.length > 0) {
-    return either.left(allLeft);
-  }
+    const filename = toFilename(screenshot);
 
-  return either.right(toAllRight(decodings));
-};
+    const downloadResponse = await supabaseClient.storage
+      .from(SCREENSHOT_BUCKET_NAME)
+      .download(filename);
 
-export const getSrc = async ({
-  screenshotId,
-  imageType,
-}: {
-  imageType: Data.ImageType.ImageType;
-  screenshotId: Data.ScreenshotId.ScreenshotId;
-}): Promise<either.Either<{ message: string }, { src: string }>> => {
-  const filename = toFilename({ screenshotId, imageType });
+    if (downloadResponse.error) {
+      return either.left([
+        new Error(
+          `Supabase couldn't download screenshot. ${downloadResponse.error.message}`
+        ),
+      ]);
+    }
 
-  const response = await supabaseClient.storage
-    .from(SCREENSHOT_BUCKET_NAME)
-    .getPublicUrl(filename);
+    if (!downloadResponse.data) {
+      return either.left([
+        new Error(
+          'Supabase did not return any data when downloading screenshot'
+        ),
+      ]);
+    }
 
-  if (response.error) {
-    return either.left({ message: response.error.message });
-  }
+    const blob = downloadResponse.data;
 
-  if (response.publicURL) {
-    return either.right({ src: response.publicURL });
-  }
+    const arrayBuffer = await blob.arrayBuffer();
 
-  return either.left({ message: 'Failed to get screenshot url' });
-};
+    const buffer = Buffer.from(arrayBuffer);
+
+    return either.right([screenshot, buffer]);
+  };
+
+//
+//
+//
+//
+//
+//
+//
+
+export const findManyByProjectId =
+  (supabaseClient: SupabaseClient) =>
+  async ({
+    projectId,
+  }: {
+    projectId: string;
+  }): Promise<either.Either<Error[], Screenshot[]>> => {
+    const response = await supabaseClient
+      .from<definitions['screenshots']>('screenshots')
+      .select('*')
+      .match({ project_id: projectId })
+      .order('created_at', { ascending: false });
+
+    if (response.error) {
+      return either.left([new Error(response.error.message)]);
+    }
+
+    const decodings = response.data.map(decodeRow);
+
+    const allLeft = toAllLeft(decodings).flat();
+
+    if (allLeft.length > 0) {
+      return either.left(allLeft);
+    }
+
+    return either.right(toAllRight(decodings));
+  };
+
+export const getSrc =
+  (supabaseClient: SupabaseClient) =>
+  async ({
+    screenshotId,
+    imageType,
+  }: {
+    imageType: Data.ImageType.ImageType;
+    screenshotId: Data.ScreenshotId.ScreenshotId;
+  }): Promise<either.Either<Error[], { src: string }>> => {
+    const filename = toFilename({ screenshotId, imageType });
+
+    const response = await supabaseClient.storage
+      .from(SCREENSHOT_BUCKET_NAME)
+      .getPublicUrl(filename);
+
+    if (response.error) {
+      return either.left([new Error(response.error.message)]);
+    }
+
+    if (response.publicURL) {
+      return either.right({ src: response.publicURL });
+    }
+
+    return either.left([new Error('supabase returned a null publicURL')]);
+  };
+
+export const put =
+  (supabaseClient: SupabaseClient) =>
+  async (
+    {
+      targetUrl,
+      delaySec,
+      projectId,
+      imageType,
+    }: {
+      targetUrl: Data.TargetUrl.TargetUrl;
+      delaySec: Data.DelaySec.DelaySec;
+      projectId: Data.ProjectId.ProjectId;
+      imageType: Data.ImageType.ImageType;
+    },
+    buffer: Buffer
+  ): Promise<either.Either<Error[], Screenshot>> => {
+    const findElseInsertResult = await findOneElseInsertOne(supabaseClient)({
+      targetUrl,
+      delaySec,
+      projectId,
+      imageType,
+    });
+
+    if (either.isLeft(findElseInsertResult)) {
+      return findElseInsertResult;
+    }
+
+    const screenshot = findElseInsertResult.right;
+
+    const filename = toFilename({
+      imageType: screenshot.imageType,
+      screenshotId: screenshot.screenshotId,
+    });
+
+    const uploadResponse = await supabaseClient.storage
+      .from(SCREENSHOT_BUCKET_NAME)
+      .upload(filename, buffer, { upsert: true });
+
+    if (uploadResponse.error) {
+      return either.left([new Error(uploadResponse.error.message)]);
+    }
+
+    return either.right(screenshot);
+  };
+
+const findOne =
+  (supabaseClient: SupabaseClient) =>
+  async ({
+    targetUrl,
+    delaySec,
+    projectId,
+    imageType,
+  }: {
+    targetUrl: Data.TargetUrl.TargetUrl;
+    delaySec: Data.DelaySec.DelaySec;
+    projectId: Data.ProjectId.ProjectId;
+    imageType: Data.ImageType.ImageType;
+  }): Promise<either.Either<Error[], Screenshot>> => {
+    const response = await supabaseClient
+      .from<definitions['screenshots']>('screenshots')
+      .select('*')
+      .match({
+        project_id: projectId,
+        target_url: targetUrl,
+        image_type: imageType,
+        delay_sec: delaySec,
+      })
+      .single();
+
+    if (response.error) {
+      return either.left([new Error(response.error.message)]);
+    }
+
+    const decoded = decodeRow(response.data);
+
+    return decoded;
+  };
+
+const insertOne =
+  (supabaseClient: SupabaseClient) =>
+  async ({
+    projectId,
+    targetUrl,
+    delaySec,
+    imageType,
+  }: {
+    projectId: Data.ProjectId.ProjectId;
+    targetUrl: Data.TargetUrl.TargetUrl;
+    delaySec: Data.DelaySec.DelaySec;
+    imageType: Data.ImageType.ImageType;
+  }): Promise<either.Either<Error[], Screenshot>> => {
+    const response = await supabaseClient
+      .from<definitions['screenshots']>('screenshots')
+      .insert({
+        project_id: projectId,
+        target_url: targetUrl,
+        delay_sec: delaySec,
+        image_type: imageType,
+      })
+      .single();
+
+    if (response.error) {
+      return either.left([new Error(response.error.message)]);
+    }
+
+    const decoded = decodeRow(response.data);
+
+    return decoded;
+  };
+
+const findOneElseInsertOne =
+  (supabaseClient: SupabaseClient) =>
+  async ({
+    projectId,
+    targetUrl,
+    delaySec,
+    imageType,
+  }: {
+    projectId: Data.ProjectId.ProjectId;
+    targetUrl: Data.TargetUrl.TargetUrl;
+    delaySec: Data.DelaySec.DelaySec;
+    imageType: Data.ImageType.ImageType;
+  }): Promise<either.Either<Error[], Screenshot>> => {
+    const findResult = await findOne(supabaseClient)({
+      projectId,
+      targetUrl,
+      delaySec,
+      imageType,
+    });
+
+    if (either.isRight(findResult)) {
+      return findResult;
+    }
+
+    const insertResult = await insertOne(supabaseClient)({
+      projectId,
+      targetUrl,
+      delaySec,
+      imageType,
+    });
+
+    if (either.isLeft(insertResult)) {
+      return either.left([...findResult.left, ...insertResult.left]);
+    }
+
+    return insertResult;
+  };

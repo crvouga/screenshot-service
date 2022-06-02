@@ -1,7 +1,22 @@
 import { Data } from '@crvouga/screenshot-service';
+import { either } from 'fp-ts';
 import puppeteer, { Browser } from 'puppeteer';
 
+//
+//
+//
+//
+//
+//
+
 export type WebBrowser = puppeteer.Browser;
+
+//
+//
+//
+//
+//
+//
 
 export const openNewPage = async (browser: puppeteer.Browser) => {
   const page = await browser.newPage();
@@ -20,41 +35,27 @@ export const goTo = async (
 export const captureScreenshot = async (
   page: puppeteer.Page,
   imageType: Data.ImageType.ImageType
-): Promise<
-  | { type: 'success'; buffer: Buffer }
-  | { type: 'error'; errors: { message: string }[] }
-> => {
+): Promise<either.Either<Error[], Buffer>> => {
   try {
     const buffer = await page.screenshot({
       type: imageType,
     });
 
     if (typeof buffer === 'string' || !buffer) {
-      return {
-        type: 'error',
-        errors: [
-          {
-            message: 'puppeteer did not return a buffer for the screenshot',
-          },
-        ],
-      };
+      return either.left([
+        new Error(
+          'puppeteer did not return a buffer when capturing the screenshot'
+        ),
+      ]);
     }
 
-    return {
-      type: 'success',
-      buffer: buffer,
-    };
+    return either.right(buffer);
   } catch (error) {
-    const message = String(error?.toString?.() ?? 'puppeteer threw an error');
+    const message = String(
+      error?.toString?.() ?? 'puppeteer threw an unkwown error'
+    );
 
-    return {
-      type: 'error',
-      errors: [
-        {
-          message,
-        },
-      ],
-    };
+    return either.left([new Error(message)]);
   }
 };
 

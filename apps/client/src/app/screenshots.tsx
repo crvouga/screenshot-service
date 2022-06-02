@@ -1,9 +1,10 @@
 import { Data, DataAccess } from '@crvouga/screenshot-service';
 import { useQuery } from 'react-query';
+import { supabaseClient } from './supabase';
 
 export const useScreenshotsQuery = ({ projectId }: { projectId: string }) => {
   return useQuery(['screenshots', projectId], () =>
-    DataAccess.Screenshots.findManyByProjectId({ projectId })
+    DataAccess.Screenshots.findManyByProjectId(supabaseClient)({ projectId })
   );
 };
 
@@ -15,6 +16,6 @@ export const useScreenshotSrcQuery = ({
   imageType: Data.ImageType.ImageType;
 }) => {
   return useQuery(['screenshots', screenshotId], () =>
-    DataAccess.Screenshots.getSrc({ screenshotId, imageType })
+    DataAccess.Screenshots.getSrc(supabaseClient)({ screenshotId, imageType })
   );
 };

@@ -1,7 +1,8 @@
+import { SupabaseClient } from '@supabase/supabase-js';
 import { array, either } from 'fp-ts';
 import { pipe } from 'fp-ts/lib/function';
 import * as Data from '../data';
-import { definitions, supabaseClient } from '../supabase';
+import { definitions } from '../supabase';
 import { toAllLeft, toAllRight } from '../utils';
 
 export type Project = {
@@ -42,114 +43,124 @@ const decodeRow = (
   );
 };
 
-export const findMany = async ({
-  ownerId,
-}: {
-  ownerId: Data.UserId.UserId;
-}): Promise<either.Either<Error[], Project[]>> => {
-  const response = await supabaseClient
-    .from<definitions['projects']>('projects')
-    .select('*')
-    .match({ owner_id: ownerId });
+export const findMany =
+  (supabaseClient: SupabaseClient) =>
+  async ({
+    ownerId,
+  }: {
+    ownerId: Data.UserId.UserId;
+  }): Promise<either.Either<Error[], Project[]>> => {
+    const response = await supabaseClient
+      .from<definitions['projects']>('projects')
+      .select('*')
+      .match({ owner_id: ownerId });
 
-  if (response.error) {
-    return either.left([new Error(response.error.message)]);
-  }
+    if (response.error) {
+      return either.left([new Error(response.error.message)]);
+    }
 
-  const decodings = response.data.map(decodeRow);
+    const decodings = response.data.map(decodeRow);
 
-  const lefts = toAllLeft(decodings).flat();
+    const lefts = toAllLeft(decodings).flat();
 
-  if (lefts.length > 0) {
-    return either.left(lefts);
-  }
+    if (lefts.length > 0) {
+      return either.left(lefts);
+    }
 
-  return either.right(toAllRight(decodings));
-};
+    return either.right(toAllRight(decodings));
+  };
 
-export const findOne = async ({
-  projectId,
-}: {
-  projectId: Data.ProjectId.ProjectId;
-}): Promise<either.Either<Error[], Project>> => {
-  const response = await supabaseClient
-    .from<definitions['projects']>('projects')
-    .select('*')
-    .match({ id: projectId })
-    .single();
+export const findOne =
+  (supabaseClient: SupabaseClient) =>
+  async ({
+    projectId,
+  }: {
+    projectId: Data.ProjectId.ProjectId;
+  }): Promise<either.Either<Error[], Project>> => {
+    const response = await supabaseClient
+      .from<definitions['projects']>('projects')
+      .select('*')
+      .match({ id: projectId })
+      .single();
 
-  if (response.error) {
-    return either.left([new Error(response.error.message)]);
-  }
+    if (response.error) {
+      return either.left([new Error(response.error.message)]);
+    }
 
-  const decoded = decodeRow(response.data);
+    const decoded = decodeRow(response.data);
 
-  return decoded;
-};
+    return decoded;
+  };
 
-export const deleteForever = async ({
-  projectId,
-}: {
-  projectId: Data.ProjectId.ProjectId;
-}): Promise<either.Either<Error[], Project>> => {
-  const response = await supabaseClient
-    .from<definitions['projects']>('projects')
-    .delete()
-    .match({ id: projectId })
-    .single();
+export const deleteForever =
+  (supabaseClient: SupabaseClient) =>
+  async ({
+    projectId,
+  }: {
+    projectId: Data.ProjectId.ProjectId;
+  }): Promise<either.Either<Error[], Project>> => {
+    const response = await supabaseClient
+      .from<definitions['projects']>('projects')
+      .delete()
+      .match({ id: projectId })
+      .single();
 
-  if (response.error) {
-    return either.left([new Error(response.error.message)]);
-  }
+    if (response.error) {
+      return either.left([new Error(response.error.message)]);
+    }
 
-  const decoded = decodeRow(response.data);
+    const decoded = decodeRow(response.data);
 
-  return decoded;
-};
+    return decoded;
+  };
 
-export const insert = async ({
-  ownerId,
-  projectName,
-}: {
-  ownerId: Data.UserId.UserId;
-  projectName: Data.ProjectName.ProjectName;
-}): Promise<either.Either<Error[], Project>> => {
-  const response = await supabaseClient
-    .from<definitions['projects']>('projects')
-    .insert({ owner_id: ownerId, name: projectName })
-    .single();
+export const insert =
+  (supabaseClient: SupabaseClient) =>
+  async ({
+    ownerId,
+    projectName,
+  }: {
+    ownerId: Data.UserId.UserId;
+    projectName: Data.ProjectName.ProjectName;
+  }): Promise<either.Either<Error[], Project>> => {
+    const response = await supabaseClient
+      .from<definitions['projects']>('projects')
+      .insert({ owner_id: ownerId, name: projectName })
+      .single();
 
-  if (response.error) {
-    return either.left([new Error(response.error.message)]);
-  }
+    if (response.error) {
+      return either.left([new Error(response.error.message)]);
+    }
 
-  const decoded = decodeRow(response.data);
+    const decoded = decodeRow(response.data);
 
-  return decoded;
-};
+    return decoded;
+  };
 
-export const update = async ({
-  projectId,
-  ...updates
-}: Partial<Project> & { projectId: Data.ProjectId.ProjectId }): Promise<
-  either.Either<Error[], Project>
-> => {
-  const response = await supabaseClient
-    .from<definitions['projects']>('projects')
-    .update({
-      name: updates.projectName,
-      whitelisted_urls: updates.whitelistedUrls,
-    })
-    .match({
-      id: projectId,
-    })
-    .single();
+export const update =
+  (supabaseClient: SupabaseClient) =>
+  async ({
+    projectId,
+    ...updates
+  }: Partial<Project> & { projectId: Data.ProjectId.ProjectId }): Promise<
+    either.Either<Error[], Project>
+  > => {
+    const response = await supabaseClient
+      .from<definitions['projects']>('projects')
+      .update({
+        name: updates.projectName,
+        whitelisted_urls: updates.whitelistedUrls,
+      })
+      .match({
+        id: projectId,
+      })
+      .single();
 
-  if (response.error) {
-    return either.left([new Error(response.error.message)]);
-  }
+    if (response.error) {
+      return either.left([new Error(response.error.message)]);
+    }
 
-  const decoded = decodeRow(response.data);
+    const decoded = decodeRow(response.data);
 
-  return decoded;
-};
+    return decoded;
+  };

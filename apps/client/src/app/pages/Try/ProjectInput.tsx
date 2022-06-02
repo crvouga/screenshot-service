@@ -1,6 +1,7 @@
 import { Data } from '@crvouga/screenshot-service';
 import { ListItemText, MenuItem, Select } from '@mui/material';
 import { either, option } from 'fp-ts';
+import { pipe } from 'fp-ts/lib/function';
 import * as React from 'react';
 import { useAuthUser } from '../../authentication';
 import { useProjectsQuery } from '../../projects';
@@ -23,10 +24,18 @@ export const ProjectInput = ({
       ? []
       : query.data.right;
 
+  const currentValue = pipe(
+    projectId,
+    option.fold(
+      () => 'None',
+      (projectId) => projectId
+    )
+  );
+
   return (
-    <Select fullWidth placeholder="select a project">
+    <Select fullWidth value={currentValue} placeholder="select a project">
       <MenuItem
-        selected={Eq.equals(projectId, option.none)}
+        value={'None'}
         onClick={() => {
           setProjectId(option.none);
         }}
@@ -39,8 +48,8 @@ export const ProjectInput = ({
 
       {options.map((project) => (
         <MenuItem
+          value={project.projectId}
           key={project.projectId}
-          selected={Eq.equals(projectId, option.some(project.projectId))}
           onClick={() => {
             setProjectId(option.some(project.projectId));
           }}

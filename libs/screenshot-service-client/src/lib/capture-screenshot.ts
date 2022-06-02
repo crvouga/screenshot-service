@@ -61,15 +61,12 @@ export type Request = {
 //
 
 const ToServer = {
-  RequestScreenshot: createAction(
-    'ToServer/RequestScreenshot',
-    (request: Request) => ({
-      payload: { request },
-    })
-  ),
+  StartRequest: createAction('ToServer/StartRequest', (request: Request) => ({
+    payload: { request },
+  })),
 
-  CancelRequestScreenshot: createAction(
-    'ToServer/CancelRequestScreenshot',
+  CancelRequest: createAction(
+    'ToServer/CancelRequest',
     (requestId: Data.RequestId.RequestId) => ({
       payload: { requestId },
     })
@@ -81,8 +78,8 @@ export type ToServer = InferActionUnion<typeof ToServer>;
 export type ToServerMap = InferActionMap<typeof ToServer>;
 
 const ToClient = {
-  CancelRequestSucceeded: createAction(
-    'ToClient/CancelRequestScreenshotSucceeded',
+  RequestCancelled: createAction(
+    'ToClient/RequestCancelled',
     (clientId: string) => ({
       payload: {
         clientId,
@@ -90,8 +87,8 @@ const ToClient = {
     })
   ),
 
-  RequestScreenshotSucceeded: createAction(
-    'ToClient/RequestScreenshotSucceeded',
+  RequestSucceeded: createAction(
+    'ToClient/RequestSucceeded',
     (payload: {
       clientId: string;
       screenshotId: Data.ScreenshotId.ScreenshotId;
@@ -103,8 +100,8 @@ const ToClient = {
     })
   ),
 
-  RequestScreenshotFailed: createAction(
-    'ToClient/RequestScreenshotFailed',
+  RequestFailed: createAction(
+    'CaptureScreenshot/ToClient/RequestFailed',
     (clientId: string, errors: Error[]) => ({
       payload: {
         clientId,
@@ -156,7 +153,7 @@ export const reducer = (
         return addLog(action.payload, state);
       }
 
-      if (ToServer.RequestScreenshot.match(action)) {
+      if (ToServer.StartRequest.match(action)) {
         return initLoading(state);
       }
 
@@ -167,7 +164,7 @@ export const reducer = (
         return addLog(action.payload, state);
       }
 
-      if (ToServer.RequestScreenshot.match(action)) {
+      if (ToServer.StartRequest.match(action)) {
         return initLoading(state);
       }
 
@@ -178,7 +175,7 @@ export const reducer = (
         return addLog(action.payload, state);
       }
 
-      if (ToClient.CancelRequestSucceeded.match(action)) {
+      if (ToClient.RequestCancelled.match(action)) {
         return { ...state, type: 'Cancelled' };
       }
 
@@ -189,7 +186,7 @@ export const reducer = (
         return addLog(action.payload, state);
       }
 
-      if (ToServer.RequestScreenshot.match(action)) {
+      if (ToServer.StartRequest.match(action)) {
         return initLoading(state);
       }
 
@@ -200,15 +197,15 @@ export const reducer = (
         return addLog(action.payload, state);
       }
 
-      if (ToClient.RequestScreenshotFailed.match(action)) {
+      if (ToClient.RequestFailed.match(action)) {
         return { ...state, type: 'Failed', errors: action.payload.errors };
       }
 
-      if (ToClient.RequestScreenshotSucceeded.match(action)) {
+      if (ToClient.RequestSucceeded.match(action)) {
         return { ...state, type: 'Succeeded', src: action.payload.src };
       }
 
-      if (ToServer.CancelRequestScreenshot.match(action)) {
+      if (ToServer.CancelRequest.match(action)) {
         return { ...state, type: 'Cancelled' };
       }
 
@@ -219,7 +216,7 @@ export const reducer = (
         return addLog(action.payload, state);
       }
 
-      if (ToServer.RequestScreenshot.match(action)) {
+      if (ToServer.StartRequest.match(action)) {
         return initLoading(state);
       }
 
@@ -265,11 +262,11 @@ export function* saga(webSocket: WebSocket.WebSocket) {
     yield put(action);
   });
 
-  yield takeEvery(Action.ToServer.CancelRequestScreenshot, function* (action) {
+  yield takeEvery(Action.ToServer.CancelRequest, function* (action) {
     yield call(webSocket.emit, action);
   });
 
-  yield takeEvery(Action.ToServer.RequestScreenshot, function* (action) {
+  yield takeEvery(Action.ToServer.StartRequest, function* (action) {
     yield call(webSocket.emit, action);
   });
 }

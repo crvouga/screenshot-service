@@ -1,18 +1,13 @@
 import {
-  ClientToServerEvents,
+  CaptureScreenshot,
   Data,
-  InterServerEvents,
-  isToClient,
-  ScreenshotRequest,
-  ServerToClientEvents,
-  SocketData,
-  ToClient,
-  ToServer,
-  ToServerMap,
+  DataAccess,
   Utils,
+  WebSocket,
 } from '@crvouga/screenshot-service';
 import { createAction } from '@reduxjs/toolkit';
 import express from 'express';
+import { either } from 'fp-ts';
 import http from 'http';
 import { eventChannel } from 'redux-saga';
 import {
@@ -27,7 +22,16 @@ import {
 } from 'redux-saga/effects';
 import socket from 'socket.io';
 import { call } from 'typed-redux-saga';
-import * as DataAccess from './data-access';
+import { supabaseClient } from './supabase';
+import * as WebBrowser from './web-browser';
+
+//
+//
+//
+// Action
+//
+//
+//
 
 export const Action = {
   ServerListening: createAction('ServerListening', (port: number) => ({
@@ -86,7 +90,7 @@ export const mainSaga = function* ({ port }: { port: number }) {
 };
 
 const createWebBrowser = function* () {
-  const webBrowser = yield* call(DataAccess.WebBrowser.create);
+  const webBrowser = yield* call(WebBrowser.create);
 
   yield put(Action.Log('info', 'created web browser'));
 
@@ -95,7 +99,7 @@ const createWebBrowser = function* () {
 
 const clientFlow = function* (
   clientId: string,
-  webBrowser: DataAccess.WebBrowser.WebBrowser
+  webBrowser: WebBrowser.WebBrowser
 ) {
   yield put(
     Action.Log('info', `Starting client sagas for clientId: ${clientId}`)
@@ -114,11 +118,18 @@ const clientFlow = function* (
 
 const clientFlowMain = function* (
   clientId: string,
-  webBrowser: DataAccess.WebBrowser.WebBrowser
+  webBrowser: WebBrowser.WebBrowser
 ) {
-  yield takeLatest(ToServer.RequestScreenshot, function* (action) {
-    yield* requestScreenshotFlow(clientId, webBrowser, action.payload.request);
-  });
+  yield takeLatest(
+    CaptureScreenshot.Action.ToServer.StartRequest,
+    function* (action) {
+      yield* requestScreenshotFlow(
+        clientId,
+        webBrowser,
+        action.payload.request
+      );
+    }
+  );
 };
 
 const takeClientDisconnected = function* (clientId: string) {
@@ -135,8 +146,8 @@ const takeClientDisconnected = function* (clientId: string) {
 
 const requestScreenshotFlow = function* (
   clientId: string,
-  webBrowser: DataAccess.WebBrowser.WebBrowser,
-  request: ScreenshotRequest
+  webBrowser: WebBrowser.WebBrowser,
+  request: CaptureScreenshot.Request
 ) {
   const { cancel } = yield race({
     cancel: call(takeCancelScreenshotRequest, request.requestId),
@@ -149,23 +160,33 @@ const requestScreenshotFlow = function* (
   });
 
   if (cancel) {
-    yield put(ToClient.Log(clientId, 'notice', 'Cancelled request'));
-    yield put(ToClient.CancelRequestSucceeded(clientId));
+    yield put(
+      CaptureScreenshot.Action.ToClient.Log(
+        clientId,
+        'notice',
+        'Cancelled request'
+      )
+    );
+    yield put(CaptureScreenshot.Action.ToClient.RequestCancelled(clientId));
   }
 };
 
 const requestScreenshotMainFlow = function* (
   clientId: string,
-  webBrowser: DataAccess.WebBrowser.WebBrowser,
-  request: ScreenshotRequest
+  webBrowser: WebBrowser.WebBrowser,
+  request: CaptureScreenshot.Request
 ) {
-  const projectResult = yield* call(DataAccess.Project.getOneById, request);
+  const findProjectResult = yield* call(
+    DataAccess.Projects.findOne(supabaseClient),
+    request
+  );
 
-  if (projectResult.type === 'error') {
+  if (either.isLeft(findProjectResult)) {
     yield put(
-      ToClient.RequestScreenshotFailed(clientId, [
-        { message: projectResult.error },
-      ])
+      CaptureScreenshot.Action.ToClient.RequestFailed(
+        clientId,
+        findProjectResult.left
+      )
     );
     return;
   }
@@ -181,84 +202,181 @@ const requestScreenshotMainFlow = function* (
 
 const cacheFirstFlow = function* (
   clientId: string,
-  webBrowser: DataAccess.WebBrowser.WebBrowser,
-  request: ScreenshotRequest
+  webBrowser: WebBrowser.WebBrowser,
+  request: CaptureScreenshot.Request
 ) {
-  yield put(ToClient.Log(clientId, 'info', 'Checking cache...'));
+  yield put(
+    CaptureScreenshot.Action.ToClient.Log(clientId, 'info', 'Checking cache...')
+  );
 
-  const cacheResult = yield* call(DataAccess.Screenshot.get, request);
+  const cacheResult = yield* call(
+    DataAccess.Screenshots.get(supabaseClient),
+    request
+  );
 
-  if (cacheResult.type === 'success') {
+  if (either.isRight(cacheResult)) {
+    const [screenshot] = cacheResult.right;
+
+    const srcResult = yield* call(
+      DataAccess.Screenshots.getSrc(supabaseClient),
+      screenshot
+    );
+
+    if (either.isLeft(srcResult)) {
+      yield put(
+        CaptureScreenshot.Action.ToClient.RequestFailed(
+          clientId,
+          srcResult.left
+        )
+      );
+      return;
+    }
+
+    const { src } = srcResult.right;
+
     yield put(
-      ToClient.RequestScreenshotSucceeded({
+      CaptureScreenshot.Action.ToClient.RequestSucceeded({
         source: 'Cache',
         clientId,
-        screenshotId: cacheResult.screenshot.screenshotId,
-        imageType: cacheResult.screenshot.imageType,
+        screenshotId: screenshot.screenshotId,
+        imageType: screenshot.imageType,
+        src,
       })
     );
 
     return;
   }
 
-  yield put(ToClient.Log(clientId, 'info', 'Not cached'));
+  yield put(
+    CaptureScreenshot.Action.ToClient.Log(clientId, 'info', 'Not cached')
+  );
 
   yield* networkFirstFlow(clientId, webBrowser, request);
 };
 
 const networkFirstFlow = function* (
   clientId: string,
-  webBrowser: DataAccess.WebBrowser.WebBrowser,
-  request: ScreenshotRequest
+  webBrowser: WebBrowser.WebBrowser,
+  request: CaptureScreenshot.Request
 ) {
-  yield put(ToClient.Log(clientId, 'info', 'Opening url in web browser...'));
+  yield put(
+    CaptureScreenshot.Action.ToClient.Log(
+      clientId,
+      'info',
+      'Opening url in web browser...'
+    )
+  );
 
-  const page = yield* call(DataAccess.WebBrowser.openNewPage, webBrowser);
+  const page = yield* call(WebBrowser.openNewPage, webBrowser);
 
-  yield* call(DataAccess.WebBrowser.goTo, page, request.targetUrl);
+  yield* call(WebBrowser.goTo, page, request.targetUrl);
 
   for (let remaining = request.delaySec; remaining > 0; remaining--) {
     yield put(
-      ToClient.Log(clientId, 'info', `Delaying for ${remaining} seconds...`)
+      CaptureScreenshot.Action.ToClient.Log(
+        clientId,
+        'info',
+        `Delaying for ${remaining} seconds...`
+      )
     );
 
     yield delay(1000);
   }
 
-  yield put(ToClient.Log(clientId, 'info', `Capturing screenshot...`));
+  yield put(
+    CaptureScreenshot.Action.ToClient.Log(
+      clientId,
+      'info',
+      `Capturing screenshot...`
+    )
+  );
 
   const captureResult = yield* call(
-    DataAccess.WebBrowser.captureScreenshot,
+    WebBrowser.captureScreenshot,
     page,
     request.imageType
   );
 
-  if (captureResult.type === 'error') {
-    yield put(ToClient.RequestScreenshotFailed(clientId, captureResult.errors));
-    return;
-  }
-
-  yield put(ToClient.Log(clientId, 'info', `Caching screenshot...`));
-
-  const putCacheResult = yield* call(
-    DataAccess.Screenshot.put,
-    request,
-    captureResult.buffer
-  );
-
-  if (putCacheResult.type === 'error') {
+  if (either.isLeft(captureResult)) {
     yield put(
-      ToClient.RequestScreenshotFailed(clientId, putCacheResult.errors)
+      CaptureScreenshot.Action.ToClient.RequestFailed(
+        clientId,
+        captureResult.left
+      )
     );
     return;
   }
 
   yield put(
-    ToClient.RequestScreenshotSucceeded({
+    CaptureScreenshot.Action.ToClient.Log(
+      clientId,
+      'info',
+      `Caching screenshot...`
+    )
+  );
+
+  const putCacheResult = yield* call(
+    DataAccess.Screenshots.put(supabaseClient),
+    request,
+    captureResult.right
+  );
+
+  if (either.isLeft(putCacheResult)) {
+    yield put(
+      CaptureScreenshot.Action.ToClient.Log(
+        clientId,
+        'error',
+        `Failed to cache screenshot.`
+      )
+    );
+
+    yield put(
+      CaptureScreenshot.Action.ToClient.RequestFailed(
+        clientId,
+        putCacheResult.left
+      )
+    );
+    return;
+  }
+
+  const screenshot = putCacheResult.right;
+
+  const srcResult = yield* call(
+    DataAccess.Screenshots.getSrc(supabaseClient),
+    screenshot
+  );
+
+  if (either.isLeft(srcResult)) {
+    yield put(
+      CaptureScreenshot.Action.ToClient.Log(
+        clientId,
+        'error',
+        `Failed to get screenshot's src`
+      )
+    );
+    yield put(
+      CaptureScreenshot.Action.ToClient.RequestFailed(clientId, srcResult.left)
+    );
+    return;
+  }
+
+  const { src } = srcResult.right;
+
+  yield put(
+    CaptureScreenshot.Action.ToClient.Log(
+      clientId,
+      'notice',
+      `Request suceeded`
+    )
+  );
+
+  yield put(
+    CaptureScreenshot.Action.ToClient.RequestSucceeded({
       clientId,
       source: 'Network',
-      screenshotId: putCacheResult.screenshotId,
-      imageType: request.imageType,
+      screenshotId: screenshot.screenshotId,
+      imageType: screenshot.imageType,
+      src,
     })
   );
 };
@@ -267,8 +385,8 @@ const takeCancelScreenshotRequest = function* (
   requestId: Data.RequestId.RequestId
 ) {
   while (true) {
-    const action: ToServerMap['CancelRequestScreenshot'] = yield take(
-      ToServer.CancelRequestScreenshot
+    const action: CaptureScreenshot.ToServerMap['CancelRequest'] = yield take(
+      CaptureScreenshot.Action.ToServer.CancelRequest
     );
 
     if (action.payload.requestId === requestId) {
@@ -288,10 +406,10 @@ const takeCancelScreenshotRequest = function* (
 const app = express();
 const server = http.createServer(app);
 const io = new socket.Server<
-  ClientToServerEvents,
-  ServerToClientEvents,
-  InterServerEvents,
-  SocketData
+  WebSocket.ClientToServerEvents,
+  WebSocket.ServerToClientEvents,
+  WebSocket.InterServerEvents,
+  WebSocket.SocketData
 >(server, {
   cors: {
     origin: '*',
@@ -300,7 +418,7 @@ const io = new socket.Server<
 });
 
 const createToServerChan = ({ port }: { port: number }) =>
-  eventChannel<ToServer | IAction>((emit) => {
+  eventChannel<CaptureScreenshot.ToServer | IAction>((emit) => {
     io.on('connection', (socket) => {
       emit(Action.ClientConnected(socket.id));
       socket.on('ToServer', emit);
@@ -336,7 +454,7 @@ const serverSaga = function* ({ port }: { port: number }) {
   });
 
   yield takeEvery('*', function* (action) {
-    if (isToClient(action)) {
+    if (CaptureScreenshot.isToClient(action)) {
       io.to(action.payload.clientId).emit('ToClient', action);
       yield;
     }

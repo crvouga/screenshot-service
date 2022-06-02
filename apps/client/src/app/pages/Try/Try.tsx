@@ -47,6 +47,7 @@ export const TryPage = () => {
 
   const submit = async () => {
     const validationResult = validateForm(form);
+    console.log({ validationResult, form });
 
     if (either.isLeft(validationResult)) {
       setForm(mergeErrors(validationResult.left));
@@ -63,16 +64,14 @@ export const TryPage = () => {
     };
 
     screenshotClient.dispatch(
-      CaptureScreenshot.Action.ToServer.RequestScreenshot(request)
+      CaptureScreenshot.Action.ToServer.StartRequest(request)
     );
   };
 
   const onCancel = () => {
     if (captureState.type === 'Loading') {
       screenshotClient.dispatch(
-        CaptureScreenshot.Action.ToServer.CancelRequestScreenshot(
-          captureState.requestId
-        )
+        CaptureScreenshot.Action.ToServer.CancelRequest(captureState.requestId)
       );
     }
   };
@@ -409,9 +408,7 @@ const validateForm = (
     projectId: option.isNone(form.values.projectId)
       ? [new Error('Must select a project')]
       : [],
-    targetUrl: either.isLeft(decodedTargetUrl)
-      ? [new Error('Target url must a valid url')]
-      : [],
+    targetUrl: either.isLeft(decodedTargetUrl) ? [decodedTargetUrl.left] : [],
   };
 
   return either.left(errors);
