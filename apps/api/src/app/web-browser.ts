@@ -23,10 +23,7 @@ export const openNewPage = async (browser: puppeteer.Browser) => {
   return page;
 };
 
-export const goTo = async (
-  page: puppeteer.Page,
-  url: Data.TargetUrl.TargetUrl
-) => {
+export const goTo = async (page: puppeteer.Page, url: Data.Url.Url) => {
   await page.goto(url, {
     waitUntil: 'networkidle2',
   });
@@ -121,12 +118,4 @@ export const create = async () => {
   });
 
   return browser;
-};
-
-const secToMs = (secs: number) => secs * 1000;
-
-const createDelay = ({ seconds }: { seconds: number }) => {
-  return new Promise((resolve) => {
-    setTimeout(resolve, secToMs(seconds));
-  });
 };

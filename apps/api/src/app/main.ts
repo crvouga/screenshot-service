@@ -1,16 +1,57 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { AnyAction, configureStore } from '@reduxjs/toolkit';
 import createSagaMiddleware from 'redux-saga';
 import { mainSaga } from './main-saga';
 import loggerMiddleware from 'redux-logger';
+import * as Server from './modules/server';
+
+//
+//
+//
+// State
+//
+//
+//
+
+type State = Server.State;
+
+const initialState: State = Server.initialState;
+
+//
+//
+//
+// Action
+//
+//
+//
+
+export const Action = Server.Action;
+
+type Action = Server.Action;
+
+//
+//
+//
+// Reducer
+//
+//
+//
+
+const reducer = (state: State = initialState, action: AnyAction): State => {
+  return Server.reducer(state, action);
+};
+
+//
+//
+//
+// Main
+//
+//
+//
 
 const sagaMiddleware = createSagaMiddleware();
 
-const noopReducer = <TState>(state: TState): TState => {
-  return state;
-};
-
 export const store = configureStore({
-  reducer: noopReducer,
+  reducer: reducer,
   middleware: [loggerMiddleware, sagaMiddleware],
 });
 
