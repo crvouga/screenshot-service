@@ -1,11 +1,11 @@
-import * as WebBrowser from '../web-browser';
+import * as WebBrowser from './web-browser';
 import { Data, DataAccess } from '@crvouga/screenshot-service';
 import { AnyAction, createAction } from '@reduxjs/toolkit';
-import { InferActionMap, InferActionUnion } from '../utils';
+import { InferActionMap, InferActionUnion } from './utils';
 import { delay, put, race, take } from 'redux-saga/effects';
 import { call } from 'typed-redux-saga';
 import { either } from 'fp-ts';
-import { supabaseClient } from '../supabase';
+import { supabaseClient } from './supabase';
 
 //
 //
@@ -261,36 +261,41 @@ const captureScreenshotFlow = function* ({
   clientId: string;
   webBrowser: WebBrowser.WebBrowser;
 }) {
-  const action: ActionMap['Start'] = yield take('NEVER');
+  while (true) {
+    const action = yield* call(takeStart, clientId);
 
-  const request = action.payload.request;
+    const request = action.payload.request;
 
-  const { cancel } = yield race({
-    cancel: call(takeCancelScreenshotRequest, request.requestId),
-    requestScreenshot: call(
-      requestScreenshotMainFlow,
-      clientId,
-      webBrowser,
-      request
-    ),
-  });
+    const { cancel } = yield race({
+      cancel: call(takeCancel, request.requestId),
+      requestScreenshot: call(captureScreenshotMainFlow, {
+        clientId,
+        webBrowser,
+        request,
+      }),
+    });
 
-  if (cancel) {
-    yield put(Action.Log(clientId, 'info', 'Cancelling request...'));
+    if (cancel) {
+      yield put(Action.Log(clientId, 'info', 'Cancelling request...'));
 
-    yield delay(1000);
+      yield delay(1000);
 
-    yield put(Action.Log(clientId, 'notice', 'Cancelled request'));
+      yield put(Action.Log(clientId, 'notice', 'Cancelled request'));
 
-    yield put(Action.Cancelled(clientId));
+      yield put(Action.Cancelled(clientId));
+    }
   }
 };
 
-const requestScreenshotMainFlow = function* (
-  clientId: string,
-  webBrowser: WebBrowser.WebBrowser,
-  request: Request
-) {
+const captureScreenshotMainFlow = function* ({
+  clientId,
+  webBrowser,
+  request,
+}: {
+  clientId: string;
+  webBrowser: WebBrowser.WebBrowser;
+  request: Request;
+}) {
   const findProjectResult = yield* call(
     DataAccess.Projects.findOne(supabaseClient),
     request
@@ -301,12 +306,12 @@ const requestScreenshotMainFlow = function* (
     return;
   }
 
-  if (request.strategy === 'network-first') {
-    yield* networkFirstFlow(clientId, webBrowser, request);
-  }
-
   if (request.strategy === 'cache-first') {
     yield* cacheFirstFlow(clientId, webBrowser, request);
+  }
+
+  if (request.strategy === 'network-first') {
+    yield* networkFirstFlow(clientId, webBrowser, request);
   }
 };
 
@@ -337,20 +342,18 @@ const cacheFirstFlow = function* (
 
     const { src } = srcResult.right;
 
-    const response = {
-      source: 'Cache',
-      clientId,
-      screenshotId: screenshot.screenshotId,
-      imageType: screenshot.imageType,
-      src,
-    } as const;
-
-    yield put(Action.Succeeded(response));
+    yield put(
+      Action.Succeeded({
+        source: 'Cache',
+        clientId,
+        screenshotId: screenshot.screenshotId,
+        imageType: screenshot.imageType,
+        src,
+      })
+    );
 
     return;
   }
-
-  yield put(Action.Log(clientId, 'info', 'Not cached'));
 
   yield* networkFirstFlow(clientId, webBrowser, request);
 };
@@ -366,13 +369,7 @@ const networkFirstFlow = function* (
 
   yield* call(WebBrowser.goTo, page, request.targetUrl);
 
-  for (let remaining = request.delaySec; remaining > 0; remaining--) {
-    yield put(
-      Action.Log(clientId, 'info', `Delaying for ${remaining} seconds...`)
-    );
-
-    yield delay(1000);
-  }
+  yield* call(countDown, clientId, request.delaySec);
 
   yield put(Action.Log(clientId, 'info', `Capturing screenshot...`));
 
@@ -397,7 +394,6 @@ const networkFirstFlow = function* (
 
   if (either.isLeft(putCacheResult)) {
     yield put(Action.Log(clientId, 'error', `Failed to cache screenshot.`));
-
     yield put(Action.Failed(clientId, putCacheResult.left));
     return;
   }
@@ -418,7 +414,6 @@ const networkFirstFlow = function* (
   const { src } = srcResult.right;
 
   yield put(Action.Log(clientId, 'notice', `Request suceeded`));
-
   yield put(
     Action.Succeeded({
       clientId,
@@ -430,14 +425,40 @@ const networkFirstFlow = function* (
   );
 };
 
-const takeCancelScreenshotRequest = function* (
-  requestId: Data.RequestId.RequestId
-) {
+//
+//
+//
+// Helpers
+//
+//
+//
+
+const takeStart = function* (clientId: string) {
+  while (true) {
+    const action: ActionMap['Start'] = yield take(Action.Start);
+
+    if (action.payload.clientId === clientId) {
+      return action;
+    }
+  }
+};
+
+const takeCancel = function* (requestId: Data.RequestId.RequestId) {
   while (true) {
     const action: ActionMap['Cancel'] = yield take(Action.Cancel);
 
     if (action.payload.requestId === requestId) {
       return action;
     }
+  }
+};
+
+const countDown = function* (clientId: string, seconds: number) {
+  for (let remaining = seconds; remaining > 0; remaining--) {
+    yield put(
+      Action.Log(clientId, 'info', `Delaying for ${remaining} seconds...`)
+    );
+
+    yield delay(1000);
   }
 };

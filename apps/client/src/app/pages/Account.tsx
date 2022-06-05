@@ -1,8 +1,6 @@
 import { ChevronLeft } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import {
-  ToggleButtonGroup,
-  ToggleButton,
   Avatar,
   Box,
   Button,
@@ -10,21 +8,25 @@ import {
   Dialog,
   DialogActions,
   DialogTitle,
+  Fade,
+  LinearProgress,
   Paper,
   TextField,
   Toolbar,
   Typography,
   useTheme,
-  CircularProgress,
-  LinearProgress,
-  Fade,
 } from '@mui/material';
 import { useSnackbar } from 'notistack';
-import { useEffect, useState } from 'react';
-import { useMutation, useQueryClient } from 'react-query';
+import { useState } from 'react';
+import { useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 import * as ProfileAvatar from '../profile-avatar';
-import * as Profiles from '../profiles';
+import {
+  profileQueryFilter,
+  useDeleteProfileMutation,
+  useProfileContext,
+  useUpdateProfileMutation,
+} from '../profiles';
 import { Link, routes } from '../routes';
 import {
   IThemeMode,
@@ -34,7 +36,7 @@ import {
 
 export const AccountPage = () => {
   const navigate = useNavigate();
-  const { profile } = Profiles.useProfileContext();
+  const { profile } = useProfileContext();
 
   return (
     <>
@@ -80,9 +82,9 @@ export const AccountPage = () => {
 //
 
 const DeleteSection = () => {
-  const { profile } = Profiles.useProfileContext();
+  const { profile } = useProfileContext();
   const theme = useTheme();
-  const mutation = useMutation(Profiles.remove);
+  const mutation = useDeleteProfileMutation();
   const snackbar = useSnackbar();
   const [open, setOpen] = useState(false);
 
@@ -104,8 +106,7 @@ const DeleteSection = () => {
 
       case 'success':
         snackbar.enqueueSnackbar('deleted profile', { variant: 'default' });
-        queryClient.invalidateQueries(Profiles.queryFilter);
-        queryClient.invalidateQueries(Profiles.queryKeys.getOne(profile));
+        queryClient.invalidateQueries(profileQueryFilter);
         return;
     }
   };
@@ -158,13 +159,10 @@ const DeleteSection = () => {
 //
 
 const NameSection = () => {
-  const { profile } = Profiles.useProfileContext();
-
-  const mutation = useMutation(Profiles.update);
+  const { profile } = useProfileContext();
+  const mutation = useUpdateProfileMutation();
   const snackbar = useSnackbar();
-
   const [name, setName] = useState(profile.name);
-
   const queryClient = useQueryClient();
 
   const onSave = async () => {
@@ -182,8 +180,7 @@ const NameSection = () => {
 
       case 'success':
         snackbar.enqueueSnackbar('changed name');
-        queryClient.invalidateQueries(Profiles.queryFilter);
-        queryClient.invalidateQueries(Profiles.queryKeys.getOne(profile));
+        queryClient.invalidateQueries(profileQueryFilter);
         return;
     }
   };
@@ -233,9 +230,8 @@ const NameSection = () => {
 //
 
 const AvatarSection = () => {
-  const { profile } = Profiles.useProfileContext();
-
-  const mutation = useMutation(Profiles.update);
+  const { profile } = useProfileContext();
+  const mutation = useUpdateProfileMutation();
   const snackbar = useSnackbar();
 
   const [seed, setSeed] = useState(ProfileAvatar.toSeed(profile.avatarSeed));
@@ -259,8 +255,7 @@ const AvatarSection = () => {
 
       case 'success':
         snackbar.enqueueSnackbar('changed avatar');
-        queryClient.invalidateQueries(Profiles.queryFilter);
-        queryClient.invalidateQueries(Profiles.queryKeys.getOne(profile));
+        queryClient.invalidateQueries(profileQueryFilter);
         return;
     }
   };
@@ -349,8 +344,8 @@ const LogoutSection = () => {
 const ThemeSection = () => {
   const snackbar = useSnackbar();
   const { themeMode, setThemeMode } = useThemeModeContext();
-  const { profile } = Profiles.useProfileContext();
-  const mutation = useMutation(Profiles.update);
+  const { profile } = useProfileContext();
+  const mutation = useUpdateProfileMutation();
   const queryClient = useQueryClient();
 
   const onThemeModeChanged = async (nextThemeMode: IThemeMode) => {
@@ -369,10 +364,8 @@ const ThemeSection = () => {
 
       case 'success':
         snackbar.enqueueSnackbar('changed theme');
-        queryClient.invalidateQueries(Profiles.queryFilter);
-        queryClient.invalidateQueries(Profiles.queryKeys.getOne(profile));
+        queryClient.invalidateQueries(profileQueryFilter);
         setThemeMode(nextThemeMode);
-
         return;
     }
   };

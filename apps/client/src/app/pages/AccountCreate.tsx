@@ -16,7 +16,7 @@ import { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from 'react-query';
 import { useAuthUser } from '../authentication';
 import * as ProfileAvatar from '../profile-avatar';
-import * as Profiles from '../profiles';
+import { useCreateProfileMutation, profileQueryFilter } from '../profiles';
 import { Link, routes } from '../routes';
 import {
   IThemeMode,
@@ -42,7 +42,7 @@ export const AccountCreatePage = () => {
     seed: avatarSeed,
   });
 
-  const mutation = useMutation(Profiles.create);
+  const mutation = useCreateProfileMutation();
 
   const snackbar = useSnackbar();
 
@@ -66,10 +66,7 @@ export const AccountCreatePage = () => {
         snackbar.enqueueSnackbar('profile created', {
           variant: 'default',
         });
-        queryClient.invalidateQueries(Profiles.queryFilter);
-        queryClient.invalidateQueries(
-          Profiles.queryKeys.getOne({ userId: authUser.userId })
-        );
+        queryClient.invalidateQueries(profileQueryFilter);
         return;
     }
   };

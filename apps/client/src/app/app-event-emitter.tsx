@@ -1,11 +1,11 @@
-import { IEventEmitter } from '@screenshot-service/shared';
 import EventEmitter from 'events';
 import { useEffect } from 'react';
-import { IProfile } from './profiles';
+import { IEventEmitter } from '../lib/event-emitter';
+import { Profile } from './profiles';
 
 export type IAppEvent = {
   OpenedTryDrawer: null;
-  Profile: { profile: IProfile };
+  Profile: { profile: Profile };
 };
 
 export const appEventEmitter: IEventEmitter<IAppEvent> = new EventEmitter();

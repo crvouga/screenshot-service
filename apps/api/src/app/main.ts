@@ -1,8 +1,8 @@
 import { AnyAction, configureStore } from '@reduxjs/toolkit';
-import createSagaMiddleware from 'redux-saga';
-import { mainSaga } from './main-saga';
 import loggerMiddleware from 'redux-logger';
-import * as Server from './modules/server';
+import createSagaMiddleware from 'redux-saga';
+import { fork } from 'redux-saga/effects';
+import * as Server from './server';
 
 //
 //
@@ -43,6 +43,18 @@ const reducer = (state: State = initialState, action: AnyAction): State => {
 //
 //
 //
+// Saga
+//
+//
+//
+
+const saga = function* ({ port }: { port: number }) {
+  yield fork(Server.saga, { port });
+};
+
+//
+//
+//
 // Main
 //
 //
@@ -56,5 +68,5 @@ export const store = configureStore({
 });
 
 export const main = ({ port }: { port: number }) => {
-  sagaMiddleware.run(mainSaga, { port });
+  sagaMiddleware.run(saga, { port });
 };

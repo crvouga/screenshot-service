@@ -18,8 +18,7 @@
     "paths": {
       "@crvouga/screenshot-service": [
         "libs/screenshot-service-client/src/index.ts"
-      ],
-      "@screenshot-service/shared": ["libs/shared/src/index.ts"]
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]

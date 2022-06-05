@@ -1,4 +1,3 @@
-import * as WebBrowser from '../web-browser';
 import { WebSocket } from '@crvouga/screenshot-service';
 import { AnyAction, createAction } from '@reduxjs/toolkit';
 import express from 'express';
@@ -7,8 +6,9 @@ import { eventChannel } from 'redux-saga';
 import { cancel, fork, put, takeEvery } from 'redux-saga/effects';
 import socket from 'socket.io';
 import { call, take } from 'typed-redux-saga';
-import { InferActionMap, InferActionUnion } from '../utils';
 import * as CaptureScreenshot from './capture-screenshot';
+import { InferActionMap, InferActionUnion } from './utils';
+import * as WebBrowser from './web-browser';
 
 //
 //
@@ -186,17 +186,13 @@ const clientFlow = function* ({
   yield fork(CaptureScreenshot.saga, { clientId, webBrowser });
 };
 
-const takeClientDisconnected = function* ({ clientId }: { clientId: string }) {
-  while (true) {
-    const action: ActionMap['ClientConnected'] = yield take(
-      Action.ClientConnected
-    );
-
-    if (action.payload.clientId === clientId) {
-      return action;
-    }
-  }
-};
+//
+//
+//
+// Server Events
+//
+//
+//
 
 const createServerEventChan = ({ port }: { port: number }) => {
   const app = express();
@@ -240,4 +236,24 @@ const createServerEventChan = ({ port }: { port: number }) => {
       server.close();
     };
   });
+};
+
+//
+//
+//
+// Helpers
+//
+//
+//
+
+const takeClientDisconnected = function* ({ clientId }: { clientId: string }) {
+  while (true) {
+    const action: ActionMap['ClientDisconnected'] = yield take(
+      Action.ClientDisconnected
+    );
+
+    if (action.payload.clientId === clientId) {
+      return action;
+    }
+  }
 };
