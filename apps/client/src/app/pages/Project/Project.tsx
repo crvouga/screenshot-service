@@ -1,4 +1,4 @@
-import { Data } from '@crvouga/screenshot-service';
+import { Data } from '@screenshot-service/screenshot-service';
 import { Box, CircularProgress, Tab, Tabs, Typography } from '@mui/material';
 
 import {

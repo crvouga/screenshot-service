@@ -1,4 +1,4 @@
-import { Data, DataAccess } from '@crvouga/screenshot-service';
+import { Data, DataAccess } from '@screenshot-service/screenshot-service';
 import { LoadingButton } from '@mui/lab';
 import { Box, Paper, TextField, Typography } from '@mui/material';
 import { useSnackbar } from 'notistack';

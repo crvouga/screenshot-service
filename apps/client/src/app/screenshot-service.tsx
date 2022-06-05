@@ -1,4 +1,4 @@
-import { Client } from '@crvouga/screenshot-service';
+import { Client } from '@screenshot-service/screenshot-service';
 import { useEffect, useState } from 'react';
 import { environment } from '../environments/environment';
 

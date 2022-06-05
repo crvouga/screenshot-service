@@ -1,0 +1,33 @@
+{
+  "sourceRoot": "libs/screenshot-service/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/screenshot-service/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/screenshot-service"],
+      "options": {
+        "jestConfig": "libs/screenshot-service/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/screenshot-service",
+        "tsConfig": "libs/screenshot-service/tsconfig.lib.json",
+        "packageJson": "libs/screenshot-service/package.json",
+        "main": "libs/screenshot-service/src/index.ts",
+        "assets": ["libs/screenshot-service/*.md"]
+      }
+    }
+  },
+  "tags": []
+}

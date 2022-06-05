@@ -1,4 +1,4 @@
-import { DataAccess } from '@crvouga/screenshot-service';
+import { DataAccess } from '@screenshot-service/screenshot-service';
 import constate from 'constate';
 import { useEffect } from 'react';
 import { useMutation, useQuery } from 'react-query';

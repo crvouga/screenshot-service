@@ -1,5 +1,5 @@
 module.exports = {
-  displayName: 'screenshot-service-client',
+  displayName: 'screenshot-service',
   preset: '../../jest.preset.ts',
   globals: {
     'ts-jest': {
@@ -11,5 +11,5 @@ module.exports = {
     '^.+\\.[tj]sx?$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  coverageDirectory: '../../coverage/libs/screenshot-service-client',
+  coverageDirectory: '../../coverage/libs/screenshot-service',
 };

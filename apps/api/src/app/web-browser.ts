@@ -1,4 +1,4 @@
-import { Data } from '@crvouga/screenshot-service';
+import { Data } from '@screenshot-service/screenshot-service';
 import { either } from 'fp-ts';
 import puppeteer, { Browser } from 'puppeteer';
 

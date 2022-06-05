@@ -16,8 +16,8 @@
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
-      "@crvouga/screenshot-service": [
-        "libs/screenshot-service-client/src/index.ts"
+      "@screenshot-service/screenshot-service": [
+        "libs/screenshot-service/src/index.ts"
       ]
     }
   },

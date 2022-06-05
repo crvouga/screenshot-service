@@ -1,17 +1,16 @@
-import { WebSocket } from '@crvouga/screenshot-service';
+import { WebSocket } from '@screenshot-service/screenshot-service';
+import reduxDevTools from '@redux-devtools/cli';
 import { AnyAction, configureStore, createAction } from '@reduxjs/toolkit';
 import express from 'express';
 import http from 'http';
-import loggerMiddleware from 'redux-logger';
 import createSagaMiddleware, { eventChannel } from 'redux-saga';
 import { cancel, fork, put, takeEvery } from 'redux-saga/effects';
+import remoteDevToolsEnhancer from 'remote-redux-devtools';
 import socket from 'socket.io';
 import { call, take } from 'typed-redux-saga';
 import * as CaptureScreenshot from './capture-screenshot';
 import { InferActionMap, InferActionUnion } from './utils';
 import * as WebBrowser from './web-browser';
-import remoteDevToolsEnhancer from 'remote-redux-devtools';
-import reduxDevTools from '@redux-devtools/cli';
 
 //
 //
@@ -292,7 +291,7 @@ const takeClientDisconnected = function* ({ clientId }: { clientId: string }) {
 //
 //
 
-export const main = ({ port }: { port: number }) => {
+export const main = async ({ port }: { port: number }) => {
   const sagaMiddleware = createSagaMiddleware();
 
   const devToolsConfig = {
@@ -302,6 +301,7 @@ export const main = ({ port }: { port: number }) => {
   };
 
   configureStore({
+    preloadedState: initialState,
     reducer: reducer,
     middleware: [sagaMiddleware],
     enhancers: [
@@ -315,10 +315,16 @@ export const main = ({ port }: { port: number }) => {
     ],
   });
 
-  reduxDevTools({
+  const remoteDevTools = await reduxDevTools({
     hostname: devToolsConfig.hostname,
     port: devToolsConfig.port,
     secure: devToolsConfig.secure,
+  });
+
+  remoteDevTools.on('ready', () => {
+    console.log(
+      `Serving api devtools at http://${devToolsConfig.hostname}:${devToolsConfig.port}/`
+    );
   });
 
   sagaMiddleware.run(saga, { port });

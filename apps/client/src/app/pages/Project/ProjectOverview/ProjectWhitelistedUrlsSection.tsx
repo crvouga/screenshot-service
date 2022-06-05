@@ -1,4 +1,4 @@
-import { Data, DataAccess } from '@crvouga/screenshot-service';
+import { Data, DataAccess } from '@screenshot-service/screenshot-service';
 import { DeleteForever } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import {

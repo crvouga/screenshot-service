@@ -1,5 +1,9 @@
 import * as WebBrowser from './web-browser';
-import { Data, DataAccess } from '@crvouga/screenshot-service';
+import {
+  Data,
+  DataAccess,
+  CaptureScreenshot,
+} from '@screenshot-service/screenshot-service';
 import { AnyAction, createAction } from '@reduxjs/toolkit';
 import { InferActionMap, InferActionUnion } from './utils';
 import { delay, put, race, take } from 'redux-saga/effects';
@@ -37,14 +41,7 @@ export const initialState: State = { type: 'Idle', logs: [] };
 
 type Log = { level: Data.LogLevel.LogLevel; message: string };
 
-export type Request = {
-  requestId: Data.RequestId.RequestId;
-  projectId: Data.ProjectId.ProjectId;
-  strategy: Data.Strategy.Strategy;
-  delaySec: Data.DelaySec.DelaySec;
-  imageType: Data.ImageType.ImageType;
-  targetUrl: Data.TargetUrl.TargetUrl;
-};
+export type Request = CaptureScreenshot.Request;
 
 //
 //

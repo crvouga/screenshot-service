@@ -1,4 +1,7 @@
-import { CaptureScreenshot, Data } from '@crvouga/screenshot-service';
+import {
+  CaptureScreenshot,
+  Data,
+} from '@screenshot-service/screenshot-service';
 import { Cancel } from '@mui/icons-material';
 import BrokenImageIcon from '@mui/icons-material/BrokenImage';
 import DownloadIcon from '@mui/icons-material/Download';

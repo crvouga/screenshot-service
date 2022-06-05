@@ -1,4 +1,4 @@
-import { DataAccess } from '@crvouga/screenshot-service';
+import { DataAccess } from '@screenshot-service/screenshot-service';
 import { Box, Paper, Typography } from '@mui/material';
 import { CopyToClipboardField } from '../../../../lib/Clipboard';
 

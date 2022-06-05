@@ -1,4 +1,4 @@
-import { Data } from '@crvouga/screenshot-service';
+import { Data } from '@screenshot-service/screenshot-service';
 import { ListItemText, MenuItem, Select } from '@mui/material';
 import { either, option } from 'fp-ts';
 import { pipe } from 'fp-ts/lib/function';

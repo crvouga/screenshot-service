@@ -1,4 +1,4 @@
-import { Data } from '@crvouga/screenshot-service';
+import { Data } from '@screenshot-service/screenshot-service';
 import { Session } from '@supabase/supabase-js';
 import constate from 'constate';
 import { either } from 'fp-ts';
