@@ -10,6 +10,8 @@ import { call, take } from 'typed-redux-saga';
 import * as CaptureScreenshot from './capture-screenshot';
 import { InferActionMap, InferActionUnion } from './utils';
 import * as WebBrowser from './web-browser';
+import remoteDevToolsEnhancer from 'remote-redux-devtools';
+import reduxDevTools from '@redux-devtools/cli';
 
 //
 //
@@ -19,7 +21,7 @@ import * as WebBrowser from './web-browser';
 //
 //
 
-export const namespace = 'Server' as const;
+export const namespace = 'server' as const;
 
 //
 //
@@ -29,23 +31,19 @@ export const namespace = 'Server' as const;
 //
 //
 
-export type State = {
-  server: ServerState;
-  connectedClients: {
-    [clientId: string]: ClientState;
-  };
-};
+export type State =
+  | { status: 'Idle' }
+  | {
+      status: 'Listening';
+      port: number;
+      connectedClients: {
+        [clientId: string]: {
+          [CaptureScreenshot.namespace]: CaptureScreenshot.State;
+        };
+      };
+    };
 
-type ServerState = { type: 'Idle' } | { type: 'Listening'; port: number };
-
-type ClientState = {
-  [CaptureScreenshot.namespace]: CaptureScreenshot.State;
-};
-
-export const initialState: State = {
-  server: { type: 'Idle' },
-  connectedClients: {},
-};
+export const initialState: State = { status: 'Idle' };
 
 //
 //
@@ -84,7 +82,15 @@ export const Action = {
     })
   ),
 
-  WebSocketError: createAction(`${namespace}/WebSocketError`),
+  SocketError: createAction(`${namespace}/SocketError`, (error: Error) => ({
+    payload: { error },
+  })),
+
+  Log: createAction(`${namespace}/Log`, (message: string) => ({
+    payload: { message },
+  })),
+
+  RecievedClientEvent: createAction(`${namespace}/RecievedClientEvent`),
 };
 
 export type Action = InferActionUnion<typeof Action>;
@@ -104,52 +110,62 @@ export const isAction = (action: AnyAction): action is Action => {
 //
 //
 
-export const reducer = (state: State, action: AnyAction): State => {
-  if (Action.ClientConnected.match(action)) {
-    return {
-      ...state,
-      connectedClients: {
-        ...state.connectedClients,
-        [action.payload.clientId]: {
-          CaptureScreenshot: CaptureScreenshot.initialState,
-        },
-      },
-    };
-  }
+export const reducer = (
+  state: State = initialState,
+  action: AnyAction
+): State => {
+  switch (state.status) {
+    case 'Idle':
+      if (Action.ServerListening.match(action)) {
+        return {
+          status: 'Listening',
+          port: action.payload.port,
+          connectedClients: {},
+        };
+      }
 
-  if (Action.ClientDisconnected.match(action)) {
-    return {
-      ...state,
-      connectedClients: removeKey(
-        action.payload.clientId,
-        state.connectedClients
-      ),
-    };
-  }
+      return state;
 
-  if (Action.ServerListening.match(action)) {
-    return {
-      ...state,
-      server: { type: 'Listening', port: action.payload.port },
-    };
-  }
+    case 'Listening':
+      if (Action.ClientConnected.match(action)) {
+        return {
+          ...state,
+          connectedClients: {
+            ...state.connectedClients,
+            [action.payload.clientId]: {
+              [CaptureScreenshot.namespace]: CaptureScreenshot.initialState,
+            },
+          },
+        };
+      }
 
-  if (CaptureScreenshot.isAction(action)) {
-    const clientId = action.payload.clientId;
-    const slice = state.connectedClients[clientId]['CaptureScreenshot'];
-    return {
-      ...state,
-      connectedClients: {
-        ...state.connectedClients,
-        [clientId]: {
-          ...slice,
-          CaptureScreenshot: CaptureScreenshot.reducer(slice, action),
-        },
-      },
-    };
-  }
+      if (Action.ClientDisconnected.match(action)) {
+        return {
+          ...state,
+          connectedClients: removeKey(
+            action.payload.clientId,
+            state.connectedClients
+          ),
+        };
+      }
 
-  return state;
+      if (CaptureScreenshot.isAction(action)) {
+        const clientId = action.payload.clientId;
+        const slice = state.connectedClients[clientId]['CaptureScreenshot'];
+        return {
+          ...state,
+          connectedClients: {
+            ...state.connectedClients,
+            [clientId]: {
+              ...slice,
+              CaptureScreenshot: CaptureScreenshot.reducer(slice, action),
+            },
+          },
+        };
+      }
+
+      return state;
+  }
 };
 
 const removeKey = <T>(key: keyof T, object: T): T => {
@@ -204,21 +220,21 @@ const clientFlow = function* ({
 //
 //
 
-const createServerEventChan = ({ port }: { port: number }) => {
-  const app = express();
-  const server = http.createServer(app);
-  const io = new socket.Server<
-    WebSocket.ClientToServerEvents,
-    WebSocket.ServerToClientEvents,
-    WebSocket.InterServerEvents,
-    WebSocket.SocketData
-  >(server, {
-    cors: {
-      origin: '*',
-      methods: ['GET', 'POST'],
-    },
-  });
+const app = express();
+const server = http.createServer(app);
+const io = new socket.Server<
+  WebSocket.ClientToServerEvents,
+  WebSocket.ServerToClientEvents,
+  WebSocket.InterServerEvents,
+  WebSocket.SocketData
+>(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
+});
 
+const createServerEventChan = ({ port }: { port: number }) => {
   return eventChannel<Action>((emit) => {
     io.on('connection', (socket) => {
       emit(Action.ClientConnected(socket.id));
@@ -232,8 +248,8 @@ const createServerEventChan = ({ port }: { port: number }) => {
         emit(Action.ClientDisconnected(socket.id));
       });
 
-      socket.on('error', () => {
-        emit(Action.WebSocketError());
+      socket.on('error', (error) => {
+        emit(Action.SocketError(error));
       });
     });
 
@@ -279,9 +295,30 @@ const takeClientDisconnected = function* ({ clientId }: { clientId: string }) {
 export const main = ({ port }: { port: number }) => {
   const sagaMiddleware = createSagaMiddleware();
 
+  const devToolsConfig = {
+    hostname: 'localhost',
+    port: 9000,
+    secure: false,
+  };
+
   configureStore({
     reducer: reducer,
-    middleware: [loggerMiddleware, sagaMiddleware],
+    middleware: [sagaMiddleware],
+    enhancers: [
+      remoteDevToolsEnhancer({
+        realtime: true,
+        name: 'Screenshot Service API',
+        hostname: devToolsConfig.hostname,
+        port: devToolsConfig.port,
+        secure: devToolsConfig.secure,
+      }),
+    ],
+  });
+
+  reduxDevTools({
+    hostname: devToolsConfig.hostname,
+    port: devToolsConfig.port,
+    secure: devToolsConfig.secure,
   });
 
   sagaMiddleware.run(saga, { port });

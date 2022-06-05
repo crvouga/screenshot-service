@@ -15,7 +15,7 @@ import { supabaseClient } from './supabase';
 //
 //
 
-export const namespace = 'CaptureScreenshot' as const;
+export const namespace = 'captureScreenshot' as const;
 
 //
 //
