@@ -7,7 +7,7 @@ import { supabaseClient } from './supabase';
 
 export type Profile = DataAccess.Profiles.Profile;
 
-export const profileQueryFilter = 'projects';
+export const profileQueryFilter = 'profile';
 
 export const useProfileQuery = ({ userId }: { userId: string }) => {
   return useQuery([profileQueryFilter, userId], () =>

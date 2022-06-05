@@ -47,7 +47,6 @@ export const TryPage = () => {
 
   const submit = async () => {
     const validationResult = validateForm(form);
-    console.log({ validationResult, form });
 
     if (either.isLeft(validationResult)) {
       setForm(mergeErrors(validationResult.left));

@@ -2,11 +2,9 @@ import { Data } from '@crvouga/screenshot-service';
 import { ListItemText, MenuItem, Select } from '@mui/material';
 import { either, option } from 'fp-ts';
 import { pipe } from 'fp-ts/lib/function';
-import * as React from 'react';
+import React from 'react';
 import { useAuthUser } from '../../authentication';
 import { useProjectsQuery } from '../../projects';
-
-const Eq = option.getEq(Data.ProjectId.Eq);
 
 export const ProjectInput = ({
   projectId,

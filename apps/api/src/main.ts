@@ -1,16 +1,18 @@
 import { main } from './app/main';
 
-const defaultPort = 8000;
+const fallbackPort = 8000;
 
 const getPort = (): number => {
   const port =
-    Number(process.env.PORT) ?? Number(process.env.port) ?? defaultPort;
+    Number(process.env.PORT) ?? Number(process.env.port) ?? fallbackPort;
 
   if (isNaN(port)) {
-    return defaultPort;
+    return fallbackPort;
   }
 
   return port;
 };
 
-main({ port: getPort() });
+main({
+  port: getPort(),
+});
