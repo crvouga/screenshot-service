@@ -5,6 +5,6 @@ const devServerBaseUrl = 'http://localhost:8000';
 
 const config = environment.production
   ? {}
-  : { overrides: { serverBaseUrl: devServerBaseUrl } };
+  : { socketConfig: { serverBaseUrl: devServerBaseUrl } };
 
-export const screenshotService = ScreenshotService.Client.create(config);
+export const screenshotService = ScreenshotService.makeClient(config);

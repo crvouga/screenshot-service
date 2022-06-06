@@ -12,7 +12,9 @@ import { InferActionUnion } from './utils';
 //
 //
 
-export type State = { type: 'Connecting' } | { type: 'Connected' };
+export type State =
+  | { type: 'Connecting' }
+  | { type: 'Connected'; clientId: string };
 
 export const initialState: State = { type: 'Connecting' };
 
@@ -25,9 +27,11 @@ export const initialState: State = { type: 'Connecting' };
 //
 
 export const Action = {
-  Connected: createAction(`socket/Connected`),
   Disconnected: createAction(`socket/Disconnected`),
   ConnectError: createAction(`socket/ConnectError`),
+  Connected: createAction(`socket/Connected`, (clientId: string) => ({
+    payload: { clientId },
+  })),
 };
 
 export type Action = InferActionUnion<typeof Action>;
@@ -40,9 +44,12 @@ export type Action = InferActionUnion<typeof Action>;
 //
 //
 
-export const reducer = (state: State, action: AnyAction): State => {
+export const reducer = (
+  state: State = initialState,
+  action: AnyAction
+): State => {
   if (Action.Connected.match(action)) {
-    return { type: 'Connected' };
+    return { type: 'Connected', clientId: action.payload.clientId };
   }
 
   if (Action.Disconnected.match(action)) {
@@ -77,7 +84,7 @@ const clientToServerFlow = function* (socket: Socket.Instance) {
 const serverToClientFlow = function* (socket: Socket.Instance) {
   const socketChan = eventChannel<AnyAction>((emit) => {
     socket.on('connect', () => {
-      emit(Action.Connected());
+      emit(Action.Connected(socket.id));
     });
 
     socket.on('disconnect', () => {

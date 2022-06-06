@@ -18,11 +18,6 @@ export type State = {
   socketConnection: SocketConnection.State;
 };
 
-export const initialState: State = {
-  captureScreenshotRequest: CaptureScreenshotRequest.initialState,
-  socketConnection: SocketConnection.initialState,
-};
-
 //
 //
 //
@@ -72,12 +67,11 @@ export const saga = function* (socket: Socket.Instance) {
 export const makeClient = ({
   socketConfig,
 }: {
-  socketConfig: Socket.Config;
+  socketConfig?: Socket.Config;
 }) => {
   const sagaMiddleware = createSagaMiddleware();
 
   const store = configureStore({
-    preloadedState: initialState,
     reducer: reducer,
     middleware: [sagaMiddleware],
   });

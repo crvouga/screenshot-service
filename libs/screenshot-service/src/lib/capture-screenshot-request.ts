@@ -155,7 +155,10 @@ export type Action = InferActionUnion<typeof Action>;
 //
 //
 
-export const reducer = (state: State, action: AnyAction): State => {
+export const reducer = (
+  state: State = initialState,
+  action: AnyAction
+): State => {
   switch (state.type) {
     case 'Failed':
       if (Action.Log.match(action)) {

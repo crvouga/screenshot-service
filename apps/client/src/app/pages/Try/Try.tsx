@@ -51,7 +51,7 @@ export const TryPage = () => {
     return unsubscribe;
   }, []);
 
-  const captureState = state.captureScreenshot;
+  const captureState = state.captureScreenshotRequest;
 
   const submit = async () => {
     const validationResult = validateForm(form);
@@ -61,19 +61,32 @@ export const TryPage = () => {
       return;
     }
 
-    screenshotService.start({
-      requestId: ScreenshotService.Data.RequestId.generate(),
-      delaySec: form.values.delaySec,
-      imageType: form.values.imageType,
-      strategy: form.values.strategy,
-      targetUrl: validationResult.right.targetUrl,
-      projectId: validationResult.right.projectId,
-    });
+    if (state.socketConnection.type === 'Connected') {
+      screenshotService.dispatch(
+        ScreenshotService.CaptureScreenshotRequest.Action.Start({
+          clientId: state.socketConnection.clientId,
+          requestId: ScreenshotService.Data.RequestId.generate(),
+          delaySec: form.values.delaySec,
+          imageType: form.values.imageType,
+          strategy: form.values.strategy,
+          targetUrl: validationResult.right.targetUrl,
+          projectId: validationResult.right.projectId,
+        })
+      );
+    }
   };
 
   const onCancel = () => {
-    if (state.captureScreenshot.type === 'Loading') {
-      screenshotService.cancel(state.captureScreenshot.requestId);
+    if (
+      state.captureScreenshotRequest.type === 'Loading' &&
+      state.socketConnection.type === 'Connected'
+    ) {
+      screenshotService.dispatch(
+        ScreenshotService.CaptureScreenshotRequest.Action.Cancel(
+          state.socketConnection.clientId,
+          state.captureScreenshotRequest.requestId
+        )
+      );
     }
   };
 
@@ -257,7 +270,7 @@ const Screenshot = ({
 }: {
   alt: string;
   src?: string;
-  stateType: ScreenshotService.Client.State['captureScreenshot']['type'];
+  stateType: ScreenshotService.State['captureScreenshotRequest']['type'];
 } & PaperProps) => {
   return (
     <Paper

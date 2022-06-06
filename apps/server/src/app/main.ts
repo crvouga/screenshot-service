@@ -4,7 +4,7 @@ import { Socket } from '@screenshot-service/screenshot-service';
 import express from 'express';
 import http from 'http';
 import createSagaMiddleware, { eventChannel } from 'redux-saga';
-import { cancel, fork, put, takeEvery } from 'redux-saga/effects';
+import { cancel, fork, put, select, takeEvery } from 'redux-saga/effects';
 import remoteDevToolsEnhancer from 'remote-redux-devtools';
 import socket from 'socket.io';
 import { take } from 'typed-redux-saga';
@@ -56,6 +56,28 @@ export const isAction = (action: AnyAction): action is Action => {
 //
 //
 //
+// Server
+//
+//
+//
+
+const app = express();
+
+const server = http.createServer(app);
+
+const socketServer = new socket.Server<
+  Socket.ClientToServerEvents,
+  Socket.ServerToClientEvents
+>(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
+});
+
+//
+//
+//
 // Saga
 //
 //
@@ -76,6 +98,17 @@ const clientFlow = function* (webBrowser: WebBrowser.WebBrowser) {
 
     yield cancel(task);
   });
+};
+const takeClientDisconnected = function* ({ clientId }: { clientId: string }) {
+  while (true) {
+    const action: ActionMap['ClientDisconnected'] = yield take(
+      Action.ClientDisconnected
+    );
+
+    if (action.payload.clientId === clientId) {
+      return action;
+    }
+  }
 };
 
 const connectedClientFlow = function* (
@@ -141,26 +174,6 @@ const socketChan = eventChannel<AnyAction>((emit) => {
 //
 //
 //
-// Helpers
-//
-//
-//
-
-const takeClientDisconnected = function* ({ clientId }: { clientId: string }) {
-  while (true) {
-    const action: ActionMap['ClientDisconnected'] = yield take(
-      Action.ClientDisconnected
-    );
-
-    if (action.payload.clientId === clientId) {
-      return action;
-    }
-  }
-};
-
-//
-//
-//
 // Main
 //
 //
@@ -206,23 +219,7 @@ export const main = async ({ port }: { port: number }) => {
 
   sagaMiddleware.run(saga, webBrowser);
 
-  server.listen(() => {
+  server.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}/`);
   });
 };
-
-const app = express();
-
-const server = http.createServer(app);
-
-const socketServer = new socket.Server<
-  Socket.ClientToServerEvents,
-  Socket.ServerToClientEvents
->(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
-  },
-});
-
-type SocketServer = typeof socketServer;
