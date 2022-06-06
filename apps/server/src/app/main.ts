@@ -2,7 +2,7 @@ import { Shared } from '@screenshot-service/screenshot-service';
 import reduxDevTools from '@redux-devtools/cli';
 import { AnyAction, configureStore, createAction } from '@reduxjs/toolkit';
 import express from 'express';
-import http from 'http';
+import http, { Server } from 'http';
 import createSagaMiddleware, { eventChannel } from 'redux-saga';
 import { cancel, fork, put, takeEvery } from 'redux-saga/effects';
 import remoteDevToolsEnhancer from 'remote-redux-devtools';
@@ -30,19 +30,21 @@ export const namespace = 'server' as const;
 //
 //
 
-export type State =
-  | { status: 'Idle' }
-  | {
-      status: 'Listening';
-      port: number;
-      connectedClients: {
-        [clientId: string]: {
-          [CaptureScreenshot.namespace]: CaptureScreenshot.State;
-        };
-      };
-    };
+export type State = {
+  status: { type: 'Idle' } | { type: 'Listening'; port: number };
+  clients: {
+    [clientId: string]: ClientState;
+  };
+};
 
-export const initialState: State = { status: 'Idle' };
+type ClientState = {
+  [CaptureScreenshot.namespace]: CaptureScreenshot.State;
+};
+
+export const initialState: State = {
+  status: { type: 'Idle' },
+  clients: {},
+};
 
 //
 //
@@ -88,8 +90,6 @@ export const Action = {
   Log: createAction(`${namespace}/Log`, (message: string) => ({
     payload: { message },
   })),
-
-  RecievedClientEvent: createAction(`${namespace}/RecievedClientEvent`),
 };
 
 export type Action = InferActionUnion<typeof Action>;
@@ -113,58 +113,57 @@ export const reducer = (
   state: State = initialState,
   action: AnyAction
 ): State => {
-  switch (state.status) {
-    case 'Idle':
-      if (Action.ServerListening.match(action)) {
-        return {
-          status: 'Listening',
-          port: action.payload.port,
-          connectedClients: {},
-        };
-      }
+  return {
+    status: statusReducer(state.status, action),
+    clients: clientsReducer(state.clients, action),
+  };
+};
 
-      return state;
-
-    case 'Listening':
-      if (Action.ClientConnected.match(action)) {
-        return {
-          ...state,
-          connectedClients: {
-            ...state.connectedClients,
-            [action.payload.clientId]: {
-              [CaptureScreenshot.namespace]: CaptureScreenshot.initialState,
-            },
-          },
-        };
-      }
-
-      if (Action.ClientDisconnected.match(action)) {
-        return {
-          ...state,
-          connectedClients: removeKey(
-            action.payload.clientId,
-            state.connectedClients
-          ),
-        };
-      }
-
-      if (CaptureScreenshot.isAction(action)) {
-        const clientId = action.payload.clientId;
-        const slice = state.connectedClients[clientId]['CaptureScreenshot'];
-        return {
-          ...state,
-          connectedClients: {
-            ...state.connectedClients,
-            [clientId]: {
-              ...slice,
-              CaptureScreenshot: CaptureScreenshot.reducer(slice, action),
-            },
-          },
-        };
-      }
-
-      return state;
+const statusReducer = (
+  state: State['status'],
+  action: AnyAction
+): State['status'] => {
+  if (Action.ServerListening.match(action)) {
+    return { type: 'Listening', port: action.payload.port };
   }
+
+  return state;
+};
+
+const clientsReducer = (
+  state: State['clients'],
+  action: AnyAction
+): State['clients'] => {
+  if (Action.ClientConnected.match(action)) {
+    return {
+      ...state,
+      [action.payload.clientId]: {
+        [CaptureScreenshot.namespace]: CaptureScreenshot.initialState,
+      },
+    };
+  }
+
+  if (Action.ClientDisconnected.match(action)) {
+    return removeKey(action.payload.clientId, state);
+  }
+
+  if (CaptureScreenshot.isAction(action)) {
+    const clientId = action.payload.clientId;
+    const clientState = state[clientId];
+    const captureScreenshotState = clientState['captureScreenshot'];
+    return {
+      ...state,
+      [clientId]: {
+        ...clientState,
+        [CaptureScreenshot.namespace]: CaptureScreenshot.reducer(
+          captureScreenshotState,
+          action
+        ),
+      },
+    };
+  }
+
+  return state;
 };
 
 const removeKey = <T>(key: keyof T, object: T): T => {
@@ -182,9 +181,14 @@ const removeKey = <T>(key: keyof T, object: T): T => {
 //
 
 export const saga = function* ({ port }: { port: number }) {
-  const chan = yield* call(createServerEventChan, { port });
+  const [serverChan, server] = yield* call(createServerChan, { port });
+  const [socketChan, io] = yield* call(createSocketChan, { server });
 
-  yield takeEvery(chan, function* (action) {
+  yield takeEvery(serverChan, function* (action) {
+    yield put(action);
+  });
+
+  yield takeEvery(socketChan, function* (action) {
     yield put(action);
   });
 
@@ -214,30 +218,66 @@ const clientFlow = function* ({
 //
 //
 //
-// Server Events
+// Server
 //
 //
 //
 
-const app = express();
-const server = http.createServer(app);
-const io = new socket.Server<
-  Shared.ClientToServerEvents,
-  Shared.ServerToClientEvents,
-  Shared.InterServerEvents,
-  Shared.SocketData
->(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
-  },
-});
+const createServerChan = ({ port }: { port: number }) => {
+  const app = express();
+  const server = http.createServer(app);
 
-const createServerEventChan = ({ port }: { port: number }) => {
-  return eventChannel<Action>((emit) => {
+  const chan = eventChannel<Action>((emit) => {
+    server.listen(port, () => {
+      emit(Action.ServerListening(port));
+    });
+
+    return () => {
+      server.close();
+    };
+  });
+
+  return [chan, server] as const;
+};
+
+//
+//
+//
+// Socket
+//
+//
+//
+
+const createSocketChan = ({ server }: { server: http.Server }) => {
+  const io = new socket.Server<
+    Shared.ClientToServerEvents,
+    Shared.ServerToClientEvents,
+    Shared.InterServerEvents,
+    Shared.SocketData
+  >(server, {
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST'],
+    },
+  });
+
+  const chan = eventChannel<AnyAction>((emit) => {
     io.on('connection', (socket) => {
       emit(Action.ClientConnected(socket.id));
-      // socket.on('ToServer', emit);
+
+      socket.on('ClientToServer', (action) => {
+        if (Shared.ClientToServer.CancelCaptureScreenshot.match(action)) {
+          emit(
+            CaptureScreenshot.Action.Cancel(socket.id, action.payload.requestId)
+          );
+        }
+
+        if (Shared.ClientToServer.StartCapureScreenshot.match(action)) {
+          emit(
+            CaptureScreenshot.Action.Start(socket.id, action.payload.request)
+          );
+        }
+      });
 
       socket.on('disconnecting', () => {
         emit(Action.ClientDisconnecting(socket.id));
@@ -252,15 +292,12 @@ const createServerEventChan = ({ port }: { port: number }) => {
       });
     });
 
-    server.listen(port, () => {
-      emit(Action.ServerListening(port));
-    });
-
     return () => {
       io.close();
-      server.close();
     };
   });
+
+  return [chan, io] as const;
 };
 
 //

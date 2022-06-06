@@ -44,9 +44,11 @@ export const TryPage = () => {
   const [state, setState] = React.useState(screenshotService.getState);
 
   React.useEffect(() => {
-    return screenshotService.subscribe(() => {
-      setState(screenshotService.getState());
+    const unsubscribe = screenshotService.subscribe(() => {
+      setState(screenshotService.getState);
     });
+
+    return unsubscribe;
   }, []);
 
   const captureState = state.captureScreenshot;

@@ -31,12 +31,12 @@ const namespace = 'client' as const;
 
 export type State = {
   status: 'ServerConnected' | 'ServerConnecting';
-  captureScreenshot: Shared.CaptureScreenshot.State;
+  captureScreenshot: Shared.CaptureScreenshotState;
 };
 
 const initialState: State = {
   status: 'ServerConnecting',
-  captureScreenshot: Shared.CaptureScreenshot.initialState,
+  captureScreenshot: Shared.initialCaptureScreenshotState,
 };
 
 //
@@ -51,13 +51,13 @@ const Action = {
   ServerConnected: createAction(`${namespace}/ServerConnected`),
   ServerDisconnected: createAction(`${namespace}/ServerDisconnected`),
   ServerConnectionError: createAction(`${namespace}/ServerConnectionError`),
-  RecievedServerAction: createAction(
-    `${namespace}/RecievedServerAction`,
-    (payload: Shared.ServerToClient) => ({ payload })
+  RecievedState: createAction(
+    `${namespace}/RecievedState`,
+    (payload: Shared.CaptureScreenshotState) => ({ payload })
   ),
   Start: createAction(
     `${namespace}/Start`,
-    (request: Shared.CaptureScreenshot.Request) => ({ payload: { request } })
+    (request: Shared.CaptureScreenshotRequest) => ({ payload: { request } })
   ),
   Cancel: createAction(
     `${namespace}/Cancel`,
@@ -96,13 +96,19 @@ const reducer = (state: State = initialState, action: AnyAction): State => {
 //
 
 const saga = function* ({ overrides }: { overrides?: Overrides }) {
-  const socketChan = createSocketChan({ overrides });
+  const [inputChan, socket] = createSocketChans({ overrides });
 
-  yield takeEvery(socketChan, function* (action) {
+  yield takeEvery(inputChan, function* (action) {
     yield put(action);
   });
 
-  yield;
+  yield takeEvery(Action.Start, function* (action) {
+    socket.emit(
+      'ClientToServer',
+      Shared.ClientToServer.StartCapureScreenshot(action.payload.request)
+    );
+    yield;
+  });
 };
 
 //
@@ -115,7 +121,7 @@ const saga = function* ({ overrides }: { overrides?: Overrides }) {
 
 export type Overrides = { serverBaseUrl: string };
 
-const createSocketChan = ({ overrides }: { overrides?: Overrides }) => {
+const createSocketChans = ({ overrides }: { overrides?: Overrides }) => {
   const baseUrl = overrides?.serverBaseUrl
     ? overrides.serverBaseUrl
     : Shared.PRODUCTION_SERVER_BASE_URL;
@@ -125,7 +131,13 @@ const createSocketChan = ({ overrides }: { overrides?: Overrides }) => {
     Shared.ClientToServerEvents
   > = socketClient(baseUrl);
 
-  return eventChannel<Action>((emit) => {
+  const inputChan = eventChannel<AnyAction>((emit) => {
+    socket.on('ServerToClient', (action) => {
+      if (Shared.ServerToClient.RecievedState.match(action)) {
+        emit(Action.RecievedState(action.payload));
+      }
+    });
+
     socket.on('connect', () => {
       emit(Action.ServerConnected());
     });
@@ -142,6 +154,8 @@ const createSocketChan = ({ overrides }: { overrides?: Overrides }) => {
       socket.close();
     };
   });
+
+  return [inputChan, socket] as const;
 };
 
 //

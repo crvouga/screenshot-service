@@ -29,13 +29,13 @@ export const namespace = 'captureScreenshot' as const;
 //
 //
 
-export type State = Shared.CaptureScreenshot.State;
+export type State = Shared.CaptureScreenshotState;
 
-export const initialState = Shared.CaptureScreenshot.initialState;
+export const initialState = Shared.initialCaptureScreenshotState;
 
-type Log = Shared.CaptureScreenshot.Log;
+type Log = Shared.CaptureScreenshotLog;
 
-type Request = Shared.CaptureScreenshot.Request;
+type Request = Shared.CaptureScreenshotRequest;
 
 //
 //
