@@ -1,4 +1,5 @@
-export * as Client from './lib/client';
+export * from './lib/main';
 export * as Data from './lib/data';
+export * as Socket from './lib/socket';
 export * as DataAccess from './lib/data-access';
-export * as Shared from './lib/shared';
+export * as CaptureScreenshotRequest from './lib/capture-screenshot-request';
