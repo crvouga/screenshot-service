@@ -99,6 +99,7 @@ const clientFlow = function* (webBrowser: WebBrowser.WebBrowser) {
     yield cancel(task);
   });
 };
+
 const takeClientDisconnected = function* ({ clientId }: { clientId: string }) {
   while (true) {
     const action: ActionMap['ClientDisconnected'] = yield take(
