@@ -1,4 +1,4 @@
-import { WebSocket } from '@screenshot-service/screenshot-service';
+import { Shared } from '@screenshot-service/screenshot-service';
 import reduxDevTools from '@redux-devtools/cli';
 import { AnyAction, configureStore, createAction } from '@reduxjs/toolkit';
 import express from 'express';
@@ -222,10 +222,10 @@ const clientFlow = function* ({
 const app = express();
 const server = http.createServer(app);
 const io = new socket.Server<
-  WebSocket.ClientToServerEvents,
-  WebSocket.ServerToClientEvents,
-  WebSocket.InterServerEvents,
-  WebSocket.SocketData
+  Shared.ClientToServerEvents,
+  Shared.ServerToClientEvents,
+  Shared.InterServerEvents,
+  Shared.SocketData
 >(server, {
   cors: {
     origin: '*',
@@ -329,3 +329,25 @@ export const main = async ({ port }: { port: number }) => {
 
   sagaMiddleware.run(saga, { port });
 };
+
+/* 
+
+
+{
+  type: 'captureScreenshot/Start',
+  payload: {
+    clientId: 'HDm1ow7Mvzj2dVU9AAAB',
+    request: {
+      requestId: 'a662d306-775f-4f4a-8d13-3705f79dfe71',
+      projectId: 'a662d306-775f-4f4a-8d13-3705f79dfe71',
+      delaySec: 3,
+      targetUrl:'https://stackoverflow.com/questions/37624144/is-there-a-way-to-short-circuit-async-await-flow',
+      imageType: 'jpeg',
+      strategy: 'network-first',
+    },
+  },
+}
+
+
+
+*/

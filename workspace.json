@@ -1,9 +1,9 @@
 {
   "version": 2,
   "projects": {
-    "api": "apps/api",
     "client": "apps/client",
     "client-e2e": "apps/client-e2e",
-    "screenshot-service": "libs/screenshot-service"
+    "screenshot-service": "libs/screenshot-service",
+    "server": "apps/server"
   }
 }

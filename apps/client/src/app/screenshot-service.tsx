@@ -1,26 +1,10 @@
-import { Client } from '@screenshot-service/screenshot-service';
-import { useEffect, useState } from 'react';
+import * as ScreenshotService from '@screenshot-service/screenshot-service';
 import { environment } from '../environments/environment';
 
 const devServerBaseUrl = 'http://localhost:8000';
 
-const clientConfig = environment.production
+const config = environment.production
   ? {}
-  : { overrides: { baseUrl: devServerBaseUrl } };
+  : { overrides: { serverBaseUrl: devServerBaseUrl } };
 
-export const screenshotClient = Client.create(clientConfig);
-
-export const useScreenshotClient = () => {
-  const [state, setState] = useState(screenshotClient.getState);
-
-  useEffect(() => {
-    screenshotClient.subscribe(() => {
-      setState(screenshotClient.getState);
-    });
-  }, []);
-
-  return {
-    state,
-    dispatch: screenshotClient.dispatch,
-  };
-};
+export const screenshotService = ScreenshotService.Client.create(config);

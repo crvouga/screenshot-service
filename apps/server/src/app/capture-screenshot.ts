@@ -2,11 +2,11 @@ import * as WebBrowser from './web-browser';
 import {
   Data,
   DataAccess,
-  CaptureScreenshot,
+  Shared,
 } from '@screenshot-service/screenshot-service';
 import { AnyAction, createAction } from '@reduxjs/toolkit';
 import { InferActionMap, InferActionUnion } from './utils';
-import { delay, put, race, take } from 'redux-saga/effects';
+import { delay, fork, put, race, take } from 'redux-saga/effects';
 import { call } from 'typed-redux-saga';
 import { either } from 'fp-ts';
 import { supabaseClient } from './supabase';
@@ -29,19 +29,13 @@ export const namespace = 'captureScreenshot' as const;
 //
 //
 
-export type State =
-  | { type: 'Idle'; logs: Log[] }
-  | { type: 'Loading'; logs: Log[]; requestId: Data.RequestId.RequestId }
-  | { type: 'Failed'; logs: Log[]; errors: Error[] }
-  | { type: 'Cancelling'; logs: Log[] }
-  | { type: 'Cancelled'; logs: Log[] }
-  | { type: 'Succeeded'; logs: Log[]; src: string };
+export type State = Shared.CaptureScreenshot.State;
 
-export const initialState: State = { type: 'Idle', logs: [] };
+export const initialState = Shared.CaptureScreenshot.initialState;
 
-type Log = { level: Data.LogLevel.LogLevel; message: string };
+type Log = Shared.CaptureScreenshot.Log;
 
-export type Request = CaptureScreenshot.Request;
+type Request = Shared.CaptureScreenshot.Request;
 
 //
 //
@@ -248,7 +242,7 @@ export const saga = function* ({
   clientId: string;
   webBrowser: WebBrowser.WebBrowser;
 }) {
-  yield* captureScreenshotFlow({ clientId, webBrowser });
+  yield fork(captureScreenshotFlow, { clientId, webBrowser });
 };
 
 const captureScreenshotFlow = function* ({

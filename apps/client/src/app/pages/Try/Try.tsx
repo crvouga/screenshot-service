@@ -1,7 +1,3 @@
-import {
-  CaptureScreenshot,
-  Data,
-} from '@screenshot-service/screenshot-service';
 import { Cancel } from '@mui/icons-material';
 import BrokenImageIcon from '@mui/icons-material/BrokenImage';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -23,10 +19,11 @@ import {
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
+import * as ScreenshotService from '@screenshot-service/screenshot-service';
 import { either, option } from 'fp-ts';
 import * as React from 'react';
 import useLocalStorage from '../../../lib/use-local-storage';
-import { useScreenshotClient } from '../../screenshot-service';
+import { screenshotService } from '../../screenshot-service';
 import { ProjectInput } from './ProjectInput';
 import { TargetUrlInput } from './TargetUrlInput';
 
@@ -44,9 +41,15 @@ export const TryPage = () => {
     initialFormState
   );
 
-  const screenshotClient = useScreenshotClient();
+  const [state, setState] = React.useState(screenshotService.getState);
 
-  const captureState = screenshotClient.state.captureScreenshot;
+  React.useEffect(() => {
+    return screenshotService.subscribe(() => {
+      setState(screenshotService.getState());
+    });
+  }, []);
+
+  const captureState = state.captureScreenshot;
 
   const submit = async () => {
     const validationResult = validateForm(form);
@@ -56,23 +59,19 @@ export const TryPage = () => {
       return;
     }
 
-    const request: CaptureScreenshot.Request = {
-      requestId: Data.RequestId.generate(),
+    screenshotService.start({
+      requestId: ScreenshotService.Data.RequestId.generate(),
       delaySec: form.values.delaySec,
       imageType: form.values.imageType,
       strategy: form.values.strategy,
       targetUrl: validationResult.right.targetUrl,
       projectId: validationResult.right.projectId,
-    };
-
-    screenshotClient.dispatch(CaptureScreenshot.Action.ToServer.Start(request));
+    });
   };
 
   const onCancel = () => {
-    if (captureState.type === 'Loading') {
-      screenshotClient.dispatch(
-        CaptureScreenshot.Action.ToServer.Cancel(captureState.requestId)
-      );
+    if (state.captureScreenshot.type === 'Loading') {
+      screenshotService.cancel(state.captureScreenshot.requestId);
     }
   };
 
@@ -109,7 +108,7 @@ export const TryPage = () => {
       <ToggleButtonGroup
         value={form.values.imageType}
         onChange={(_event, value) => {
-          if (Data.ImageType.is(value)) {
+          if (ScreenshotService.Data.ImageType.is(value)) {
             setForm(mergeValues({ imageType: value }));
           }
         }}
@@ -129,14 +128,14 @@ export const TryPage = () => {
       <Select
         value={form.values.delaySec}
         onChange={(event) => {
-          const delaySec = Data.DelaySec.fromNumber(
+          const delaySec = ScreenshotService.Data.DelaySec.fromNumber(
             Number(event?.target.value ?? 0)
           );
 
           setForm(mergeValues({ delaySec }));
         }}
       >
-        {Data.DelaySec.delaySecs.map((delaySec) => (
+        {ScreenshotService.Data.DelaySec.delaySecs.map((delaySec) => (
           <MenuItem value={delaySec} key={delaySec}>
             <ListItemText primary={`${delaySec} seconds`} />
           </MenuItem>
@@ -150,7 +149,7 @@ export const TryPage = () => {
       <ToggleButtonGroup
         value={form.values.strategy}
         onChange={(_event, value) => {
-          if (Data.Strategy.is(value)) {
+          if (ScreenshotService.Data.Strategy.is(value)) {
             setForm(mergeValues({ strategy: value }));
           }
         }}
@@ -256,7 +255,7 @@ const Screenshot = ({
 }: {
   alt: string;
   src?: string;
-  stateType: CaptureScreenshot.State['type'];
+  stateType: ScreenshotService.Client.State['captureScreenshot']['type'];
 } & PaperProps) => {
   return (
     <Paper
@@ -336,10 +335,10 @@ const Screenshot = ({
 type FormState = {
   values: {
     targetUrl: string;
-    imageType: Data.ImageType.ImageType;
-    delaySec: Data.DelaySec.DelaySec;
-    projectId: option.Option<Data.ProjectId.ProjectId>;
-    strategy: Data.Strategy.Strategy;
+    imageType: ScreenshotService.Data.ImageType.ImageType;
+    delaySec: ScreenshotService.Data.DelaySec.DelaySec;
+    projectId: option.Option<ScreenshotService.Data.ProjectId.ProjectId>;
+    strategy: ScreenshotService.Data.Strategy.Strategy;
   };
 
   errors: {
@@ -390,9 +389,14 @@ const validateForm = (
   form: FormState
 ): either.Either<
   FormState['errors'],
-  { targetUrl: Data.TargetUrl.TargetUrl; projectId: Data.ProjectId.ProjectId }
+  {
+    targetUrl: ScreenshotService.Data.TargetUrl.TargetUrl;
+    projectId: ScreenshotService.Data.ProjectId.ProjectId;
+  }
 > => {
-  const decodedTargetUrl = Data.TargetUrl.decode(form.values.targetUrl);
+  const decodedTargetUrl = ScreenshotService.Data.TargetUrl.decode(
+    form.values.targetUrl
+  );
 
   if (
     option.isSome(form.values.projectId) &&
