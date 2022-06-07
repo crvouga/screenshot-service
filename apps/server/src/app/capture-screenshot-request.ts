@@ -115,8 +115,6 @@ const captureScreenshotFlow = function* ({
 
   const project = findProjectResult.right;
 
-  yield put({ type: 'log', message: 'found project', project });
-
   const isOnWhitelist = project.whitelistedUrls.some(
     (url) => url === request.originUrl
   );

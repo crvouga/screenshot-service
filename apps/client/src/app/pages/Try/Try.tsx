@@ -53,8 +53,6 @@ export const TryPage = () => {
     return unsubscribe;
   }, []);
 
-  const captureState = state.captureScreenshotRequest;
-
   const submit = async () => {
     const validationResult = validateForm(form);
 
@@ -73,14 +71,14 @@ export const TryPage = () => {
 
     const originUrl = decodedOrigin.right;
 
-    if (state.socketConnection.type === 'Connected') {
+    if (state.type === 'Connected') {
       const requestId = ScreenshotService.Data.RequestId.generate();
 
       setRequestId(requestId);
 
       screenshotService.dispatch(
         ScreenshotService.CaptureScreenshotRequest.Action.Start({
-          clientId: state.socketConnection.clientId,
+          clientId: state.clientId,
           originUrl: originUrl,
           requestId: requestId,
           delaySec: form.values.delaySec,
@@ -94,24 +92,30 @@ export const TryPage = () => {
   };
 
   const onCancel = () => {
-    if (requestId && state.socketConnection.type === 'Connected') {
+    if (requestId && state.type === 'Connected') {
       screenshotService.dispatch(
         ScreenshotService.CaptureScreenshotRequest.Action.Cancel(
-          state.socketConnection.clientId,
+          state.clientId,
           requestId
         )
       );
     }
   };
 
-  const requestState = requestId
-    ? ScreenshotService.CaptureScreenshotRequest.toRequest(
-        requestId,
-        state.captureScreenshotRequest
-      )
-    : ScreenshotService.CaptureScreenshotRequest.initialRequestState;
+  const requestState =
+    requestId && state.type === 'Connected'
+      ? ScreenshotService.CaptureScreenshotRequest.toRequest(
+          requestId,
+          state.captureScreenshotRequest
+        )
+      : ScreenshotService.CaptureScreenshotRequest.initialRequestState;
 
-  const problems = requestState.type === 'Failed' ? requestState.problems : [];
+  const problems =
+    state.type === 'Connecting'
+      ? [{ message: 'Connecting to server...' }]
+      : requestState.type === 'Failed'
+      ? requestState.problems
+      : [];
 
   return (
     <>
@@ -222,6 +226,7 @@ export const TryPage = () => {
         }}
         onClick={submit}
         loading={requestState.type === 'Loading'}
+        disabled={state.type === 'Connecting'}
       >
         capture screenshot
       </LoadingButton>
@@ -232,7 +237,9 @@ export const TryPage = () => {
         size="large"
         variant="contained"
         loading={requestState.type === 'Cancelling'}
-        disabled={requestState.type !== 'Loading'}
+        disabled={
+          requestState.type !== 'Loading' || state.type === 'Connecting'
+        }
         onClick={onCancel}
       >
         cancel

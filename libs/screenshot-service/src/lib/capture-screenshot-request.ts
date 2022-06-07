@@ -1,6 +1,7 @@
 import { AnyAction, createAction } from '@reduxjs/toolkit';
 import { Data } from '@screenshot-service/screenshot-service';
 import { InferActionUnion } from './utils';
+import * as SocketConnection from './socket-connection';
 
 //
 //
