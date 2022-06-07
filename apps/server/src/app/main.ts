@@ -1,11 +1,11 @@
-import reduxDevTools from '@redux-devtools/cli';
+// import reduxDevTools from '@redux-devtools/cli';
 import { AnyAction, configureStore, createAction } from '@reduxjs/toolkit';
 import { Socket } from '@screenshot-service/screenshot-service';
 import express from 'express';
 import http from 'http';
 import createSagaMiddleware, { eventChannel } from 'redux-saga';
-import { cancel, fork, put, select, takeEvery } from 'redux-saga/effects';
-import remoteDevToolsEnhancer from 'remote-redux-devtools';
+import { cancel, fork, put, takeEvery } from 'redux-saga/effects';
+// import remoteDevToolsEnhancer from 'remote-redux-devtools';
 import socket from 'socket.io';
 import { take } from 'typed-redux-saga';
 import * as CaptureScreenshot from './capture-screenshot-request';
@@ -68,6 +68,11 @@ export const saga = function* ({
   webBrowser: WebBrowser.WebBrowser;
   socketServer: SocketServer;
 }) {
+  yield takeEvery('*', function* (action) {
+    console.log(action);
+    yield;
+  });
+
   yield fork(socketFlow, { socketServer });
   yield fork(clientFlow, { webBrowser, socketServer });
 };
@@ -187,38 +192,38 @@ const makeSocketChan = (socketServer: SocketServer) =>
 export const main = async ({ port }: { port: number }) => {
   const sagaMiddleware = createSagaMiddleware();
 
-  const devToolsConfig = {
-    hostname: 'localhost',
-    port: 9000,
-    secure: false,
-  };
+  // const devToolsConfig = {
+  //   hostname: 'localhost',
+  //   port: 9000,
+  //   secure: false,
+  // };
 
   configureStore({
     preloadedState: initialState,
     reducer: (state) => state,
     middleware: [sagaMiddleware],
-    enhancers: [
-      remoteDevToolsEnhancer({
-        realtime: true,
-        name: 'Screenshot Service API',
-        hostname: devToolsConfig.hostname,
-        port: devToolsConfig.port,
-        secure: devToolsConfig.secure,
-      }),
-    ],
+    // enhancers: [
+    //   remoteDevToolsEnhancer({
+    //     realtime: true,
+    //     name: 'Screenshot Service API',
+    //     hostname: devToolsConfig.hostname,
+    //     port: devToolsConfig.port,
+    //     secure: devToolsConfig.secure,
+    //   }),
+    // ],
   });
 
-  const remoteDevTools = await reduxDevTools({
-    hostname: devToolsConfig.hostname,
-    port: devToolsConfig.port,
-    secure: devToolsConfig.secure,
-  });
+  // const remoteDevTools = await reduxDevTools({
+  //   hostname: devToolsConfig.hostname,
+  //   port: devToolsConfig.port,
+  //   secure: devToolsConfig.secure,
+  // });
 
-  remoteDevTools.on('ready', () => {
-    console.log(
-      `Serving devtools at http://${devToolsConfig.hostname}:${devToolsConfig.port}/`
-    );
-  });
+  // remoteDevTools.on('ready', () => {
+  //   console.log(
+  //     `Serving devtools at http://${devToolsConfig.hostname}:${devToolsConfig.port}/`
+  //   );
+  // });
 
   const webBrowser = await WebBrowser.create();
 
