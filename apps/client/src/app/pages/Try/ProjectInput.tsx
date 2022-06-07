@@ -1,7 +1,4 @@
-import { LoadingButton } from '@mui/lab';
 import {
-  Alert,
-  AlertTitle,
   Box,
   ListItemText,
   MenuItem,
@@ -12,7 +9,7 @@ import {
 import { Data } from '@screenshot-service/screenshot-service';
 import { either, option } from 'fp-ts';
 import { pipe } from 'fp-ts/lib/function';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useAuthUser } from '../../authentication';
 import { useProjectsQuery } from '../../projects';
 
