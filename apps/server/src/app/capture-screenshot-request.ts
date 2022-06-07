@@ -41,25 +41,30 @@ export const saga = function* ({
 }) {
   while (true) {
     const action = yield* call(takeStart, clientId);
+
     const request = action.payload;
     const requestId = request.requestId;
 
-    const [cancel] = yield race([
-      call(takeCancel, requestId),
-      call(captureScreenshotFlow, { clientId, webBrowser, request }),
-    ]);
+    yield fork(function* () {
+      const [cancel] = yield race([
+        call(takeCancel, { requestId }),
+        call(captureScreenshotFlow, { clientId, webBrowser, request }),
+      ]);
 
-    if (cancel) {
-      yield put(
-        Action.Log(clientId, requestId, 'info', 'Cancelling request...')
-      );
+      if (cancel) {
+        yield put(
+          Action.Log(clientId, requestId, 'info', 'Cancelling request...')
+        );
 
-      yield delay(1000);
+        yield delay(1000);
 
-      yield put(Action.Log(clientId, requestId, 'notice', 'Cancelled request'));
+        yield put(
+          Action.Log(clientId, requestId, 'notice', 'Cancelled request')
+        );
 
-      yield put(Action.Cancelled(clientId, requestId));
-    }
+        yield put(Action.Cancelled(clientId, requestId));
+      }
+    });
   }
 };
 
@@ -73,7 +78,11 @@ const takeStart = function* (clientId: string) {
   }
 };
 
-const takeCancel = function* (requestId: Data.RequestId.RequestId) {
+const takeCancel = function* ({
+  requestId,
+}: {
+  requestId: Data.RequestId.RequestId;
+}) {
   while (true) {
     const action: ActionMap['Cancel'] = yield take(Action.Cancel);
 

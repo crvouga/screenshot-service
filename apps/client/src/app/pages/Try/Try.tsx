@@ -42,6 +42,8 @@ export const TryPage = () => {
   );
 
   const [state, setState] = React.useState(screenshotService.getState);
+  const [requestId, setRequestId] =
+    React.useState<ScreenshotService.Data.RequestId.RequestId | null>(null);
 
   React.useEffect(() => {
     const unsubscribe = screenshotService.subscribe(() => {
@@ -62,10 +64,14 @@ export const TryPage = () => {
     }
 
     if (state.socketConnection.type === 'Connected') {
+      const requestId = ScreenshotService.Data.RequestId.generate();
+
+      setRequestId(requestId);
+
       screenshotService.dispatch(
         ScreenshotService.CaptureScreenshotRequest.Action.Start({
           clientId: state.socketConnection.clientId,
-          requestId: ScreenshotService.Data.RequestId.generate(),
+          requestId: requestId,
           delaySec: form.values.delaySec,
           imageType: form.values.imageType,
           strategy: form.values.strategy,
@@ -77,20 +83,24 @@ export const TryPage = () => {
   };
 
   const onCancel = () => {
-    if (
-      state.captureScreenshotRequest.type === 'Loading' &&
-      state.socketConnection.type === 'Connected'
-    ) {
+    if (requestId && state.socketConnection.type === 'Connected') {
       screenshotService.dispatch(
         ScreenshotService.CaptureScreenshotRequest.Action.Cancel(
           state.socketConnection.clientId,
-          state.captureScreenshotRequest.requestId
+          requestId
         )
       );
     }
   };
 
-  const errors = captureState.type === 'Failed' ? captureState.errors : [];
+  const requestState = requestId
+    ? ScreenshotService.CaptureScreenshotRequest.toRequest(
+        requestId,
+        state.captureScreenshotRequest
+      )
+    : ScreenshotService.CaptureScreenshotRequest.initialRequestState;
+
+  const errors = requestState.type === 'Failed' ? requestState.errors : [];
 
   return (
     <>
@@ -205,7 +215,7 @@ export const TryPage = () => {
           mb: 2,
         }}
         onClick={submit}
-        loading={captureState.type === 'Loading'}
+        loading={requestState.type === 'Loading'}
       >
         capture screenshot
       </LoadingButton>
@@ -215,8 +225,8 @@ export const TryPage = () => {
         fullWidth
         size="large"
         variant="contained"
-        loading={captureState.type === 'Cancelling'}
-        disabled={captureState.type !== 'Loading'}
+        loading={requestState.type === 'Cancelling'}
+        disabled={requestState.type !== 'Loading'}
         onClick={onCancel}
       >
         cancel
@@ -230,14 +240,14 @@ export const TryPage = () => {
 
       <Box sx={{ mb: 4 }}>
         <Typography>
-          {captureState.logs[captureState.logs.length - 1]?.message ?? '...'}
+          {requestState.logs[requestState.logs.length - 1]?.message ?? '...'}
         </Typography>
       </Box>
 
       <Screenshot
-        stateType={captureState.type}
+        stateType={requestState.type}
         alt={`screenshot of ${form.values.targetUrl}`}
-        src={captureState.type === 'Succeeded' ? captureState.src : undefined}
+        src={requestState.type === 'Succeeded' ? requestState.src : undefined}
       />
 
       <Button
@@ -247,11 +257,11 @@ export const TryPage = () => {
         variant="contained"
         startIcon={<DownloadIcon />}
         title={form.values.targetUrl}
-        disabled={captureState.type !== 'Succeeded'}
-        {...(captureState.type === 'Succeeded'
+        disabled={requestState.type !== 'Succeeded'}
+        {...(requestState.type === 'Succeeded'
           ? {
-              href: captureState.src,
-              download: captureState.src,
+              href: requestState.src,
+              download: requestState.src,
             }
           : {})}
       >
@@ -270,7 +280,7 @@ const Screenshot = ({
 }: {
   alt: string;
   src?: string;
-  stateType: ScreenshotService.State['captureScreenshotRequest']['type'];
+  stateType: ScreenshotService.CaptureScreenshotRequest.RequestState['type'];
 } & PaperProps) => {
   return (
     <Paper

@@ -10,7 +10,11 @@ import { InferActionUnion } from './utils';
 //
 //
 
-export type State =
+export type State = {
+  [requestId: Data.RequestId.RequestId]: RequestState;
+};
+
+export type RequestState =
   | { type: 'Idle'; logs: Log[] }
   | { type: 'Loading'; logs: Log[]; requestId: Data.RequestId.RequestId }
   | { type: 'Failed'; logs: Log[]; errors: Error[] }
@@ -23,10 +27,9 @@ export type Log = {
   message: string;
 };
 
-export const initialState: State = {
-  type: 'Idle',
-  logs: [],
-};
+export const initialState: State = {};
+
+export const initialRequestState: RequestState = { type: 'Idle', logs: [] };
 
 //
 //
@@ -147,6 +150,10 @@ export const Action = {
 
 export type Action = InferActionUnion<typeof Action>;
 
+export const isAction = (action: AnyAction): action is Action => {
+  return isClientToServer(action) || isServerToClient(action);
+};
+
 //
 //
 //
@@ -159,6 +166,22 @@ export const reducer = (
   state: State = initialState,
   action: AnyAction
 ): State => {
+  if (isAction(action)) {
+    const requestId = action.payload.requestId;
+
+    return {
+      ...state,
+      [requestId]: requestReducer(state[requestId], action),
+    };
+  }
+
+  return state;
+};
+
+const requestReducer = (
+  state: RequestState = initialRequestState,
+  action: AnyAction
+): RequestState => {
   switch (state.type) {
     case 'Failed':
       if (Action.Log.match(action)) {
@@ -236,14 +259,14 @@ export const reducer = (
   }
 };
 
-const appendLog = (log: Log, state: State): State => {
+const appendLog = (log: Log, state: RequestState): RequestState => {
   return { ...state, logs: [...state.logs, log] };
 };
 
 const initLoading = (
-  state: State,
+  state: RequestState,
   requestId: Data.RequestId.RequestId
-): State => {
+): RequestState => {
   return {
     ...state,
     type: 'Loading',
@@ -251,3 +274,16 @@ const initLoading = (
     requestId,
   };
 };
+
+//
+//
+//
+// Selectors
+//
+//
+//
+
+export const toRequest = (
+  requestId: Data.RequestId.RequestId,
+  state: State
+): RequestState => state[requestId] ?? initialRequestState;
