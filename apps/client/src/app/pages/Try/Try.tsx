@@ -218,9 +218,7 @@ export const TryPage = () => {
       />
 
       {option.isSome(form.values.projectId) && (
-        <Box sx={{ marginBottom: 4 }}>
-          <NotOnWhitelistAlert projectId={form.values.projectId.value} />
-        </Box>
+        <NotOnWhitelistAlert projectId={form.values.projectId.value} />
       )}
 
       <LoadingButton

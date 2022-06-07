@@ -75,9 +75,9 @@ export const NotOnWhitelistAlert = ({
     );
 
   return (
-    <Box>
-      <Collapse in={showAlert}>
-        {currentProject && (
+    <Collapse in={showAlert}>
+      {currentProject && (
+        <Box sx={{ marginBottom: 4 }}>
           <Alert severity="warning" variant="outlined">
             <Box sx={{ marginBottom: 1 }}>
               The url for this website, {window.location.origin} is not on the
@@ -93,8 +93,8 @@ export const NotOnWhitelistAlert = ({
               Add To Whitelist
             </LoadingButton>
           </Alert>
-        )}
-      </Collapse>
-    </Box>
+        </Box>
+      )}
+    </Collapse>
   );
 };
