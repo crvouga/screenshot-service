@@ -8,7 +8,7 @@ export type Profile = {
   themeMode: ThemeMode;
 };
 
-type ThemeMode = 'light' | 'dark';
+type ThemeMode = 'light' | 'dark' | 'system';
 
 const rowToProfile = (row: definitions['profiles']): Profile => {
   return {
@@ -17,12 +17,6 @@ const rowToProfile = (row: definitions['profiles']): Profile => {
     avatarSeed: row.avatar_seed,
     themeMode: row.theme_mode,
   };
-};
-
-export const queryFilter = 'projects';
-
-export const queryKeys = {
-  getOne: ({ userId }: { userId: string }) => [queryFilter, 'getOne', userId],
 };
 
 export const getOne =

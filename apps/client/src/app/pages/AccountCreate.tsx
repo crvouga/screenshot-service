@@ -19,7 +19,7 @@ import * as ProfileAvatar from '../profile-avatar';
 import { useCreateProfileMutation, profileQueryFilter } from '../profiles';
 import { Link, routes } from '../routes';
 import {
-  IThemeMode,
+  ThemeMode,
   ThemeModeToggleButtonGroup,
   useThemeModeContext,
 } from '../theme';
@@ -31,7 +31,7 @@ export const AccountCreatePage = () => {
   const [avatarSeed, setAvatarSeed] = useState<ProfileAvatar.Seed>(
     ProfileAvatar.toSeed(authUser.defaultName)
   );
-  const [themeMode, setThemeMode] = useState<IThemeMode>('dark');
+  const [themeMode, setThemeMode] = useState<ThemeMode>('dark');
   const themeModeContext = useThemeModeContext();
 
   useEffect(() => {

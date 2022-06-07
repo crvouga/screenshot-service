@@ -1,4 +1,4 @@
-import { DarkMode, LightMode } from '@mui/icons-material';
+import { DarkMode, LightMode, SettingsBrightness } from '@mui/icons-material';
 import {
   createTheme,
   CssBaseline,
@@ -7,42 +7,44 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   ToggleButtonGroupProps,
+  useMediaQuery,
 } from '@mui/material';
 import constate from 'constate';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useAppEventListener } from './app-event-emitter';
 import useLocalStorage from '../lib/use-local-storage';
 
-/**
- *
- *
- *
- *
- *
- *
- */
+//
+//
+//
+//
+//
+//
+//
+//
 
-export type IThemeMode = 'light' | 'dark';
+export type ThemeMode = 'light' | 'dark' | 'system';
 
-const toThemeMode = (themeMode: string): IThemeMode => {
-  if (themeMode === 'light' || themeMode === 'dark') {
+const toThemeMode = (themeMode: string): ThemeMode => {
+  if (themeMode === 'light' || themeMode === 'dark' || themeMode === 'system') {
     return themeMode;
   }
+
   return 'dark';
 };
 
-/**
- *
- *
- *
- *
- *
- *
- */
+//
+//
+//
+//
+//
+//
+//
+//
 
 const baseTheme = createTheme();
 
-export const makeTheme = ({ mode }: { mode: IThemeMode }) => {
+export const makeTheme = ({ mode }: { mode: 'light' | 'dark' }) => {
   return responsiveFontSizes(
     createTheme({
       palette: {
@@ -105,7 +107,7 @@ const lightTheme = makeTheme({ mode: 'light' });
 export const [ThemeModeContext, useThemeModeContext] = constate(() => {
   const [stored, setStored] = useLocalStorage('theme-mode', 'dark');
 
-  const [themeMode, setThemeMode] = useState<IThemeMode>(toThemeMode(stored));
+  const [themeMode, setThemeMode] = useState<ThemeMode>(toThemeMode(stored));
 
   useEffect(() => {
     setStored(themeMode);
@@ -124,6 +126,8 @@ export const [ThemeModeContext, useThemeModeContext] = constate(() => {
 export const ThemeContext = ({ children }: { children: ReactNode }) => {
   const { themeMode } = useThemeModeContext();
 
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+
   const theme = useMemo(() => {
     switch (themeMode) {
       case 'dark':
@@ -131,8 +135,15 @@ export const ThemeContext = ({ children }: { children: ReactNode }) => {
 
       case 'light':
         return lightTheme;
+
+      case 'system':
+        if (prefersDarkMode) {
+          return darkTheme;
+        }
+
+        return lightTheme;
     }
-  }, [themeMode]);
+  }, [themeMode, prefersDarkMode]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -142,24 +153,22 @@ export const ThemeContext = ({ children }: { children: ReactNode }) => {
   );
 };
 
-/**
- *
- *
- *
- *
- *
- *
- *
- *
- */
+//
+//
+//
+//
+//
+//
+//
+//
 
 export const ThemeModeToggleButtonGroup = ({
   themeMode,
   onThemeModeChanged,
   ...props
 }: {
-  themeMode: IThemeMode;
-  onThemeModeChanged: (themeMode: IThemeMode) => void;
+  themeMode: ThemeMode;
+  onThemeModeChanged: (themeMode: ThemeMode) => void;
 } & ToggleButtonGroupProps) => {
   return (
     <ToggleButtonGroup
@@ -175,6 +184,12 @@ export const ThemeModeToggleButtonGroup = ({
         <LightMode sx={{ mr: 1 }} />
         Light
       </ToggleButton>
+
+      <ToggleButton value="system">
+        <SettingsBrightness sx={{ mr: 1 }} />
+        System
+      </ToggleButton>
+
       <ToggleButton value="dark">
         <DarkMode sx={{ mr: 1 }} />
         Dark

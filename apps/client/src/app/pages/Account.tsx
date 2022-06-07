@@ -29,7 +29,7 @@ import {
 } from '../profiles';
 import { Link, routes } from '../routes';
 import {
-  IThemeMode,
+  ThemeMode,
   ThemeModeToggleButtonGroup,
   useThemeModeContext,
 } from '../theme';
@@ -348,7 +348,7 @@ const ThemeSection = () => {
   const mutation = useUpdateProfileMutation();
   const queryClient = useQueryClient();
 
-  const onThemeModeChanged = async (nextThemeMode: IThemeMode) => {
+  const onThemeModeChanged = async (nextThemeMode: ThemeMode) => {
     const result = await mutation.mutateAsync({
       userId: profile.userId,
       themeMode: nextThemeMode,
