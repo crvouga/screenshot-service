@@ -1,7 +1,7 @@
 import {
+  CaptureScreenshotRequest,
   Data,
   DataAccess,
-  CaptureScreenshotRequest,
 } from '@screenshot-service/screenshot-service';
 import { either } from 'fp-ts';
 import { delay, fork, put, race, take } from 'redux-saga/effects';
@@ -22,8 +22,6 @@ const Action = CaptureScreenshotRequest.Action;
 
 type ActionMap = InferActionMap<typeof Action>;
 
-type StartCaptureRequest = ActionMap['Start']['payload'];
-
 //
 //
 //
@@ -32,17 +30,9 @@ type StartCaptureRequest = ActionMap['Start']['payload'];
 //
 //
 
-export const saga = function* ({
-  clientId,
-  webBrowser,
-}: {
-  clientId: string;
-  webBrowser: WebBrowser.WebBrowser;
-}) {
-  yield fork(captureScreenshotFlow, { clientId, webBrowser });
-};
+type CaptureScreenshotRequest = ActionMap['Start']['payload'];
 
-const captureScreenshotFlow = function* ({
+export const saga = function* ({
   clientId,
   webBrowser,
 }: {
@@ -51,17 +41,13 @@ const captureScreenshotFlow = function* ({
 }) {
   while (true) {
     const action = yield* call(takeStart, clientId);
+    const request = action.payload;
+    const requestId = request.requestId;
 
-    const requestId = action.payload.requestId;
-
-    const { cancel } = yield race({
-      cancel: call(takeCancel, requestId),
-      requestScreenshot: call(captureScreenshotMainFlow, {
-        clientId,
-        webBrowser,
-        request: action.payload,
-      }),
-    });
+    const [cancel] = yield race([
+      call(takeCancel, requestId),
+      call(captureScreenshotFlow, { clientId, webBrowser, request }),
+    ]);
 
     if (cancel) {
       yield put(
@@ -77,14 +63,34 @@ const captureScreenshotFlow = function* ({
   }
 };
 
-const captureScreenshotMainFlow = function* ({
+const takeStart = function* (clientId: string) {
+  while (true) {
+    const action: ActionMap['Start'] = yield take(Action.Start);
+
+    if (action.payload.clientId === clientId) {
+      return action;
+    }
+  }
+};
+
+const takeCancel = function* (requestId: Data.RequestId.RequestId) {
+  while (true) {
+    const action: ActionMap['Cancel'] = yield take(Action.Cancel);
+
+    if (action.payload.requestId === requestId) {
+      return action;
+    }
+  }
+};
+
+const captureScreenshotFlow = function* ({
   clientId,
   webBrowser,
   request,
 }: {
   clientId: string;
   webBrowser: WebBrowser.WebBrowser;
-  request: StartCaptureRequest;
+  request: CaptureScreenshotRequest;
 }) {
   const findProjectResult = yield* call(
     DataAccess.Projects.findOne(supabaseClient),
@@ -110,7 +116,7 @@ const captureScreenshotMainFlow = function* ({
 const cacheFirstFlow = function* (
   clientId: string,
   webBrowser: WebBrowser.WebBrowser,
-  request: StartCaptureRequest
+  request: CaptureScreenshotRequest
 ) {
   yield put(
     Action.Log(clientId, request.requestId, 'info', 'Checking cache...')
@@ -156,7 +162,7 @@ const cacheFirstFlow = function* (
 const networkFirstFlow = function* (
   clientId: string,
   webBrowser: WebBrowser.WebBrowser,
-  request: StartCaptureRequest
+  request: CaptureScreenshotRequest
 ) {
   const requestId = request.requestId;
 
@@ -238,32 +244,4 @@ const networkFirstFlow = function* (
       src,
     })
   );
-};
-
-//
-//
-//
-// Helpers
-//
-//
-//
-
-const takeStart = function* (clientId: string) {
-  while (true) {
-    const action: ActionMap['Start'] = yield take(Action.Start);
-
-    if (action.payload.clientId === clientId) {
-      return action;
-    }
-  }
-};
-
-const takeCancel = function* (requestId: Data.RequestId.RequestId) {
-  while (true) {
-    const action: ActionMap['Cancel'] = yield take(Action.Cancel);
-
-    if (action.payload.requestId === requestId) {
-      return action;
-    }
-  }
 };

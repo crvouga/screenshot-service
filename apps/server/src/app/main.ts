@@ -56,47 +56,64 @@ export const isAction = (action: AnyAction): action is Action => {
 //
 //
 //
-// Server
-//
-//
-//
-
-const app = express();
-
-const server = http.createServer(app);
-
-const socketServer = new socket.Server<
-  Socket.ClientToServerEvents,
-  Socket.ServerToClientEvents
->(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
-  },
-});
-
-//
-//
-//
 // Saga
 //
 //
 //
 
-export const saga = function* (webBrowser: WebBrowser.WebBrowser) {
-  yield fork(socketFlow);
-  yield fork(clientFlow, webBrowser);
+export const saga = function* ({
+  webBrowser,
+  socketServer,
+}: {
+  webBrowser: WebBrowser.WebBrowser;
+  socketServer: SocketServer;
+}) {
+  yield fork(socketFlow, { socketServer });
+  yield fork(clientFlow, { webBrowser, socketServer });
 };
 
-const clientFlow = function* (webBrowser: WebBrowser.WebBrowser) {
+const clientFlow = function* ({
+  webBrowser,
+  socketServer,
+}: {
+  webBrowser: WebBrowser.WebBrowser;
+  socketServer: SocketServer;
+}) {
   yield takeEvery(Action.ClientConnected, function* (action) {
     const clientId = action.payload.clientId;
 
-    const task = yield fork(connectedClientFlow, webBrowser, clientId);
+    const task = yield fork(
+      connectedClientFlow,
+      { webBrowser, socketServer },
+      clientId
+    );
 
     yield takeClientDisconnected({ clientId });
 
     yield cancel(task);
+  });
+};
+
+const connectedClientFlow = function* (
+  {
+    webBrowser,
+    socketServer,
+  }: {
+    webBrowser: WebBrowser.WebBrowser;
+    socketServer: SocketServer;
+  },
+  clientId: string
+) {
+  yield fork(CaptureScreenshot.saga, { clientId, webBrowser });
+
+  yield takeEvery('*', function* (action) {
+    if (
+      Socket.isServerToClientAction(action) &&
+      action.payload.clientId === clientId
+    ) {
+      socketServer.to(clientId).emit('ServerToClient', action);
+      yield;
+    }
   });
 };
 
@@ -112,22 +129,6 @@ const takeClientDisconnected = function* ({ clientId }: { clientId: string }) {
   }
 };
 
-const connectedClientFlow = function* (
-  webBrowser: WebBrowser.WebBrowser,
-  clientId: string
-) {
-  yield fork(CaptureScreenshot.saga, { clientId, webBrowser });
-
-  yield takeEvery('*', function* (action) {
-    if (
-      Socket.isServerToClientAction(action) &&
-      action.payload.clientId === clientId
-    ) {
-      socketServer.to(clientId).emit('ServerToClient', action);
-      yield;
-    }
-  });
-};
 //
 //
 //
@@ -136,41 +137,44 @@ const connectedClientFlow = function* (
 //
 //
 
-const socketFlow = function* () {
-  yield fork(clientToServerFlow);
-};
+const socketFlow = function* ({
+  socketServer,
+}: {
+  socketServer: SocketServer;
+}) {
+  const socketChan = makeSocketChan(socketServer);
 
-const clientToServerFlow = function* () {
   yield takeEvery(socketChan, function* (action) {
     yield put(action);
   });
 };
 
-const socketChan = eventChannel<AnyAction>((emit) => {
-  socketServer.on('connection', (socket) => {
-    emit(Action.ClientConnected(socket.id));
+const makeSocketChan = (socketServer: SocketServer) =>
+  eventChannel<AnyAction>((emit) => {
+    socketServer.on('connection', (socket) => {
+      emit(Action.ClientConnected(socket.id));
 
-    socket.on('disconnecting', () => {
-      emit(Action.ClientDisconnecting(socket.id));
+      socket.on('disconnecting', () => {
+        emit(Action.ClientDisconnecting(socket.id));
+      });
+
+      socket.on('disconnect', () => {
+        emit(Action.ClientDisconnected(socket.id));
+      });
+
+      socket.on('error', (error) => {
+        emit(Action.SocketError(error));
+      });
+
+      socket.on('ClientToServer', (action) => {
+        return emit(action);
+      });
     });
 
-    socket.on('disconnect', () => {
-      emit(Action.ClientDisconnected(socket.id));
-    });
-
-    socket.on('error', (error) => {
-      emit(Action.SocketError(error));
-    });
-
-    socket.on('ClientToServer', (action) => {
-      return emit(action);
-    });
+    return () => {
+      //
+    };
   });
-
-  return () => {
-    //
-  };
-});
 
 //
 //
@@ -218,9 +222,25 @@ export const main = async ({ port }: { port: number }) => {
 
   const webBrowser = await WebBrowser.create();
 
-  sagaMiddleware.run(saga, webBrowser);
+  const app = express();
+
+  const server = http.createServer(app);
+
+  const socketServer: SocketServer = new socket.Server(server, {
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST'],
+    },
+  });
+
+  sagaMiddleware.run(saga, { webBrowser, socketServer });
 
   server.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}/`);
   });
 };
+
+type SocketServer = socket.Server<
+  Socket.ClientToServerEvents,
+  Socket.ServerToClientEvents
+>;
