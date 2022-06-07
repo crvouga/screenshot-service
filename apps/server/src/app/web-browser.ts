@@ -32,7 +32,7 @@ export const goTo = async (page: puppeteer.Page, url: Data.Url.Url) => {
   } catch (error) {
     const message =
       error?.toString?.() ??
-      'Failed to navigate to url in headless web browser for an unknown reason';
+      'Web browser failed to navigate to url for an unknown reason';
 
     return either.left([{ message }]);
   }
