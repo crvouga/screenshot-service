@@ -53,13 +53,13 @@ export const saga = function* ({
 
       if (cancel) {
         yield put(
-          Action.Log(clientId, requestId, 'info', 'Cancelling request...')
+          Action.Log(clientId, requestId, 'info', 'cancelling request...')
         );
 
         yield delay(1000);
 
         yield put(
-          Action.Log(clientId, requestId, 'notice', 'Cancelled request')
+          Action.Log(clientId, requestId, 'notice', 'cancelled request')
         );
 
         yield put(Action.Cancelled(clientId, requestId));
@@ -145,7 +145,7 @@ const cacheFirstFlow = function* (
   request: CaptureScreenshotRequest
 ) {
   yield put(
-    Action.Log(clientId, request.requestId, 'info', 'Checking cache...')
+    Action.Log(clientId, request.requestId, 'info', 'checking cache...')
   );
 
   const cacheResult = yield* call(
@@ -156,17 +156,23 @@ const cacheFirstFlow = function* (
   if (either.isRight(cacheResult)) {
     const [screenshot] = cacheResult.right;
 
-    const srcResult = yield* call(
-      DataAccess.Screenshots.getSrc(supabaseClient),
+    const publicUrlResult = yield* call(
+      DataAccess.Screenshots.getPublicUrl(supabaseClient),
       screenshot
     );
 
-    if (either.isLeft(srcResult)) {
-      yield put(Action.Failed(clientId, request.requestId, srcResult.left));
+    if (either.isLeft(publicUrlResult)) {
+      yield put(
+        Action.Failed(clientId, request.requestId, [publicUrlResult.left])
+      );
       return;
     }
 
-    const { src } = srcResult.right;
+    const publicUrl = publicUrlResult.right;
+
+    yield put(
+      Action.Log(clientId, request.requestId, 'info', 'found cached screenshot')
+    );
 
     yield put(
       Action.Succeeded({
@@ -175,7 +181,7 @@ const cacheFirstFlow = function* (
         requestId: request.requestId,
         screenshotId: screenshot.screenshotId,
         imageType: screenshot.imageType,
-        src,
+        src: publicUrl,
       })
     );
 
@@ -193,7 +199,7 @@ const networkFirstFlow = function* (
   const requestId = request.requestId;
 
   yield put(
-    Action.Log(clientId, requestId, 'info', 'Opening url in web browser...')
+    Action.Log(clientId, requestId, 'info', 'opening url in web browser...')
   );
 
   const page = yield* call(WebBrowser.openNewPage, webBrowser);
@@ -211,14 +217,14 @@ const networkFirstFlow = function* (
         clientId,
         requestId,
         'info',
-        `Delaying for ${remaining} seconds...`
+        `delaying for ${remaining} seconds...`
       )
     );
 
     yield delay(1000);
   }
 
-  yield put(Action.Log(clientId, requestId, 'info', `Capturing screenshot...`));
+  yield put(Action.Log(clientId, requestId, 'info', `capturing screenshot...`));
 
   const captureResult = yield* call(
     WebBrowser.captureScreenshot,
@@ -231,7 +237,7 @@ const networkFirstFlow = function* (
     return;
   }
 
-  yield put(Action.Log(clientId, requestId, 'info', `Caching screenshot...`));
+  yield put(Action.Log(clientId, requestId, 'info', `caching screenshot...`));
 
   const putCacheResult = yield* call(
     DataAccess.Screenshots.put(supabaseClient),
@@ -241,7 +247,7 @@ const networkFirstFlow = function* (
 
   if (either.isLeft(putCacheResult)) {
     yield put(
-      Action.Log(clientId, requestId, 'error', `Failed to cache screenshot.`)
+      Action.Log(clientId, requestId, 'error', `failed to cache screenshot.`)
     );
     yield put(Action.Failed(clientId, requestId, putCacheResult.left));
     return;
@@ -249,22 +255,21 @@ const networkFirstFlow = function* (
 
   const screenshot = putCacheResult.right;
 
-  const srcResult = yield* call(
-    DataAccess.Screenshots.getSrc(supabaseClient),
+  const publicUrlResult = yield* call(
+    DataAccess.Screenshots.getPublicUrl(supabaseClient),
     screenshot
   );
 
-  if (either.isLeft(srcResult)) {
-    yield put(
-      Action.Log(clientId, requestId, 'error', `Failed to get screenshot's src`)
-    );
-    yield put(Action.Failed(clientId, requestId, srcResult.left));
+  if (either.isLeft(publicUrlResult)) {
+    yield put(Action.Failed(clientId, requestId, [publicUrlResult.left]));
     return;
   }
 
-  const { src } = srcResult.right;
+  const publicUrl = publicUrlResult.right;
 
-  yield put(Action.Log(clientId, requestId, 'notice', `Request suceeded`));
+  yield put(
+    Action.Log(clientId, requestId, 'notice', `captured new screenshot`)
+  );
   yield put(
     Action.Succeeded({
       clientId,
@@ -272,7 +277,7 @@ const networkFirstFlow = function* (
       source: 'Network',
       screenshotId: screenshot.screenshotId,
       imageType: screenshot.imageType,
-      src,
+      src: publicUrl,
     })
   );
 };

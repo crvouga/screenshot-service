@@ -16,6 +16,9 @@ export const useScreenshotSrcQuery = ({
   imageType: Data.ImageType.ImageType;
 }) => {
   return useQuery(['screenshots', screenshotId], () =>
-    DataAccess.Screenshots.getSrc(supabaseClient)({ screenshotId, imageType })
+    DataAccess.Screenshots.getPublicUrl(supabaseClient)({
+      screenshotId,
+      imageType,
+    })
   );
 };

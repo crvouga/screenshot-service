@@ -145,7 +145,7 @@ const ScreenshotImage = ({
                 alt="..."
                 width="100%"
                 height="100%"
-                src={query.data.right.src}
+                src={query.data.right}
                 style={{ objectFit: 'cover' }}
               />
             )}

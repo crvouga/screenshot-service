@@ -173,7 +173,7 @@ export const findManyByProjectId =
     return either.right(toAllRight(decodings));
   };
 
-export const getSrc =
+export const getPublicUrl =
   (supabaseClient: SupabaseClient) =>
   async ({
     screenshotId,
@@ -181,7 +181,7 @@ export const getSrc =
   }: {
     imageType: Data.ImageType.ImageType;
     screenshotId: Data.ScreenshotId.ScreenshotId;
-  }): Promise<either.Either<Problem[], { src: string }>> => {
+  }): Promise<either.Either<Problem, Data.Url.Url>> => {
     const filename = toFilename({ screenshotId, imageType });
 
     const response = await supabaseClient.storage
@@ -189,14 +189,12 @@ export const getSrc =
       .getPublicUrl(filename);
 
     if (response.error) {
-      return either.left([{ message: response.error.message }]);
+      return either.left({ message: response.error.message });
     }
 
-    if (response.publicURL) {
-      return either.right({ src: response.publicURL });
-    }
+    const decoded = Data.Url.decode(response.publicURL);
 
-    return either.left([{ message: 'supabase returned a null publicURL' }]);
+    return decoded;
   };
 
 export const put =
