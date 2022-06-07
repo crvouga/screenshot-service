@@ -5,10 +5,9 @@ export type RequestId = Uuid.Uuid & { tag: 'IRequestId' };
 
 export const is = (value: unknown): value is RequestId => Uuid.is(value);
 
-export const decode = either.fromPredicate(
-  is,
-  () => new Error('failed to decode request id')
-);
+export const decode = either.fromPredicate(is, () => ({
+  message: 'failed to decode request id',
+}));
 
 export const generate = (): RequestId => {
   const uuid = Uuid.generate();

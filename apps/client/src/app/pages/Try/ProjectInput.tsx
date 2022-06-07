@@ -1,5 +1,11 @@
 import { Data } from '@screenshot-service/screenshot-service';
-import { ListItemText, MenuItem, Select } from '@mui/material';
+import {
+  ListItemText,
+  MenuItem,
+  Select,
+  SelectProps,
+  Typography,
+} from '@mui/material';
 import { either, option } from 'fp-ts';
 import { pipe } from 'fp-ts/lib/function';
 import React from 'react';
@@ -9,10 +15,13 @@ import { useProjectsQuery } from '../../projects';
 export const ProjectInput = ({
   projectId,
   setProjectId,
+  helperText,
+  ...selectProps
 }: {
   projectId: option.Option<Data.ProjectId.ProjectId>;
   setProjectId: (projectId: option.Option<Data.ProjectId.ProjectId>) => void;
-}) => {
+  helperText?: string;
+} & SelectProps) => {
   const authUser = useAuthUser();
   const query = useProjectsQuery({ ownerId: authUser.userId });
   const options =
@@ -31,30 +40,46 @@ export const ProjectInput = ({
   );
 
   return (
-    <Select fullWidth value={currentValue} placeholder="select a project">
-      <MenuItem
-        value={'None'}
-        onClick={() => {
-          setProjectId(option.none);
-        }}
+    <>
+      <Select
+        fullWidth
+        value={currentValue}
+        placeholder="select a project"
+        {...selectProps}
       >
-        <ListItemText
-          primaryTypographyProps={{ color: 'text.secondary' }}
-          primary={'No project selected'}
-        />
-      </MenuItem>
-
-      {options.map((project) => (
         <MenuItem
-          value={project.projectId}
-          key={project.projectId}
+          value={'None'}
           onClick={() => {
-            setProjectId(option.some(project.projectId));
+            setProjectId(option.none);
           }}
         >
-          <ListItemText primary={project.projectName} />
+          <ListItemText
+            primaryTypographyProps={{ color: 'text.secondary' }}
+            primary={'No project selected'}
+          />
         </MenuItem>
-      ))}
-    </Select>
+
+        {options.map((project) => (
+          <MenuItem
+            value={project.projectId}
+            key={project.projectId}
+            onClick={() => {
+              setProjectId(option.some(project.projectId));
+            }}
+          >
+            <ListItemText primary={project.projectName} />
+          </MenuItem>
+        ))}
+      </Select>
+      {helperText && (
+        <Typography
+          color={selectProps.error ? 'error' : 'inherit'}
+          variant="caption"
+          sx={{ marginX: 1.5 }}
+        >
+          {helperText}
+        </Typography>
+      )}
+    </>
   );
 };

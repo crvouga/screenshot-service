@@ -19,6 +19,8 @@ export type Screenshot = {
   targetUrl: Data.TargetUrl.TargetUrl;
 };
 
+type Problem = { message: string };
+
 //
 //
 //
@@ -40,7 +42,7 @@ export const toFilename = ({
 
 const decodeRow = (
   row: definitions['screenshots']
-): either.Either<Error[], Screenshot> => {
+): either.Either<Problem[], Screenshot> => {
   const projectId = Data.ProjectId.decode(row.project_id);
   const screenshotId = Data.ScreenshotId.decode(row.id);
   const imageType = Data.ImageType.decode(row.image_type);
@@ -89,7 +91,7 @@ export const get =
     delaySec: Data.DelaySec.DelaySec;
     targetUrl: Data.TargetUrl.TargetUrl;
     imageType: Data.ImageType.ImageType;
-  }): Promise<either.Either<Error[], [Screenshot, Buffer]>> => {
+  }): Promise<either.Either<Problem[], [Screenshot, Buffer]>> => {
     const findResult = await findOne(supabaseClient)({
       projectId,
       delaySec,
@@ -111,17 +113,18 @@ export const get =
 
     if (downloadResponse.error) {
       return either.left([
-        new Error(
-          `Supabase couldn't download screenshot. ${downloadResponse.error.message}`
-        ),
+        {
+          message: `Supabase couldn't download screenshot. ${downloadResponse.error.message}`,
+        },
       ]);
     }
 
     if (!downloadResponse.data) {
       return either.left([
-        new Error(
-          'Supabase did not return any data when downloading screenshot'
-        ),
+        {
+          message:
+            'Supabase did not return any data when downloading screenshot',
+        },
       ]);
     }
 
@@ -148,7 +151,7 @@ export const findManyByProjectId =
     projectId,
   }: {
     projectId: string;
-  }): Promise<either.Either<Error[], Screenshot[]>> => {
+  }): Promise<either.Either<Problem[], Screenshot[]>> => {
     const response = await supabaseClient
       .from<definitions['screenshots']>('screenshots')
       .select('*')
@@ -156,7 +159,7 @@ export const findManyByProjectId =
       .order('created_at', { ascending: false });
 
     if (response.error) {
-      return either.left([new Error(response.error.message)]);
+      return either.left([{ message: response.error.message }]);
     }
 
     const decodings = response.data.map(decodeRow);
@@ -178,7 +181,7 @@ export const getSrc =
   }: {
     imageType: Data.ImageType.ImageType;
     screenshotId: Data.ScreenshotId.ScreenshotId;
-  }): Promise<either.Either<Error[], { src: string }>> => {
+  }): Promise<either.Either<Problem[], { src: string }>> => {
     const filename = toFilename({ screenshotId, imageType });
 
     const response = await supabaseClient.storage
@@ -186,14 +189,14 @@ export const getSrc =
       .getPublicUrl(filename);
 
     if (response.error) {
-      return either.left([new Error(response.error.message)]);
+      return either.left([{ message: response.error.message }]);
     }
 
     if (response.publicURL) {
       return either.right({ src: response.publicURL });
     }
 
-    return either.left([new Error('supabase returned a null publicURL')]);
+    return either.left([{ message: 'supabase returned a null publicURL' }]);
   };
 
 export const put =
@@ -211,7 +214,7 @@ export const put =
       imageType: Data.ImageType.ImageType;
     },
     buffer: Buffer
-  ): Promise<either.Either<Error[], Screenshot>> => {
+  ): Promise<either.Either<Problem[], Screenshot>> => {
     const findElseInsertResult = await findOneElseInsertOne(supabaseClient)({
       targetUrl,
       delaySec,
@@ -235,7 +238,7 @@ export const put =
       .upload(filename, buffer, { upsert: true });
 
     if (uploadResponse.error) {
-      return either.left([new Error(uploadResponse.error.message)]);
+      return either.left([{ message: uploadResponse.error.message }]);
     }
 
     return either.right(screenshot);
@@ -253,7 +256,7 @@ const findOne =
     delaySec: Data.DelaySec.DelaySec;
     projectId: Data.ProjectId.ProjectId;
     imageType: Data.ImageType.ImageType;
-  }): Promise<either.Either<Error[], Screenshot>> => {
+  }): Promise<either.Either<Problem[], Screenshot>> => {
     const response = await supabaseClient
       .from<definitions['screenshots']>('screenshots')
       .select('*')
@@ -266,7 +269,7 @@ const findOne =
       .single();
 
     if (response.error) {
-      return either.left([new Error(response.error.message)]);
+      return either.left([{ message: response.error.message }]);
     }
 
     const decoded = decodeRow(response.data);
@@ -286,7 +289,7 @@ const insertOne =
     targetUrl: Data.TargetUrl.TargetUrl;
     delaySec: Data.DelaySec.DelaySec;
     imageType: Data.ImageType.ImageType;
-  }): Promise<either.Either<Error[], Screenshot>> => {
+  }): Promise<either.Either<Problem[], Screenshot>> => {
     const response = await supabaseClient
       .from<definitions['screenshots']>('screenshots')
       .insert({
@@ -298,7 +301,7 @@ const insertOne =
       .single();
 
     if (response.error) {
-      return either.left([new Error(response.error.message)]);
+      return either.left([{ message: response.error.message }]);
     }
 
     const decoded = decodeRow(response.data);
@@ -318,7 +321,7 @@ const findOneElseInsertOne =
     targetUrl: Data.TargetUrl.TargetUrl;
     delaySec: Data.DelaySec.DelaySec;
     imageType: Data.ImageType.ImageType;
-  }): Promise<either.Either<Error[], Screenshot>> => {
+  }): Promise<either.Either<Problem[], Screenshot>> => {
     const findResult = await findOne(supabaseClient)({
       projectId,
       targetUrl,

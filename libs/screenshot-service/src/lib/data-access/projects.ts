@@ -12,9 +12,11 @@ export type Project = {
   whitelistedUrls: Data.Url.Url[];
 };
 
+type Problem = { message: string };
+
 const decodeRow = (
   row: definitions['projects']
-): either.Either<Error[], Project> => {
+): either.Either<Problem[], Project> => {
   const projectId = Data.ProjectId.decode(row.id);
   const ownerId = Data.UserId.decode(row.owner_id);
   const projectName = Data.ProjectName.decode(row.name);
@@ -49,14 +51,14 @@ export const findMany =
     ownerId,
   }: {
     ownerId: Data.UserId.UserId;
-  }): Promise<either.Either<Error[], Project[]>> => {
+  }): Promise<either.Either<Problem[], Project[]>> => {
     const response = await supabaseClient
       .from<definitions['projects']>('projects')
       .select('*')
       .match({ owner_id: ownerId });
 
     if (response.error) {
-      return either.left([new Error(response.error.message)]);
+      return either.left([{ message: response.error.message }]);
     }
 
     const decodings = response.data.map(decodeRow);
@@ -76,7 +78,7 @@ export const findOne =
     projectId,
   }: {
     projectId: Data.ProjectId.ProjectId;
-  }): Promise<either.Either<Error[], Project>> => {
+  }): Promise<either.Either<Problem[], Project>> => {
     const response = await supabaseClient
       .from<definitions['projects']>('projects')
       .select('*')
@@ -84,7 +86,7 @@ export const findOne =
       .single();
 
     if (response.error) {
-      return either.left([new Error(response.error.message)]);
+      return either.left([{ message: response.error.message }]);
     }
 
     const decoded = decodeRow(response.data);
@@ -98,7 +100,7 @@ export const deleteForever =
     projectId,
   }: {
     projectId: Data.ProjectId.ProjectId;
-  }): Promise<either.Either<Error[], Project>> => {
+  }): Promise<either.Either<Problem[], Project>> => {
     const response = await supabaseClient
       .from<definitions['projects']>('projects')
       .delete()
@@ -106,7 +108,7 @@ export const deleteForever =
       .single();
 
     if (response.error) {
-      return either.left([new Error(response.error.message)]);
+      return either.left([{ message: response.error.message }]);
     }
 
     const decoded = decodeRow(response.data);
@@ -122,14 +124,14 @@ export const insert =
   }: {
     ownerId: Data.UserId.UserId;
     projectName: Data.ProjectName.ProjectName;
-  }): Promise<either.Either<Error[], Project>> => {
+  }): Promise<either.Either<Problem[], Project>> => {
     const response = await supabaseClient
       .from<definitions['projects']>('projects')
       .insert({ owner_id: ownerId, name: projectName })
       .single();
 
     if (response.error) {
-      return either.left([new Error(response.error.message)]);
+      return either.left([{ message: response.error.message }]);
     }
 
     const decoded = decodeRow(response.data);
@@ -143,7 +145,7 @@ export const update =
     projectId,
     ...updates
   }: Partial<Project> & { projectId: Data.ProjectId.ProjectId }): Promise<
-    either.Either<Error[], Project>
+    either.Either<Problem[], Project>
   > => {
     const response = await supabaseClient
       .from<definitions['projects']>('projects')
@@ -157,7 +159,7 @@ export const update =
       .single();
 
     if (response.error) {
-      return either.left([new Error(response.error.message)]);
+      return either.left([{ message: response.error.message }]);
     }
 
     const decoded = decodeRow(response.data);

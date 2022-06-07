@@ -14,7 +14,6 @@ export const is = (value: unknown): value is Url => {
   }
 };
 
-export const decode = either.fromPredicate(
-  is,
-  () => new Error('failed to decode url')
-);
+export const decode = either.fromPredicate(is, () => ({
+  message: 'failed to decode url',
+}));

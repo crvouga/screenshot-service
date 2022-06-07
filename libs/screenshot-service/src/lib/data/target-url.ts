@@ -7,7 +7,6 @@ export const is = (value: unknown): value is TargetUrl => {
   return Url.is(value);
 };
 
-export const decode = either.fromPredicate(
-  is,
-  () => new Error('failed to decode target url')
-);
+export const decode = either.fromPredicate(is, () => ({
+  message: 'failed to decode target url',
+}));

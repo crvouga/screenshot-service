@@ -113,6 +113,25 @@ const captureScreenshotFlow = function* ({
     return;
   }
 
+  const project = findProjectResult.right;
+
+  yield put({ type: 'log', message: 'found project', project });
+
+  const isOnWhitelist = project.whitelistedUrls.some(
+    (url) => url === request.originUrl
+  );
+
+  if (!isOnWhitelist) {
+    yield put(
+      Action.Failed(clientId, request.requestId, [
+        {
+          message: `the origin url "${request.originUrl}" is not on the whitelist for the project "${project.projectName}". add url to whitelist then try again`,
+        },
+      ])
+    );
+    return;
+  }
+
   if (request.strategy === 'cache-first') {
     yield* cacheFirstFlow(clientId, webBrowser, request);
   }
@@ -181,7 +200,12 @@ const networkFirstFlow = function* (
 
   const page = yield* call(WebBrowser.openNewPage, webBrowser);
 
-  yield* call(WebBrowser.goTo, page, request.targetUrl);
+  const goToResult = yield* call(WebBrowser.goTo, page, request.targetUrl);
+
+  if (either.isLeft(goToResult)) {
+    yield put(Action.Failed(clientId, request.requestId, goToResult.left));
+    return;
+  }
 
   for (let remaining = request.delaySec; remaining > 0; remaining--) {
     yield put(

@@ -24,9 +24,18 @@ export const openNewPage = async (browser: puppeteer.Browser) => {
 };
 
 export const goTo = async (page: puppeteer.Page, url: Data.Url.Url) => {
-  await page.goto(url, {
-    waitUntil: 'networkidle2',
-  });
+  try {
+    await page.goto(url, {
+      waitUntil: 'networkidle2',
+    });
+    return either.right([]);
+  } catch (error) {
+    const message =
+      error?.toString?.() ??
+      'Failed to navigate to url in headless web browser for an unknown reason';
+
+    return either.left([{ message }]);
+  }
 };
 
 export const captureScreenshot = async (

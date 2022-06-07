@@ -7,7 +7,6 @@ export const imageTypes = new Set(['jpeg', 'png']);
 export const is = (value: unknown): value is ImageType =>
   typeof value === 'string' && imageTypes.has(value);
 
-export const decode = either.fromPredicate(
-  is,
-  () => new Error('failed to decode image type')
-);
+export const decode = either.fromPredicate(is, () => ({
+  message: 'failed to decode image type',
+}));

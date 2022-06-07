@@ -8,10 +8,9 @@ export const is = (value: unknown): value is DelaySec => {
   return delaySecs.some((delaySec) => delaySec === value);
 };
 
-export const decode = either.fromPredicate(
-  is,
-  () => new Error('failed to decode delay sec')
-);
+export const decode = either.fromPredicate(is, () => ({
+  message: 'failed to decode delay sec',
+}));
 
 export const fromNumber = (value: number): DelaySec => {
   const clamped = Math.max(0, Math.min(10, Math.trunc(value)));

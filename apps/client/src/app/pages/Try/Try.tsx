@@ -63,6 +63,16 @@ export const TryPage = () => {
       return;
     }
 
+    const decodedOrigin = ScreenshotService.Data.Url.decode(
+      window.location.origin
+    );
+
+    if (either.isLeft(decodedOrigin)) {
+      return;
+    }
+
+    const originUrl = decodedOrigin.right;
+
     if (state.socketConnection.type === 'Connected') {
       const requestId = ScreenshotService.Data.RequestId.generate();
 
@@ -71,6 +81,7 @@ export const TryPage = () => {
       screenshotService.dispatch(
         ScreenshotService.CaptureScreenshotRequest.Action.Start({
           clientId: state.socketConnection.clientId,
+          originUrl: originUrl,
           requestId: requestId,
           delaySec: form.values.delaySec,
           imageType: form.values.imageType,
@@ -100,7 +111,7 @@ export const TryPage = () => {
       )
     : ScreenshotService.CaptureScreenshotRequest.initialRequestState;
 
-  const errors = requestState.type === 'Failed' ? requestState.errors : [];
+  const problems = requestState.type === 'Failed' ? requestState.problems : [];
 
   return (
     <>
@@ -112,7 +123,12 @@ export const TryPage = () => {
         projectId={form.values.projectId}
         setProjectId={(projectId) => {
           setForm(mergeValues({ projectId }));
+          setForm(mergeErrors({ projectId: [] }));
         }}
+        error={form.errors.projectId.length > 0}
+        helperText={form.errors.projectId
+          .map((error) => error.message)
+          .join(', ')}
       />
 
       <Typography sx={{ mt: 2 }} gutterBottom color="text.secondary">
@@ -123,7 +139,12 @@ export const TryPage = () => {
         targetUrl={form.values.targetUrl}
         setTargetUrl={(targetUrl) => {
           setForm(mergeValues({ targetUrl }));
+          setForm(mergeErrors({ targetUrl: [] }));
         }}
+        error={form.errors.targetUrl.length > 0}
+        helperText={form.errors.targetUrl
+          .map((error) => error.message)
+          .join(', ')}
       />
 
       <Typography sx={{ mt: 2 }} gutterBottom color="text.secondary">
@@ -185,21 +206,6 @@ export const TryPage = () => {
         <ToggleButton value="network-first">Network First</ToggleButton>
       </ToggleButtonGroup>
 
-      {errors.length > 0 && (
-        <Box sx={{ marginY: 2 }}>
-          {errors.map((error) => (
-            <Alert
-              key={error.message}
-              severity="error"
-              sx={{ marginBottom: 2 }}
-            >
-              <AlertTitle>Error</AlertTitle>
-              {error.message}
-            </Alert>
-          ))}
-        </Box>
-      )}
-
       <Divider
         sx={{
           my: 4,
@@ -231,6 +237,21 @@ export const TryPage = () => {
       >
         cancel
       </LoadingButton>
+
+      {problems.length > 0 && (
+        <Box sx={{ marginY: 2 }}>
+          {problems.map((problems) => (
+            <Alert
+              key={problems.message}
+              severity="error"
+              sx={{ marginBottom: 2 }}
+            >
+              <AlertTitle>Problem</AlertTitle>
+              {problems.message}
+            </Alert>
+          ))}
+        </Box>
+      )}
 
       <Divider
         sx={{
@@ -367,8 +388,8 @@ type FormState = {
   };
 
   errors: {
-    targetUrl: Error[];
-    projectId: Error[];
+    targetUrl: { message: string }[];
+    projectId: { message: string }[];
   };
 };
 
@@ -435,7 +456,7 @@ const validateForm = (
 
   const errors: FormState['errors'] = {
     projectId: option.isNone(form.values.projectId)
-      ? [new Error('Must select a project')]
+      ? [{ message: 'Must select a project' }]
       : [],
     targetUrl: either.isLeft(decodedTargetUrl) ? [decodedTargetUrl.left] : [],
   };

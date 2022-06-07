@@ -87,11 +87,13 @@ const AddToWhitelistInput = ({
   const mutation = useUpdateProjectMutation();
   const snackbar = useSnackbar();
   const [urlInput, setUrlInput] = useState<string>('');
+  const [problems, setProblems] = useState<{ message: string }[]>([]);
 
   const onAdd = async () => {
     const decodedUrl = Data.Url.decode(urlInput);
 
     if (either.isLeft(decodedUrl)) {
+      setProblems([decodedUrl.left]);
       return;
     }
 
@@ -124,8 +126,7 @@ const AddToWhitelistInput = ({
     }
   };
 
-  const canAddUrl =
-    Data.Url.is(urlInput) && !whitelistedUrls.includes(urlInput);
+  const canAddUrl = Data.Url.is(urlInput);
 
   return (
     <>
@@ -135,18 +136,30 @@ const AddToWhitelistInput = ({
           label="base url"
           value={urlInput}
           onChange={(event) => {
+            setProblems([]);
             setUrlInput(event.currentTarget.value);
           }}
           fullWidth
           sx={{ flex: 1 }}
         />
       </Box>
+
+      {problems.length > 0 && (
+        <Box sx={{ marginY: 2 }}>
+          {problems.map((problem) => (
+            <Alert severity="error" key={problem.message}>
+              {problem.message}
+            </Alert>
+          ))}
+        </Box>
+      )}
+
       <Box sx={{ marginTop: 2, display: 'flex', flexDirection: 'row-reverse' }}>
         <LoadingButton
           variant="contained"
           onClick={onAdd}
           loading={mutation.status === 'loading'}
-          disabled={canAddUrl}
+          disabled={!canAddUrl}
         >
           add
         </LoadingButton>

@@ -17,7 +17,7 @@ export type State = {
 export type RequestState =
   | { type: 'Idle'; logs: Log[] }
   | { type: 'Loading'; logs: Log[]; requestId: Data.RequestId.RequestId }
-  | { type: 'Failed'; logs: Log[]; errors: Error[] }
+  | { type: 'Failed'; logs: Log[]; problems: Problem[] }
   | { type: 'Cancelling'; logs: Log[] }
   | { type: 'Cancelled'; logs: Log[] }
   | { type: 'Succeeded'; logs: Log[]; src: string };
@@ -30,6 +30,8 @@ export type Log = {
 export const initialState: State = {};
 
 export const initialRequestState: RequestState = { type: 'Idle', logs: [] };
+
+export type Problem = { message: string };
 
 //
 //
@@ -44,6 +46,7 @@ export const ClientToServerAction = {
     `CaptureScreenshot/Start`,
     (payload: {
       clientId: string;
+      originUrl: Data.Url.Url;
       requestId: Data.RequestId.RequestId;
       projectId: Data.ProjectId.ProjectId;
       strategy: Data.Strategy.Strategy;
@@ -108,12 +111,12 @@ export const ServerToClientAction = {
     (
       clientId: string,
       requestId: Data.RequestId.RequestId,
-      errors: Error[]
+      problems: Problem[]
     ) => ({
       payload: {
         clientId,
         requestId,
-        errors,
+        problems,
       },
     })
   ),
@@ -233,7 +236,7 @@ const requestReducer = (
       }
 
       if (Action.Failed.match(action)) {
-        return { ...state, type: 'Failed', errors: action.payload.errors };
+        return { ...state, type: 'Failed', problems: action.payload.problems };
       }
 
       if (Action.Succeeded.match(action)) {

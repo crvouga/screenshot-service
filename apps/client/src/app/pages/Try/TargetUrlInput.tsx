@@ -9,12 +9,9 @@ import {
   Button,
   CardActionArea,
   IconButton,
-  List,
-  ListItemButton,
-  ListItemSecondaryAction,
-  ListItemText,
   Menu,
   TextField,
+  TextFieldProps,
   Tooltip,
   Typography,
 } from '@mui/material';
@@ -33,10 +30,11 @@ const isValidUrl = (url: string) => {
 export const TargetUrlInput = ({
   targetUrl,
   setTargetUrl,
+  ...textFieldProps
 }: {
   targetUrl: string;
   setTargetUrl: (targetUrl: string) => void;
-}) => {
+} & TextFieldProps) => {
   const [history, setHistory] = useLocalStorage<string[]>(
     'targetUrlHistory',
     []
@@ -179,6 +177,7 @@ export const TargetUrlInput = ({
           </Box>
         ),
       }}
+      {...textFieldProps}
     />
   );
 };

@@ -9,7 +9,6 @@ export const is = (value: unknown): value is Strategy => {
   );
 };
 
-export const decode = either.fromPredicate(
-  is,
-  () => new Error('failed to decode strategy')
-);
+export const decode = either.fromPredicate(is, () => ({
+  message: 'failed to decode strategy',
+}));
