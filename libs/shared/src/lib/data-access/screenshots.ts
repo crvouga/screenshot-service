@@ -1,7 +1,7 @@
+import { Data } from '@screenshot-service/screenshot-service';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { either } from 'fp-ts';
-import * as Data from '../data';
-import { definitions } from '../supabase';
+import { definitions } from '../supabase-types';
 import { toAllLeft, toAllRight } from '../utils';
 
 //

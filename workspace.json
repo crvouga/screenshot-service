@@ -4,6 +4,7 @@
     "client": "apps/client",
     "client-e2e": "apps/client-e2e",
     "screenshot-service": "libs/screenshot-service",
-    "server": "apps/server"
+    "server": "apps/server",
+    "shared": "libs/shared"
   }
 }

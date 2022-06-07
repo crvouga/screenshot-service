@@ -1,4 +1,5 @@
-import { Data, DataAccess } from '@screenshot-service/screenshot-service';
+import { Data } from '@screenshot-service/screenshot-service';
+import { DataAccess } from '@screenshot-service/shared';
 import { useMutation, useQuery } from 'react-query';
 import { supabaseClient } from './supabase';
 

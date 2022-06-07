@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { definitions } from '../supabase';
+import { definitions } from '../supabase-types';
 
 export type Profile = {
   userId: string;

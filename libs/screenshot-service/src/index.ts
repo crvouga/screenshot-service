@@ -1,5 +1,4 @@
-export * from './lib/main';
-export * as Data from './lib/data';
-export * as Socket from './lib/socket';
-export * as DataAccess from './lib/data-access';
 export * as CaptureScreenshotRequest from './lib/capture-screenshot-request';
+export * as Data from './lib/data';
+export * from './lib/main';
+export * as Socket from './lib/socket';

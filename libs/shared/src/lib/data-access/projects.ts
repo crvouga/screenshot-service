@@ -1,8 +1,8 @@
+import { Data } from '@screenshot-service/screenshot-service';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { array, either } from 'fp-ts';
 import { pipe } from 'fp-ts/lib/function';
-import * as Data from '../data';
-import { definitions } from '../supabase';
+import { definitions } from '../supabase-types';
 import { toAllLeft, toAllRight } from '../utils';
 
 export type Project = {

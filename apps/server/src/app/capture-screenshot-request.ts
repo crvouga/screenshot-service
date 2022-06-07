@@ -1,8 +1,8 @@
 import {
   CaptureScreenshotRequest,
   Data,
-  DataAccess,
 } from '@screenshot-service/screenshot-service';
+import { DataAccess } from '@screenshot-service/shared';
 import { either } from 'fp-ts';
 import { delay, fork, put, race, take } from 'redux-saga/effects';
 import { call } from 'typed-redux-saga';

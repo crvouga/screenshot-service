@@ -1,19 +1,16 @@
-import { Data, DataAccess } from '@screenshot-service/screenshot-service';
 import { LoadingButton } from '@mui/lab';
 import { Box, Paper, TextField, Typography } from '@mui/material';
+import { Data } from '@screenshot-service/screenshot-service';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 import { useQueryClient } from 'react-query';
 import {
+  Project,
   projectsQueryFilter,
   useUpdateProjectMutation,
 } from '../../../projects';
 
-export const ProjectNameSection = ({
-  project,
-}: {
-  project: DataAccess.Projects.Project;
-}) => {
+export const ProjectNameSection = ({ project }: { project: Project }) => {
   const queryClient = useQueryClient();
 
   const [projectName, setProjectName] = useState(project.projectName);

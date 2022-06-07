@@ -1,12 +1,8 @@
-import { DataAccess } from '@screenshot-service/screenshot-service';
 import { Box, Paper, Typography } from '@mui/material';
 import { CopyToClipboardField } from '../../../../lib/Clipboard';
+import { Project } from '../../../projects';
 
-export const ProjectIdSection = ({
-  project,
-}: {
-  project: DataAccess.Projects.Project;
-}) => {
+export const ProjectIdSection = ({ project }: { project: Project }) => {
   return (
     <Paper
       variant="outlined"

@@ -1,4 +1,3 @@
-import { Data, DataAccess } from '@screenshot-service/screenshot-service';
 import { DeleteForever } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import {
@@ -16,12 +15,14 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { Data } from '@screenshot-service/screenshot-service';
 import { either } from 'fp-ts';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 import { useQueryClient } from 'react-query';
 import { CopyToClipboardField } from '../../../../lib/Clipboard';
 import {
+  Project,
   projectsQueryFilter,
   useUpdateProjectMutation,
 } from '../../../projects';
@@ -29,7 +30,7 @@ import {
 export const ProjectWhitelistedUrlsSection = ({
   project,
 }: {
-  project: DataAccess.Projects.Project;
+  project: Project;
 }) => {
   const [whitelistedUrls, setWhitelistedUrls] = useState(
     project.whitelistedUrls
