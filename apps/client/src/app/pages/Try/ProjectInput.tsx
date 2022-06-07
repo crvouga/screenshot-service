@@ -1,14 +1,18 @@
-import { Data } from '@screenshot-service/screenshot-service';
+import { LoadingButton } from '@mui/lab';
 import {
+  Alert,
+  AlertTitle,
+  Box,
   ListItemText,
   MenuItem,
   Select,
   SelectProps,
   Typography,
 } from '@mui/material';
+import { Data } from '@screenshot-service/screenshot-service';
 import { either, option } from 'fp-ts';
 import { pipe } from 'fp-ts/lib/function';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuthUser } from '../../authentication';
 import { useProjectsQuery } from '../../projects';
 
@@ -24,7 +28,8 @@ export const ProjectInput = ({
 } & SelectProps) => {
   const authUser = useAuthUser();
   const query = useProjectsQuery({ ownerId: authUser.userId });
-  const options =
+
+  const projects =
     query.status !== 'success'
       ? []
       : either.isLeft(query.data)
@@ -39,8 +44,16 @@ export const ProjectInput = ({
     )
   );
 
+  const currentProject = pipe(
+    projectId,
+    option.fold(
+      () => null,
+      (projectId) => projects.find((project) => project.projectId === projectId)
+    )
+  );
+
   return (
-    <>
+    <Box>
       <Select
         fullWidth
         value={currentValue}
@@ -52,14 +65,15 @@ export const ProjectInput = ({
           onClick={() => {
             setProjectId(option.none);
           }}
+          disabled
         >
           <ListItemText
             primaryTypographyProps={{ color: 'text.secondary' }}
-            primary={'No project selected'}
+            primary={'Select a project...'}
           />
         </MenuItem>
 
-        {options.map((project) => (
+        {projects.map((project) => (
           <MenuItem
             value={project.projectId}
             key={project.projectId}
@@ -71,6 +85,7 @@ export const ProjectInput = ({
           </MenuItem>
         ))}
       </Select>
+
       {helperText && (
         <Typography
           color={selectProps.error ? 'error' : 'inherit'}
@@ -80,6 +95,6 @@ export const ProjectInput = ({
           {helperText}
         </Typography>
       )}
-    </>
+    </Box>
   );
 };

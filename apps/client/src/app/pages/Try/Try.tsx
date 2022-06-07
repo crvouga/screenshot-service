@@ -24,6 +24,7 @@ import { either, option } from 'fp-ts';
 import * as React from 'react';
 import useLocalStorage from '../../../lib/use-local-storage';
 import { screenshotService } from '../../screenshot-service';
+import { NotOnWhitelistAlert } from './NotOnWhitelistAlert';
 import { ProjectInput } from './ProjectInput';
 import { TargetUrlInput } from './TargetUrlInput';
 
@@ -215,6 +216,12 @@ export const TryPage = () => {
           my: 4,
         }}
       />
+
+      {option.isSome(form.values.projectId) && (
+        <Box sx={{ marginBottom: 4 }}>
+          <NotOnWhitelistAlert projectId={form.values.projectId.value} />
+        </Box>
+      )}
 
       <LoadingButton
         startIcon={<PhotoCameraIcon />}

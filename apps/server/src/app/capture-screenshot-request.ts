@@ -45,6 +45,10 @@ export const saga = function* ({
     const request = action.payload;
     const requestId = request.requestId;
 
+    yield put(Action.Log(clientId, requestId, 'info', 'starting...'));
+
+    yield delay(500);
+
     yield fork(function* () {
       const [cancel] = yield race([
         call(takeCancel, { requestId }),
@@ -52,15 +56,11 @@ export const saga = function* ({
       ]);
 
       if (cancel) {
-        yield put(
-          Action.Log(clientId, requestId, 'info', 'cancelling request...')
-        );
+        yield put(Action.Log(clientId, requestId, 'info', 'cancelling...'));
 
         yield delay(1000);
 
-        yield put(
-          Action.Log(clientId, requestId, 'notice', 'cancelled request')
-        );
+        yield put(Action.Log(clientId, requestId, 'notice', 'cancelled'));
 
         yield put(Action.Cancelled(clientId, requestId));
       }

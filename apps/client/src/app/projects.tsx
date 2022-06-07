@@ -21,8 +21,10 @@ export const useSingleProjectQuery = ({
 }: {
   projectId: Data.ProjectId.ProjectId;
 }) => {
-  return useQuery([projectsQueryFilter, projectId], () =>
-    DataAccess.Projects.findOne(supabaseClient)({ projectId })
+  return useQuery(
+    [projectsQueryFilter, projectId],
+    () => DataAccess.Projects.findOne(supabaseClient)({ projectId }),
+    { refetchOnWindowFocus: true }
   );
 };
 
