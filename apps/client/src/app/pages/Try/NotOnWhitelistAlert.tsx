@@ -78,7 +78,7 @@ export const NotOnWhitelistAlert = ({
     <Collapse in={showAlert}>
       {currentProject && (
         <Box sx={{ marginBottom: 4 }}>
-          <Alert severity="warning" variant="outlined">
+          <Alert severity="warning" variant="standard">
             <Box sx={{ marginBottom: 1 }}>
               The url for this website, {window.location.origin} is not on the
               selected project's url whitelist.
