@@ -1,4 +1,18 @@
+// docs: https://github.com/tiaanduplessis/kill-port
+import killPort from 'kill-port';
 import { main } from './app/main';
+
+const runMain = async () => {
+  const port = getPort();
+
+  try {
+    await killPort(port);
+  } finally {
+    main({
+      port,
+    });
+  }
+};
 
 const fallbackPort = 8000;
 
@@ -13,6 +27,4 @@ const getPort = (): number => {
   return port;
 };
 
-main({
-  port: getPort(),
-});
+runMain();
