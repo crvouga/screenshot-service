@@ -1,16 +1,15 @@
 import { CameraAlt, Close } from '@mui/icons-material';
 import { Box, Button, Divider, Drawer, Toolbar } from '@mui/material';
-import { useState } from 'react';
-import { appEventEmitter, useAppEventListener } from '../../app-event-emitter';
-import { TryPage } from '.';
 import useLocalStorage from '../../../lib/use-local-storage';
+import { appEventEmitter, useAppEventListener } from '../../app-event-emitter';
+import { CaptureScreenshotForm } from './CaptureScreenshotForm';
 
-export const TryDrawerButton = () => {
+export const ToggleCaptureScreenshotFormDrawerButton = () => {
   return (
     <Button
       variant="contained"
       onClick={() => {
-        appEventEmitter.emit('OpenedTryDrawer', null);
+        appEventEmitter.emit('ToggleCaptureScreenshotFormDrawer', null);
       }}
       startIcon={<CameraAlt />}
     >
@@ -19,13 +18,13 @@ export const TryDrawerButton = () => {
   );
 };
 
-export const TryDrawer = () => {
+export const CaptureScreenshotFormDrawer = () => {
   const [state, setState] = useLocalStorage<'opened' | 'closed'>(
-    'tryDrawerState',
+    'captureScreenshotFormDrawerStatus',
     'closed'
   );
 
-  useAppEventListener('OpenedTryDrawer', () => {
+  useAppEventListener('ToggleCaptureScreenshotFormDrawer', () => {
     setState('opened');
   });
 
@@ -74,7 +73,7 @@ export const TryDrawer = () => {
           paddingTop: 2,
         }}
       >
-        <TryPage />
+        <CaptureScreenshotForm />
       </Box>
     </Drawer>
   );

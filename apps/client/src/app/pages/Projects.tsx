@@ -37,6 +37,8 @@ export const ProjectsPage = () => {
 
       {query.status === 'success' && query.data.type === 'Ok' && (
         <>
+          {query.data.value.length === 0 && <CreateProjectCallToAction />}
+
           {query.data.value.length > 0 && (
             <Container sx={{ mt: 2 }} maxWidth="sm">
               <Link to={routes['/projects/create'].make()}>
@@ -67,8 +69,6 @@ export const ProjectsPage = () => {
               ))}
             </Container>
           )}
-
-          {query.data.value.length === 0 && <CreateProjectCallToAction />}
         </>
       )}
     </>

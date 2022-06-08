@@ -1,7 +1,7 @@
 import { CameraAlt } from '@mui/icons-material';
 import { Avatar, Box, Toolbar } from '@mui/material';
 import React from 'react';
-import { TryDrawerButton } from '../pages/Try';
+import { ToggleCaptureScreenshotFormDrawerButton } from '../pages/CaptureScreenshot';
 import * as ProfileAvatar from '../profile-avatar';
 import { useProfileContext } from '../profiles';
 import { Link, routes } from '../routes';
@@ -30,7 +30,7 @@ export const Header = () => {
 
       <Box sx={{ flex: 1 }}></Box>
 
-      <TryDrawerButton />
+      <ToggleCaptureScreenshotFormDrawerButton />
 
       <Link to={routes['/account'].make()}>
         <Avatar

@@ -13,7 +13,7 @@ import {
 } from './pages/Project';
 import { ProjectsCreatePage } from './pages/ProjectCreate';
 import { ProjectsPage } from './pages/Projects';
-import { TryDrawer } from './pages/Try';
+import { CaptureScreenshotFormDrawer } from './pages/CaptureScreenshot';
 import * as Profiles from './profiles';
 import { routes } from './routes';
 
@@ -115,7 +115,7 @@ export const Loaded = () => {
         overflowY: 'scroll',
       }}
     >
-      <TryDrawer />
+      <CaptureScreenshotFormDrawer />
 
       <Routes>
         <Route path={routes['/'].pattern} element={<ProjectsPage />} />

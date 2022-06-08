@@ -38,7 +38,7 @@ import { TargetUrlInput } from './TargetUrlInput';
 //
 //
 
-export const TryPage = () => {
+export const CaptureScreenshotForm = () => {
   const [form, setForm] = useLocalStorage<FormState>(
     'formState',
     initialFormState
