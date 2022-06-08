@@ -1,5 +1,3 @@
-
-
 # screenshot service
 
 - [heroku deployment](https://dashboard.heroku.com/apps/crvouga-screenshot-service)
