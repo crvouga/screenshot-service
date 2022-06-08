@@ -19,13 +19,8 @@ import { Data } from '@screenshot-service/screenshot-service';
 import { either } from 'fp-ts';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
-import { useQueryClient } from 'react-query';
 import { CopyToClipboardField } from '../../../../lib/Clipboard';
-import {
-  Project,
-  projectsQueryFilter,
-  useUpdateProjectMutation,
-} from '../../../projects';
+import { Project, useUpdateProjectMutation } from '../../../projects';
 
 export const ProjectWhitelistedUrlsSection = ({
   project,
@@ -84,7 +79,6 @@ const AddToWhitelistInput = ({
   whitelistedUrls: Data.Url.Url[];
   setWhitelistedUrls: (urls: Data.Url.Url[]) => void;
 }) => {
-  const queryClient = useQueryClient();
   const mutation = useUpdateProjectMutation();
   const snackbar = useSnackbar();
   const [urlInput, setUrlInput] = useState<string>('');
@@ -120,8 +114,6 @@ const AddToWhitelistInput = ({
         snackbar.enqueueSnackbar('project updated', {
           variant: 'default',
         });
-
-        queryClient.invalidateQueries(projectsQueryFilter);
 
         return;
     }
@@ -180,7 +172,6 @@ const WhitelistedUrlField = ({
   whitelistedUrls: Data.Url.Url[];
   setWhitelistedUrls: (urls: Data.Url.Url[]) => void;
 }) => {
-  const queryClient = useQueryClient();
   const snackbar = useSnackbar();
   const [open, setOpen] = useState(false);
   const mutation = useUpdateProjectMutation();
@@ -212,8 +203,6 @@ const WhitelistedUrlField = ({
         snackbar.enqueueSnackbar('removed url from whitelist', {
           variant: 'default',
         });
-
-        queryClient.invalidateQueries(projectsQueryFilter);
 
         return;
     }

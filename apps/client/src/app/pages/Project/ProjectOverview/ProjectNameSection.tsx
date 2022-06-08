@@ -4,19 +4,11 @@ import { Data } from '@screenshot-service/screenshot-service';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 import { useQueryClient } from 'react-query';
-import {
-  Project,
-  projectsQueryFilter,
-  useUpdateProjectMutation,
-} from '../../../projects';
+import { Project, useUpdateProjectMutation } from '../../../projects';
 
 export const ProjectNameSection = ({ project }: { project: Project }) => {
-  const queryClient = useQueryClient();
-
   const [projectName, setProjectName] = useState(project.projectName);
-
   const mutation = useUpdateProjectMutation();
-
   const snackbar = useSnackbar();
 
   const onSave = async () => {
@@ -36,8 +28,6 @@ export const ProjectNameSection = ({ project }: { project: Project }) => {
         snackbar.enqueueSnackbar('project updated', {
           variant: 'default',
         });
-
-        queryClient.invalidateQueries(projectsQueryFilter);
 
         return;
     }

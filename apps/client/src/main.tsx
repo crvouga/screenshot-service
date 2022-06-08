@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { App } from './app/App';
 import { ThemeContext, ThemeModeContext } from './app/theme';
+import { ReactQueryDevtools } from 'react-query/devtools';
 
 const rootElement = document.getElementById('root');
 
@@ -24,6 +25,7 @@ if (rootElement) {
                 }}
               >
                 <App />
+                <ReactQueryDevtools />
               </SnackbarProvider>
             </ThemeContext>
           </ThemeModeContext>

@@ -1,11 +1,11 @@
 import { Data } from '@screenshot-service/screenshot-service';
 import { DataAccess } from '@screenshot-service/shared';
-import { useMutation, useQuery } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { supabaseClient } from './supabase';
 
 export type Project = DataAccess.Projects.Project;
 
-export const projectsQueryFilter = 'projects';
+const projectsQueryFilter = 'projects';
 
 export const useProjectsQuery = ({
   ownerId,
@@ -30,13 +30,34 @@ export const useSingleProjectQuery = ({
 };
 
 export const useCreateProjectMutation = () => {
-  return useMutation(DataAccess.Projects.insert(supabaseClient));
+  const queryClient = useQueryClient();
+  return useMutation(DataAccess.Projects.insert(supabaseClient), {
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes(projectsQueryFilter),
+      });
+    },
+  });
 };
 
 export const useUpdateProjectMutation = () => {
-  return useMutation(DataAccess.Projects.update(supabaseClient));
+  const queryClient = useQueryClient();
+  return useMutation(DataAccess.Projects.update(supabaseClient), {
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes(projectsQueryFilter),
+      });
+    },
+  });
 };
 
 export const useDeleteProjectMutation = () => {
-  return useMutation(DataAccess.Projects.deleteForever(supabaseClient));
+  const queryClient = useQueryClient();
+  return useMutation(DataAccess.Projects.deleteForever(supabaseClient), {
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes(projectsQueryFilter),
+      });
+    },
+  });
 };

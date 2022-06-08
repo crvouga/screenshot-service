@@ -4,13 +4,8 @@ import { Data } from '@screenshot-service/screenshot-service';
 import { either } from 'fp-ts';
 import { useSnackbar } from 'notistack';
 import React from 'react';
-import { useQueryClient } from 'react-query';
 import { useAuthUser } from '../../authentication';
-import {
-  projectsQueryFilter,
-  useProjectsQuery,
-  useUpdateProjectMutation,
-} from '../../projects';
+import { useProjectsQuery, useUpdateProjectMutation } from '../../projects';
 
 export const NotOnWhitelistAlert = ({
   projectId,
@@ -33,7 +28,6 @@ export const NotOnWhitelistAlert = ({
 
   const mutation = useUpdateProjectMutation();
   const snackbar = useSnackbar();
-  const queryClient = useQueryClient();
 
   const onAddToWhitelist = async () => {
     const decoded = Data.Url.decode(window.location.origin);
@@ -64,8 +58,6 @@ export const NotOnWhitelistAlert = ({
     }
 
     snackbar.enqueueSnackbar(`added current url to whitelist`);
-
-    queryClient.invalidateQueries(projectsQueryFilter);
   };
 
   const showAlert =
