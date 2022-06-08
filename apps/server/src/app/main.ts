@@ -189,6 +189,15 @@ const makeSocketChan = (socketServer: SocketServer) =>
 //
 //
 
+const httpApp = express();
+const httpServer = http.createServer(httpApp);
+const socketServer: SocketServer = new socket.Server(httpServer, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
+});
+
 export const main = async ({ port }: { port: number }) => {
   const sagaMiddleware = createSagaMiddleware();
 
@@ -199,17 +208,6 @@ export const main = async ({ port }: { port: number }) => {
   });
 
   const webBrowser = await WebBrowser.create();
-
-  const httpApp = express();
-
-  const httpServer = http.createServer(httpApp);
-
-  const socketServer: SocketServer = new socket.Server(httpServer, {
-    cors: {
-      origin: '*',
-      methods: ['GET', 'POST'],
-    },
-  });
 
   sagaMiddleware.run(saga, { webBrowser, socketServer });
 

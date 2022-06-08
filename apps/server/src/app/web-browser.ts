@@ -77,15 +77,8 @@ export const captureScreenshot = async (
 //
 //
 
-let browser: Browser | null = null;
-
 export const create = async () => {
-  //
-  if (browser) {
-    return browser;
-  }
-
-  browser = await puppeteer.launch({
+  const browser = await puppeteer.launch({
     //why?: https://www.bannerbear.com/blog/ways-to-speed-up-puppeteer-screenshots/
     args: [
       '--autoplay-policy=user-gesture-required',
