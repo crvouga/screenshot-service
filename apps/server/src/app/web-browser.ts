@@ -27,18 +27,18 @@ export const openNewPage = async (browser: puppeteer.Browser) => {
 export const goTo = async (
   page: puppeteer.Page,
   url: Data.Url.Url
-): Promise<Data.Result.Result<Problem[], []>> => {
+): Promise<Data.Result.Result<Problem, null>> => {
   try {
     await page.goto(url, {
       waitUntil: 'networkidle2',
     });
-    return Data.Result.Ok([]);
+    return Data.Result.Ok(null);
   } catch (error) {
     const message =
       error?.toString?.() ??
       'Web browser failed to navigate to url for an unknown reason';
 
-    return Data.Result.Err([{ message }]);
+    return Data.Result.Err({ message });
   }
 };
 

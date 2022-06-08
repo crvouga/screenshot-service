@@ -195,16 +195,20 @@ const networkFirstFlow = function* (
 ) {
   const requestId = request.requestId;
 
-  yield put(
-    Action.Log(clientId, requestId, 'info', 'opening url in web browser...')
-  );
+  yield put(Action.Log(clientId, requestId, 'info', 'opening new page...'));
 
   const page = yield* call(WebBrowser.openNewPage, webBrowser);
+
+  yield put(Action.Log(clientId, requestId, 'info', 'going to url...'));
 
   const goToResult = yield* call(WebBrowser.goTo, page, request.targetUrl);
 
   if (goToResult.type === 'Err') {
-    yield put(Action.Failed(clientId, request.requestId, goToResult.error));
+    yield put(
+      Action.Failed(clientId, request.requestId, [
+        { message: `going to url failed. ${goToResult.error.message}` },
+      ])
+    );
     return;
   }
 
