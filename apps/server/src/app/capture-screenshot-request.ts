@@ -47,8 +47,6 @@ export const saga = function* ({
 
     yield put(Action.Log(clientId, requestId, 'info', 'starting...'));
 
-    yield delay(500);
-
     yield fork(function* () {
       const [cancel] = yield race([
         call(takeCancel, { requestId }),
