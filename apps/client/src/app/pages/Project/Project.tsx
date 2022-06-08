@@ -14,10 +14,10 @@ import { isMatch, routes } from '../../routes';
 import { ErrorPage } from '../Error';
 import { NotFoundPage } from '../NotFound';
 
-export type IOutletContext = { project: Project };
+export type OutletContext = { project: Project };
 
 export const useProfileSingleOutletContext = () => {
-  return useOutletContext<IOutletContext>();
+  return useOutletContext<OutletContext>();
 };
 
 export const ProjectPage = () => {
@@ -41,7 +41,7 @@ const ProjectPageWithParams = ({
   const location = useLocation();
   const navigate = useNavigate();
 
-  if (query.data === undefined) {
+  if (!query.data) {
     return (
       <>
         <ProjectSingleHeader title="..." />
@@ -79,11 +79,9 @@ const ProjectPageWithParams = ({
     ? tabValues.overview
     : isMatch(location.pathname, routes['/projects/:id/screenshots'])
     ? tabValues.screenshots
-    : // : isMatch(location.pathname, routes['/projects/:id/logs'])
-      // ? tabValues.logs
-      tabValues.overview;
+    : tabValues.overview;
 
-  const outletContext: IOutletContext = { project };
+  const outletContext: OutletContext = { project };
 
   return (
     <>
@@ -107,14 +105,6 @@ const ProjectPageWithParams = ({
             );
           }}
         />
-
-        {/* <Tab
-          value={tabValues.logs}
-          label="logs"
-          onClick={() => {
-            navigate(routes['/projects/:id/logs'].make(project.projectId));
-          }}
-        /> */}
       </Tabs>
 
       <Outlet context={outletContext} />

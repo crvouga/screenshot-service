@@ -18,7 +18,7 @@ import {
 import { Data } from '@screenshot-service/screenshot-service';
 import { either } from 'fp-ts';
 import { useSnackbar } from 'notistack';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CopyToClipboardField } from '../../../../lib/Clipboard';
 import { Project, useUpdateProjectMutation } from '../../../projects';
 
@@ -30,6 +30,10 @@ export const ProjectWhitelistedUrlsSection = ({
   const [whitelistedUrls, setWhitelistedUrls] = useState(
     project.whitelistedUrls
   );
+
+  useEffect(() => {
+    setWhitelistedUrls(project.whitelistedUrls);
+  }, [project.whitelistedUrls]);
 
   return (
     <Paper
