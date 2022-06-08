@@ -3,8 +3,9 @@ import {
   Data,
 } from '@screenshot-service/screenshot-service';
 import { DataAccess } from '@screenshot-service/shared';
-import { delay, fork, put, race, take } from 'redux-saga/effects';
-import { call } from 'typed-redux-saga';
+import { cancelled, delay, fork, put, race, take } from 'redux-saga/effects';
+import { call, takeEvery } from 'typed-redux-saga';
+import { takeClientDisconnected } from './main';
 import { supabaseClient } from './supabase';
 import { InferActionMap } from './utils';
 import * as WebBrowser from './web-browser';
@@ -39,23 +40,36 @@ export const saga = function* ({
   webBrowser: WebBrowser.WebBrowser;
 }) {
   while (true) {
-    const action = yield* call(takeStart, clientId);
-
+    const action = yield* call(takeStart, { clientId });
     const request = action.payload;
     const requestId = request.requestId;
 
     yield put(Action.Log(clientId, requestId, 'info', 'starting...'));
 
     yield fork(function* () {
-      const [cancel] = yield race([
+      const [cancel, disconnected] = yield race([
         call(takeCancel, { requestId }),
+        call(takeClientDisconnected, { clientId }),
         call(captureScreenshotFlow, { clientId, webBrowser, request }),
       ]);
+
+      if (disconnected) {
+        yield put(
+          Action.Log(
+            clientId,
+            requestId,
+            'notice',
+            'cancelled because client disconnected'
+          )
+        );
+
+        yield put(Action.Cancelled(clientId, requestId));
+      }
 
       if (cancel) {
         yield put(Action.Log(clientId, requestId, 'info', 'cancelling...'));
 
-        yield delay(1000);
+        yield delay(500);
 
         yield put(Action.Log(clientId, requestId, 'notice', 'cancelled'));
 
@@ -65,7 +79,49 @@ export const saga = function* ({
   }
 };
 
-const takeStart = function* (clientId: string) {
+const takeCancelled = function* ({
+  requestId,
+}: {
+  requestId: Data.RequestId.RequestId;
+}) {
+  while (true) {
+    const action: ActionMap['Cancelled'] = yield take(Action.Cancelled);
+
+    if (action.payload.requestId === requestId) {
+      return action;
+    }
+  }
+};
+
+const takeSucceeded = function* ({
+  requestId,
+}: {
+  requestId: Data.RequestId.RequestId;
+}) {
+  while (true) {
+    const action: ActionMap['Cancelled'] = yield take(Action.Succeeded);
+
+    if (action.payload.requestId === requestId) {
+      return action;
+    }
+  }
+};
+
+const takeFailed = function* ({
+  requestId,
+}: {
+  requestId: Data.RequestId.RequestId;
+}) {
+  while (true) {
+    const action: ActionMap['Cancelled'] = yield take(Action.Succeeded);
+
+    if (action.payload.requestId === requestId) {
+      return action;
+    }
+  }
+};
+
+const takeStart = function* ({ clientId }: { clientId: string }) {
   while (true) {
     const action: ActionMap['Start'] = yield take(Action.Start);
 

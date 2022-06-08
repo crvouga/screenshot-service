@@ -87,42 +87,25 @@ const clientFlow = function* ({
   yield takeEvery(Action.ClientConnected, function* (action) {
     const clientId = action.payload.clientId;
 
-    const task = yield fork(
-      connectedClientFlow,
-      { webBrowser, socketServer },
-      clientId
-    );
+    yield fork(CaptureScreenshot.saga, { clientId, webBrowser });
 
-    yield takeClientDisconnected({ clientId });
-
-    yield cancel(task);
+    yield takeEvery('*', function* (action) {
+      if (
+        Socket.isServerToClientAction(action) &&
+        action.payload.clientId === clientId
+      ) {
+        socketServer.to(clientId).emit('ServerToClient', action);
+        yield;
+      }
+    });
   });
 };
 
-const connectedClientFlow = function* (
-  {
-    webBrowser,
-    socketServer,
-  }: {
-    webBrowser: WebBrowser.WebBrowser;
-    socketServer: SocketServer;
-  },
-  clientId: string
-) {
-  yield fork(CaptureScreenshot.saga, { clientId, webBrowser });
-
-  yield takeEvery('*', function* (action) {
-    if (
-      Socket.isServerToClientAction(action) &&
-      action.payload.clientId === clientId
-    ) {
-      socketServer.to(clientId).emit('ServerToClient', action);
-      yield;
-    }
-  });
-};
-
-const takeClientDisconnected = function* ({ clientId }: { clientId: string }) {
+export const takeClientDisconnected = function* ({
+  clientId,
+}: {
+  clientId: string;
+}) {
   while (true) {
     const action: ActionMap['ClientDisconnected'] = yield take(
       Action.ClientDisconnected
