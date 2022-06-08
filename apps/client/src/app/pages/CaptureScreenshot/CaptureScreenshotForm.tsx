@@ -23,7 +23,7 @@ import {
   CaptureScreenshotRequest,
   Data,
 } from '@screenshot-service/screenshot-service';
-import * as React from 'react';
+import { useState, useEffect } from 'react';
 import useLocalStorage from '../../../lib/use-local-storage';
 import { screenshotService } from '../../screenshot-service';
 import { NotOnWhitelistAlert } from './NotOnWhitelistAlert';
@@ -39,21 +39,16 @@ import { TargetUrlInput } from './TargetUrlInput';
 //
 
 export const CaptureScreenshotForm = () => {
-  const [form, setForm] = useLocalStorage<FormState>(
-    'formState',
-    initialFormState
+  const [form, setForm] = useState<FormState>(initialFormState);
+  const [requestId, setRequestId] = useState<Data.RequestId.RequestId | null>(
+    null
   );
+  const [state, setState] = useState(screenshotService.getState);
 
-  const [state, setState] = React.useState(screenshotService.getState);
-  const [requestId, setRequestId] =
-    React.useState<Data.RequestId.RequestId | null>(null);
-
-  React.useEffect(() => {
-    const unsubscribe = screenshotService.subscribe(() => {
+  useEffect(() => {
+    return screenshotService.subscribe(() => {
       setState(screenshotService.getState);
     });
-
-    return unsubscribe;
   }, []);
 
   const submit = async () => {
@@ -127,7 +122,9 @@ export const CaptureScreenshotForm = () => {
           setForm(mergeValues({ projectId }));
           setForm(mergeErrors({ projectId: [] }));
         }}
-        error={form.errors.projectId.length > 0}
+        SelectProps={{
+          error: form.errors.projectId.length > 0,
+        }}
         helperText={form.errors.projectId
           .map((error) => error.message)
           .join(', ')}
@@ -459,9 +456,10 @@ const validateForm = (
   }
 
   const errors: FormState['errors'] = {
-    projectId: form.values.projectId
-      ? [{ message: 'Must select a project' }]
-      : [],
+    projectId:
+      form.values.projectId === null
+        ? [{ message: 'Must select a project' }]
+        : [],
     targetUrl: Data.Result.isErr(decodedTargetUrl)
       ? [decodedTargetUrl.error]
       : [],

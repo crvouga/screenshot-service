@@ -31,7 +31,7 @@ export const AccountCreatePage = () => {
   const [avatarSeed, setAvatarSeed] = useState<ProfileAvatar.Seed>(
     ProfileAvatar.toSeed(authUser.defaultName)
   );
-  const [themeMode, setThemeMode] = useState<ThemeMode>('dark');
+  const [themeMode, setThemeMode] = useState<ThemeMode>('system');
   const themeModeContext = useThemeModeContext();
 
   useEffect(() => {

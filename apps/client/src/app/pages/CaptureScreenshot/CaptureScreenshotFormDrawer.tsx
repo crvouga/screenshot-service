@@ -9,7 +9,7 @@ export const ToggleCaptureScreenshotFormDrawerButton = () => {
     <Button
       variant="contained"
       onClick={() => {
-        appEventEmitter.emit('ToggleCaptureScreenshotFormDrawer', null);
+        appEventEmitter.emit('ToggleCaptureScreenshotFormDrawer', 'opened');
       }}
       startIcon={<CameraAlt />}
     >
@@ -24,8 +24,8 @@ export const CaptureScreenshotFormDrawer = () => {
     'closed'
   );
 
-  useAppEventListener('ToggleCaptureScreenshotFormDrawer', () => {
-    setState('opened');
+  useAppEventListener('ToggleCaptureScreenshotFormDrawer', (value) => {
+    setState(value);
   });
 
   const onClose = () => {

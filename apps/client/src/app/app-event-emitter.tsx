@@ -4,7 +4,7 @@ import { IEventEmitter } from '../lib/event-emitter';
 import { Profile } from './profiles';
 
 export type IAppEvent = {
-  ToggleCaptureScreenshotFormDrawer: null;
+  ToggleCaptureScreenshotFormDrawer: 'opened' | 'closed';
   Profile: { profile: Profile };
 };
 
