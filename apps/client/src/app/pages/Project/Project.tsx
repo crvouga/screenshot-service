@@ -54,13 +54,13 @@ const ProjectPageWithParams = ({
 
   const result = query.data;
 
-  if (result._tag === 'Left') {
+  if (result.type === 'Err') {
     return (
       <>
         <ProjectSingleHeader title="..." />
 
         <ErrorPage
-          message={`Something went wrong when loading project. ${result.left
+          message={`Something went wrong when loading project. ${result.error
             .map((error) => error.message)
             .join(', ')}`}
         />
@@ -68,7 +68,7 @@ const ProjectPageWithParams = ({
     );
   }
 
-  const project = result.right;
+  const project = result.value;
 
   const tabValues = {
     overview: 'overview',

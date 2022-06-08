@@ -3,7 +3,6 @@ import {
   Data,
 } from '@screenshot-service/screenshot-service';
 import { DataAccess } from '@screenshot-service/shared';
-import { either } from 'fp-ts';
 import { delay, fork, put, race, take } from 'redux-saga/effects';
 import { call } from 'typed-redux-saga';
 import { supabaseClient } from './supabase';
@@ -104,14 +103,14 @@ const captureScreenshotFlow = function* ({
     request
   );
 
-  if (either.isLeft(findProjectResult)) {
+  if (findProjectResult.type === 'Err') {
     yield put(
-      Action.Failed(clientId, request.requestId, findProjectResult.left)
+      Action.Failed(clientId, request.requestId, findProjectResult.error)
     );
     return;
   }
 
-  const project = findProjectResult.right;
+  const project = findProjectResult.value;
 
   const isOnWhitelist = project.whitelistedUrls.some(
     (url) => url === request.originUrl
@@ -151,22 +150,22 @@ const cacheFirstFlow = function* (
     request
   );
 
-  if (either.isRight(cacheResult)) {
-    const [screenshot] = cacheResult.right;
+  if (cacheResult.type === 'Ok') {
+    const [screenshot] = cacheResult.value;
 
     const publicUrlResult = yield* call(
       DataAccess.Screenshots.getPublicUrl(supabaseClient),
       screenshot
     );
 
-    if (either.isLeft(publicUrlResult)) {
+    if (publicUrlResult.type === 'Err') {
       yield put(
-        Action.Failed(clientId, request.requestId, [publicUrlResult.left])
+        Action.Failed(clientId, request.requestId, [publicUrlResult.error])
       );
       return;
     }
 
-    const publicUrl = publicUrlResult.right;
+    const publicUrl = publicUrlResult.value;
 
     yield put(
       Action.Log(clientId, request.requestId, 'info', 'found cached screenshot')
@@ -204,8 +203,8 @@ const networkFirstFlow = function* (
 
   const goToResult = yield* call(WebBrowser.goTo, page, request.targetUrl);
 
-  if (either.isLeft(goToResult)) {
-    yield put(Action.Failed(clientId, request.requestId, goToResult.left));
+  if (goToResult.type === 'Err') {
+    yield put(Action.Failed(clientId, request.requestId, goToResult.error));
     return;
   }
 
@@ -230,8 +229,8 @@ const networkFirstFlow = function* (
     request.imageType
   );
 
-  if (either.isLeft(captureResult)) {
-    yield put(Action.Failed(clientId, requestId, captureResult.left));
+  if (captureResult.type === 'Err') {
+    yield put(Action.Failed(clientId, requestId, captureResult.error));
     return;
   }
 
@@ -240,30 +239,30 @@ const networkFirstFlow = function* (
   const putCacheResult = yield* call(
     DataAccess.Screenshots.put(supabaseClient),
     request,
-    captureResult.right
+    captureResult.value
   );
 
-  if (either.isLeft(putCacheResult)) {
+  if (putCacheResult.type === 'Err') {
     yield put(
       Action.Log(clientId, requestId, 'error', `failed to cache screenshot.`)
     );
-    yield put(Action.Failed(clientId, requestId, putCacheResult.left));
+    yield put(Action.Failed(clientId, requestId, putCacheResult.error));
     return;
   }
 
-  const screenshot = putCacheResult.right;
+  const screenshot = putCacheResult.value;
 
   const publicUrlResult = yield* call(
     DataAccess.Screenshots.getPublicUrl(supabaseClient),
     screenshot
   );
 
-  if (either.isLeft(publicUrlResult)) {
-    yield put(Action.Failed(clientId, requestId, [publicUrlResult.left]));
+  if (publicUrlResult.type === 'Err') {
+    yield put(Action.Failed(clientId, requestId, [publicUrlResult.error]));
     return;
   }
 
-  const publicUrl = publicUrlResult.right;
+  const publicUrl = publicUrlResult.value;
 
   yield put(
     Action.Log(clientId, requestId, 'notice', `captured new screenshot`)

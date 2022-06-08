@@ -1,4 +1,3 @@
-import { Data } from '@screenshot-service/screenshot-service';
 import { Info } from '@mui/icons-material';
 import {
   Alert,
@@ -12,7 +11,7 @@ import {
   Skeleton,
   Typography,
 } from '@mui/material';
-import { either } from 'fp-ts';
+import { Data } from '@screenshot-service/screenshot-service';
 import {
   useScreenshotsQuery,
   useScreenshotSrcQuery,
@@ -44,20 +43,20 @@ export const ProjectScreenshotsTab = () => {
     case 'success': {
       const result = query.data;
 
-      switch (result._tag) {
-        case 'Left':
+      switch (result.type) {
+        case 'Err':
           return (
             <Typography>
               Failed to load screenshots:{' '}
-              {result.left.map((error) => error.message).join(', ')}
+              {result.error.map((error) => error.message).join(', ')}
             </Typography>
           );
 
-        case 'Right':
+        case 'Ok':
           return (
             <Container maxWidth="md">
               <ImageList sx={{ width: '100%', height: '100%' }} cols={3}>
-                {result.right.map((screenshot) => (
+                {result.value.map((screenshot) => (
                   <ImageListItem>
                     <ScreenshotImage
                       screenshotId={screenshot.screenshotId}
@@ -126,7 +125,7 @@ const ScreenshotImage = ({
 
         {query.status === 'success' && (
           <>
-            {either.isLeft(query.data) && (
+            {query.data.type === 'Err' && (
               <Alert
                 sx={{
                   justifyContent: 'center',
@@ -140,12 +139,12 @@ const ScreenshotImage = ({
               </Alert>
             )}
 
-            {either.isRight(query.data) && (
+            {query.data.type === 'Ok' && (
               <img
                 alt="..."
                 width="100%"
                 height="100%"
-                src={query.data.right}
+                src={query.data.value}
                 style={{ objectFit: 'cover' }}
               />
             )}

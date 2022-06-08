@@ -8,7 +8,6 @@ import {
   Container,
   Typography,
 } from '@mui/material';
-import { either } from 'fp-ts';
 import { Link } from 'react-router-dom';
 import { useAuthUser } from '../authentication';
 import { Header } from '../Header';
@@ -36,9 +35,9 @@ export const ProjectsPage = () => {
         </Box>
       )}
 
-      {query.status === 'success' && either.isRight(query.data) && (
+      {query.status === 'success' && query.data.type === 'Ok' && (
         <>
-          {query.data.right.length > 0 && (
+          {query.data.value.length > 0 && (
             <Container sx={{ mt: 2 }} maxWidth="sm">
               <Link to={routes['/projects/create'].make()}>
                 <Button
@@ -50,7 +49,7 @@ export const ProjectsPage = () => {
                 </Button>
               </Link>
 
-              {query.data.right.map((project) => (
+              {query.data.value.map((project) => (
                 <Box key={project.projectId} sx={{ mb: 2 }}>
                   <Link to={routes['/projects/:id'].make(project.projectId)}>
                     <CardActionArea>
@@ -69,7 +68,7 @@ export const ProjectsPage = () => {
             </Container>
           )}
 
-          {query.data.right.length === 0 && (
+          {query.data.value.length === 0 && (
             <Container maxWidth="sm">
               <Card sx={{ width: '100%', my: 4 }}>
                 <Container maxWidth="xs" sx={{ py: 4, textAlign: 'center' }}>

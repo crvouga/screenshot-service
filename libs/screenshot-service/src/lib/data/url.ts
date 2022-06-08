@@ -1,4 +1,4 @@
-import { either } from 'fp-ts';
+import { makeDecode } from './result';
 
 export type Url = string & { type: 'Url' };
 
@@ -14,6 +14,6 @@ export const is = (value: unknown): value is Url => {
   }
 };
 
-export const decode = either.fromPredicate(is, () => ({
+export const decode = makeDecode(is, () => ({
   message: 'failed to decode url',
 }));

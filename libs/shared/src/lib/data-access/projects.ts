@@ -1,9 +1,6 @@
 import { Data } from '@screenshot-service/screenshot-service';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { array, either } from 'fp-ts';
-import { pipe } from 'fp-ts/lib/function';
 import { definitions } from '../supabase-types';
-import { toAllLeft, toAllRight } from '../utils';
 
 export type Project = {
   projectId: Data.ProjectId.ProjectId;
@@ -16,32 +13,30 @@ type Problem = { message: string };
 
 const decodeRow = (
   row: definitions['projects']
-): either.Either<Problem[], Project> => {
+): Data.Result.Result<Problem[], Project> => {
   const projectId = Data.ProjectId.decode(row.id);
   const ownerId = Data.UserId.decode(row.owner_id);
   const projectName = Data.ProjectName.decode(row.name);
-  const whitelistedUrls = pipe(
-    row.whitelisted_urls,
-    array.map(Data.Url.decode),
-    array.sequence(either.Applicative)
+  const whitelistedUrls = Data.Result.combineValues(
+    row.whitelisted_urls.map(Data.Url.decode)
   );
 
   if (
-    either.isRight(projectId) &&
-    either.isRight(ownerId) &&
-    either.isRight(projectName) &&
-    either.isRight(whitelistedUrls)
+    Data.Result.isOk(projectId) &&
+    Data.Result.isOk(ownerId) &&
+    Data.Result.isOk(projectName) &&
+    Data.Result.isOk(whitelistedUrls)
   ) {
-    return either.right({
-      projectId: projectId.right,
-      ownerId: ownerId.right,
-      projectName: projectName.right,
-      whitelistedUrls: whitelistedUrls.right,
+    return Data.Result.Ok({
+      projectId: projectId.value,
+      ownerId: ownerId.value,
+      projectName: projectName.value,
+      whitelistedUrls: whitelistedUrls.value,
     });
   }
 
-  return either.left(
-    toAllLeft([projectId, ownerId, projectName, whitelistedUrls])
+  return Data.Result.Err(
+    Data.Result.toErrors([projectId, ownerId, projectName, whitelistedUrls])
   );
 };
 
@@ -51,25 +46,25 @@ export const findMany =
     ownerId,
   }: {
     ownerId: Data.UserId.UserId;
-  }): Promise<either.Either<Problem[], Project[]>> => {
+  }): Promise<Data.Result.Result<Problem[], Project[]>> => {
     const response = await supabaseClient
       .from<definitions['projects']>('projects')
       .select('*')
       .match({ owner_id: ownerId });
 
     if (response.error) {
-      return either.left([{ message: response.error.message }]);
+      return Data.Result.Err([{ message: response.error.message }]);
     }
 
     const decodings = response.data.map(decodeRow);
 
-    const lefts = toAllLeft(decodings).flat();
+    const problems = Data.Result.toErrors(decodings).flat();
 
-    if (lefts.length > 0) {
-      return either.left(lefts);
+    if (problems.length > 0) {
+      return Data.Result.Err(problems);
     }
 
-    return either.right(toAllRight(decodings));
+    return Data.Result.Ok(Data.Result.toValues(decodings));
   };
 
 export const findOne =
@@ -78,7 +73,7 @@ export const findOne =
     projectId,
   }: {
     projectId: Data.ProjectId.ProjectId;
-  }): Promise<either.Either<Problem[], Project>> => {
+  }): Promise<Data.Result.Result<Problem[], Project>> => {
     const response = await supabaseClient
       .from<definitions['projects']>('projects')
       .select('*')
@@ -86,7 +81,7 @@ export const findOne =
       .single();
 
     if (response.error) {
-      return either.left([{ message: response.error.message }]);
+      return Data.Result.Err([{ message: response.error.message }]);
     }
 
     const decoded = decodeRow(response.data);
@@ -100,7 +95,7 @@ export const deleteForever =
     projectId,
   }: {
     projectId: Data.ProjectId.ProjectId;
-  }): Promise<either.Either<Problem[], Project>> => {
+  }): Promise<Data.Result.Result<Problem[], Project>> => {
     const response = await supabaseClient
       .from<definitions['projects']>('projects')
       .delete()
@@ -108,7 +103,7 @@ export const deleteForever =
       .single();
 
     if (response.error) {
-      return either.left([{ message: response.error.message }]);
+      return Data.Result.Err([{ message: response.error.message }]);
     }
 
     const decoded = decodeRow(response.data);
@@ -124,14 +119,14 @@ export const insert =
   }: {
     ownerId: Data.UserId.UserId;
     projectName: Data.ProjectName.ProjectName;
-  }): Promise<either.Either<Problem[], Project>> => {
+  }): Promise<Data.Result.Result<Problem[], Project>> => {
     const response = await supabaseClient
       .from<definitions['projects']>('projects')
       .insert({ owner_id: ownerId, name: projectName })
       .single();
 
     if (response.error) {
-      return either.left([{ message: response.error.message }]);
+      return Data.Result.Err([{ message: response.error.message }]);
     }
 
     const decoded = decodeRow(response.data);
@@ -145,7 +140,7 @@ export const update =
     projectId,
     ...updates
   }: Partial<Project> & { projectId: Data.ProjectId.ProjectId }): Promise<
-    either.Either<Problem[], Project>
+    Data.Result.Result<Problem[], Project>
   > => {
     const response = await supabaseClient
       .from<definitions['projects']>('projects')
@@ -159,7 +154,7 @@ export const update =
       .single();
 
     if (response.error) {
-      return either.left([{ message: response.error.message }]);
+      return Data.Result.Err([{ message: response.error.message }]);
     }
 
     const decoded = decodeRow(response.data);

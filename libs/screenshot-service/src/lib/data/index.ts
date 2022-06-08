@@ -10,3 +10,4 @@ export * as TargetUrl from './target-url';
 export * as Url from './url';
 export * as UserId from './user-id';
 export * as Uuid from './uuid';
+export * as Result from './result';

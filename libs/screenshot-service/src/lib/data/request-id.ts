@@ -1,11 +1,11 @@
-import { either } from 'fp-ts';
+import { makeDecode } from './result';
 import * as Uuid from './uuid';
 
 export type RequestId = Uuid.Uuid & { tag: 'IRequestId' };
 
 export const is = (value: unknown): value is RequestId => Uuid.is(value);
 
-export const decode = either.fromPredicate(is, () => ({
+export const decode = makeDecode(is, () => ({
   message: 'failed to decode request id',
 }));
 

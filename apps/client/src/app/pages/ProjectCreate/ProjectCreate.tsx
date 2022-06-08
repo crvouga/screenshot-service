@@ -1,8 +1,7 @@
-import { Data } from '@screenshot-service/screenshot-service';
 import { Create } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import { Container, TextField, Typography } from '@mui/material';
-import { either } from 'fp-ts';
+import { Data } from '@screenshot-service/screenshot-service';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -26,15 +25,15 @@ export const ProjectsCreatePage = () => {
       projectName,
     });
 
-    if (either.isLeft(result)) {
+    if (result.type === 'Err') {
       snackbar.enqueueSnackbar('failed to create project', {
         variant: 'error',
       });
     }
 
-    if (either.isRight(result)) {
+    if (result.type === 'Ok') {
       snackbar.enqueueSnackbar('project created');
-      navigate(routes['/projects/:id'].make(result.right.projectId));
+      navigate(routes['/projects/:id'].make(result.value.projectId));
     }
   };
 

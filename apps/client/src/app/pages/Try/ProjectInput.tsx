@@ -7,8 +7,6 @@ import {
   Typography,
 } from '@mui/material';
 import { Data } from '@screenshot-service/screenshot-service';
-import { either, option } from 'fp-ts';
-import { pipe } from 'fp-ts/lib/function';
 import React from 'react';
 import { useAuthUser } from '../../authentication';
 import { useProjectsQuery } from '../../projects';
@@ -19,8 +17,8 @@ export const ProjectInput = ({
   helperText,
   ...selectProps
 }: {
-  projectId: option.Option<Data.ProjectId.ProjectId>;
-  setProjectId: (projectId: option.Option<Data.ProjectId.ProjectId>) => void;
+  projectId: Data.ProjectId.ProjectId | null;
+  setProjectId: (projectId: Data.ProjectId.ProjectId) => void;
   helperText?: string;
 } & SelectProps) => {
   const authUser = useAuthUser();
@@ -29,25 +27,14 @@ export const ProjectInput = ({
   const projects =
     query.status !== 'success'
       ? []
-      : either.isLeft(query.data)
+      : Data.Result.isErr(query.data)
       ? []
-      : query.data.right;
+      : query.data.value;
 
-  const currentValue = pipe(
-    projectId,
-    option.fold(
-      () => 'None',
-      (projectId) => projectId
-    )
-  );
+  const currentValue = projectId ?? 'None';
 
-  const currentProject = pipe(
-    projectId,
-    option.fold(
-      () => null,
-      (projectId) => projects.find((project) => project.projectId === projectId)
-    )
-  );
+  const currentProject =
+    projects.find((project) => project.projectId === projectId) ?? 'None';
 
   return (
     <Box>
@@ -57,13 +44,7 @@ export const ProjectInput = ({
         placeholder="select a project"
         {...selectProps}
       >
-        <MenuItem
-          value={'None'}
-          onClick={() => {
-            setProjectId(option.none);
-          }}
-          disabled
-        >
+        <MenuItem value={'None'} disabled>
           <ListItemText
             primaryTypographyProps={{ color: 'text.secondary' }}
             primary={'Select a project...'}
@@ -75,7 +56,7 @@ export const ProjectInput = ({
             value={project.projectId}
             key={project.projectId}
             onClick={() => {
-              setProjectId(option.some(project.projectId));
+              setProjectId(project.projectId);
             }}
           >
             <ListItemText primary={project.projectName} />

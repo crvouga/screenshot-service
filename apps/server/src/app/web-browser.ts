@@ -1,5 +1,4 @@
 import { Data } from '@screenshot-service/screenshot-service';
-import { either } from 'fp-ts';
 import puppeteer, { Browser } from 'puppeteer';
 
 //
@@ -10,6 +9,8 @@ import puppeteer, { Browser } from 'puppeteer';
 //
 
 export type WebBrowser = puppeteer.Browser;
+
+type Problem = { message: string };
 
 //
 //
@@ -23,45 +24,48 @@ export const openNewPage = async (browser: puppeteer.Browser) => {
   return page;
 };
 
-export const goTo = async (page: puppeteer.Page, url: Data.Url.Url) => {
+export const goTo = async (
+  page: puppeteer.Page,
+  url: Data.Url.Url
+): Promise<Data.Result.Result<Problem[], []>> => {
   try {
     await page.goto(url, {
       waitUntil: 'networkidle2',
     });
-    return either.right([]);
+    return Data.Result.Ok([]);
   } catch (error) {
     const message =
       error?.toString?.() ??
       'Web browser failed to navigate to url for an unknown reason';
 
-    return either.left([{ message }]);
+    return Data.Result.Err([{ message }]);
   }
 };
 
 export const captureScreenshot = async (
   page: puppeteer.Page,
   imageType: Data.ImageType.ImageType
-): Promise<either.Either<Error[], Buffer>> => {
+): Promise<Data.Result.Result<Problem[], Buffer>> => {
   try {
     const buffer = await page.screenshot({
       type: imageType,
     });
 
     if (typeof buffer === 'string' || !buffer) {
-      return either.left([
+      return Data.Result.Err([
         new Error(
           'puppeteer did not return a buffer when capturing the screenshot'
         ),
       ]);
     }
 
-    return either.right(buffer);
+    return Data.Result.Ok(buffer);
   } catch (error) {
     const message = String(
       error?.toString?.() ?? 'puppeteer threw an unkwown error'
     );
 
-    return either.left([new Error(message)]);
+    return Data.Result.Err([{ message }]);
   }
 };
 

@@ -3,7 +3,6 @@ import { Box, Paper, TextField, Typography } from '@mui/material';
 import { Data } from '@screenshot-service/screenshot-service';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
-import { useQueryClient } from 'react-query';
 import { Project, useUpdateProjectMutation } from '../../../projects';
 
 export const ProjectNameSection = ({ project }: { project: Project }) => {
@@ -17,14 +16,14 @@ export const ProjectNameSection = ({ project }: { project: Project }) => {
       projectName,
     });
 
-    switch (result._tag) {
-      case 'Left':
+    switch (result.type) {
+      case 'Err':
         snackbar.enqueueSnackbar('failed to update project name', {
           variant: 'error',
         });
         return;
 
-      case 'Right':
+      case 'Ok':
         snackbar.enqueueSnackbar('project updated', {
           variant: 'default',
         });

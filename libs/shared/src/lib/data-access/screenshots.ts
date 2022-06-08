@@ -1,8 +1,6 @@
 import { Data } from '@screenshot-service/screenshot-service';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { either } from 'fp-ts';
 import { definitions } from '../supabase-types';
-import { toAllLeft, toAllRight } from '../utils';
 
 //
 //
@@ -42,7 +40,7 @@ export const toFilename = ({
 
 const decodeRow = (
   row: definitions['screenshots']
-): either.Either<Problem[], Screenshot> => {
+): Data.Result.Result<Problem[], Screenshot> => {
   const projectId = Data.ProjectId.decode(row.project_id);
   const screenshotId = Data.ScreenshotId.decode(row.id);
   const imageType = Data.ImageType.decode(row.image_type);
@@ -50,23 +48,29 @@ const decodeRow = (
   const targetUrl = Data.TargetUrl.decode(row.target_url);
 
   if (
-    either.isRight(projectId) &&
-    either.isRight(screenshotId) &&
-    either.isRight(imageType) &&
-    either.isRight(delaySec) &&
-    either.isRight(targetUrl)
+    Data.Result.isOk(projectId) &&
+    Data.Result.isOk(screenshotId) &&
+    Data.Result.isOk(imageType) &&
+    Data.Result.isOk(delaySec) &&
+    Data.Result.isOk(targetUrl)
   ) {
-    return either.right({
-      projectId: projectId.right,
-      screenshotId: screenshotId.right,
-      imageType: imageType.right,
-      delaySec: delaySec.right,
-      targetUrl: targetUrl.right,
+    return Data.Result.Ok({
+      projectId: projectId.value,
+      screenshotId: screenshotId.value,
+      imageType: imageType.value,
+      delaySec: delaySec.value,
+      targetUrl: targetUrl.value,
     });
   }
 
-  return either.left(
-    toAllLeft([projectId, screenshotId, imageType, delaySec, targetUrl])
+  return Data.Result.Err(
+    Data.Result.toErrors([
+      projectId,
+      screenshotId,
+      imageType,
+      delaySec,
+      targetUrl,
+    ])
   );
 };
 
@@ -91,7 +95,7 @@ export const get =
     delaySec: Data.DelaySec.DelaySec;
     targetUrl: Data.TargetUrl.TargetUrl;
     imageType: Data.ImageType.ImageType;
-  }): Promise<either.Either<Problem[], [Screenshot, Buffer]>> => {
+  }): Promise<Data.Result.Result<Problem[], [Screenshot, Buffer]>> => {
     const findResult = await findOne(supabaseClient)({
       projectId,
       delaySec,
@@ -99,11 +103,11 @@ export const get =
       imageType,
     });
 
-    if (either.isLeft(findResult)) {
+    if (Data.Result.isErr(findResult)) {
       return findResult;
     }
 
-    const screenshot = findResult.right;
+    const screenshot = findResult.value;
 
     const filename = toFilename(screenshot);
 
@@ -112,7 +116,7 @@ export const get =
       .download(filename);
 
     if (downloadResponse.error) {
-      return either.left([
+      return Data.Result.Err([
         {
           message: `Supabase couldn't download screenshot. ${downloadResponse.error.message}`,
         },
@@ -120,7 +124,7 @@ export const get =
     }
 
     if (!downloadResponse.data) {
-      return either.left([
+      return Data.Result.Err([
         {
           message:
             'Supabase did not return any data when downloading screenshot',
@@ -134,7 +138,7 @@ export const get =
 
     const buffer = Buffer.from(arrayBuffer);
 
-    return either.right([screenshot, buffer]);
+    return Data.Result.Ok([screenshot, buffer]);
   };
 
 //
@@ -151,7 +155,7 @@ export const findManyByProjectId =
     projectId,
   }: {
     projectId: string;
-  }): Promise<either.Either<Problem[], Screenshot[]>> => {
+  }): Promise<Data.Result.Result<Problem[], Screenshot[]>> => {
     const response = await supabaseClient
       .from<definitions['screenshots']>('screenshots')
       .select('*')
@@ -159,18 +163,18 @@ export const findManyByProjectId =
       .order('created_at', { ascending: false });
 
     if (response.error) {
-      return either.left([{ message: response.error.message }]);
+      return Data.Result.Err([{ message: response.error.message }]);
     }
 
     const decodings = response.data.map(decodeRow);
 
-    const allLeft = toAllLeft(decodings).flat();
+    const problems = Data.Result.toErrors(decodings).flat();
 
-    if (allLeft.length > 0) {
-      return either.left(allLeft);
+    if (problems.length > 0) {
+      return Data.Result.Err(problems);
     }
 
-    return either.right(toAllRight(decodings));
+    return Data.Result.Ok(Data.Result.toValues(decodings));
   };
 
 export const getPublicUrl =
@@ -181,7 +185,7 @@ export const getPublicUrl =
   }: {
     imageType: Data.ImageType.ImageType;
     screenshotId: Data.ScreenshotId.ScreenshotId;
-  }): Promise<either.Either<Problem, Data.Url.Url>> => {
+  }): Promise<Data.Result.Result<Problem, Data.Url.Url>> => {
     const filename = toFilename({ screenshotId, imageType });
 
     const response = await supabaseClient.storage
@@ -189,7 +193,7 @@ export const getPublicUrl =
       .getPublicUrl(filename);
 
     if (response.error) {
-      return either.left({ message: response.error.message });
+      return Data.Result.Err({ message: response.error.message });
     }
 
     const decoded = Data.Url.decode(response.publicURL);
@@ -212,7 +216,7 @@ export const put =
       imageType: Data.ImageType.ImageType;
     },
     buffer: Buffer
-  ): Promise<either.Either<Problem[], Screenshot>> => {
+  ): Promise<Data.Result.Result<Problem[], Screenshot>> => {
     const findElseInsertResult = await findOneElseInsertOne(supabaseClient)({
       targetUrl,
       delaySec,
@@ -220,11 +224,11 @@ export const put =
       imageType,
     });
 
-    if (either.isLeft(findElseInsertResult)) {
+    if (Data.Result.isErr(findElseInsertResult)) {
       return findElseInsertResult;
     }
 
-    const screenshot = findElseInsertResult.right;
+    const screenshot = findElseInsertResult.value;
 
     const filename = toFilename({
       imageType: screenshot.imageType,
@@ -236,10 +240,10 @@ export const put =
       .upload(filename, buffer, { upsert: true });
 
     if (uploadResponse.error) {
-      return either.left([{ message: uploadResponse.error.message }]);
+      return Data.Result.Err([{ message: uploadResponse.error.message }]);
     }
 
-    return either.right(screenshot);
+    return Data.Result.Ok(screenshot);
   };
 
 const findOne =
@@ -254,7 +258,7 @@ const findOne =
     delaySec: Data.DelaySec.DelaySec;
     projectId: Data.ProjectId.ProjectId;
     imageType: Data.ImageType.ImageType;
-  }): Promise<either.Either<Problem[], Screenshot>> => {
+  }): Promise<Data.Result.Result<Problem[], Screenshot>> => {
     const response = await supabaseClient
       .from<definitions['screenshots']>('screenshots')
       .select('*')
@@ -267,7 +271,7 @@ const findOne =
       .single();
 
     if (response.error) {
-      return either.left([{ message: response.error.message }]);
+      return Data.Result.Err([{ message: response.error.message }]);
     }
 
     const decoded = decodeRow(response.data);
@@ -287,7 +291,7 @@ const insertOne =
     targetUrl: Data.TargetUrl.TargetUrl;
     delaySec: Data.DelaySec.DelaySec;
     imageType: Data.ImageType.ImageType;
-  }): Promise<either.Either<Problem[], Screenshot>> => {
+  }): Promise<Data.Result.Result<Problem[], Screenshot>> => {
     const response = await supabaseClient
       .from<definitions['screenshots']>('screenshots')
       .insert({
@@ -299,7 +303,7 @@ const insertOne =
       .single();
 
     if (response.error) {
-      return either.left([{ message: response.error.message }]);
+      return Data.Result.Err([{ message: response.error.message }]);
     }
 
     const decoded = decodeRow(response.data);
@@ -319,7 +323,7 @@ const findOneElseInsertOne =
     targetUrl: Data.TargetUrl.TargetUrl;
     delaySec: Data.DelaySec.DelaySec;
     imageType: Data.ImageType.ImageType;
-  }): Promise<either.Either<Problem[], Screenshot>> => {
+  }): Promise<Data.Result.Result<Problem[], Screenshot>> => {
     const findResult = await findOne(supabaseClient)({
       projectId,
       targetUrl,
@@ -327,7 +331,7 @@ const findOneElseInsertOne =
       imageType,
     });
 
-    if (either.isRight(findResult)) {
+    if (Data.Result.isOk(findResult)) {
       return findResult;
     }
 
@@ -338,8 +342,8 @@ const findOneElseInsertOne =
       imageType,
     });
 
-    if (either.isLeft(insertResult)) {
-      return either.left([...findResult.left, ...insertResult.left]);
+    if (Data.Result.isErr(insertResult)) {
+      return Data.Result.Err([...findResult.error, ...insertResult.error]);
     }
 
     return insertResult;

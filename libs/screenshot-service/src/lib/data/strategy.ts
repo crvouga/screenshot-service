@@ -1,4 +1,4 @@
-import { either } from 'fp-ts';
+import { makeDecode } from './result';
 
 export type Strategy = 'cache-first' | 'network-first';
 
@@ -9,6 +9,6 @@ export const is = (value: unknown): value is Strategy => {
   );
 };
 
-export const decode = either.fromPredicate(is, () => ({
+export const decode = makeDecode(is, () => ({
   message: 'failed to decode strategy',
 }));

@@ -19,8 +19,10 @@ import {
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
-import * as ScreenshotService from '@screenshot-service/screenshot-service';
-import { either, option } from 'fp-ts';
+import {
+  CaptureScreenshotRequest,
+  Data,
+} from '@screenshot-service/screenshot-service';
 import * as React from 'react';
 import useLocalStorage from '../../../lib/use-local-storage';
 import { screenshotService } from '../../screenshot-service';
@@ -44,7 +46,7 @@ export const TryPage = () => {
 
   const [state, setState] = React.useState(screenshotService.getState);
   const [requestId, setRequestId] =
-    React.useState<ScreenshotService.Data.RequestId.RequestId | null>(null);
+    React.useState<Data.RequestId.RequestId | null>(null);
 
   React.useEffect(() => {
     const unsubscribe = screenshotService.subscribe(() => {
@@ -57,36 +59,34 @@ export const TryPage = () => {
   const submit = async () => {
     const validationResult = validateForm(form);
 
-    if (either.isLeft(validationResult)) {
-      setForm(mergeErrors(validationResult.left));
+    if (Data.Result.isErr(validationResult)) {
+      setForm(mergeErrors(validationResult.error));
       return;
     }
 
-    const decodedOrigin = ScreenshotService.Data.Url.decode(
-      window.location.origin
-    );
+    const decodedOrigin = Data.Url.decode(window.location.origin);
 
-    if (either.isLeft(decodedOrigin)) {
+    if (Data.Result.isErr(decodedOrigin)) {
       return;
     }
 
-    const originUrl = decodedOrigin.right;
+    const originUrl = decodedOrigin.value;
 
     if (state.type === 'Connected') {
-      const requestId = ScreenshotService.Data.RequestId.generate();
+      const requestId = Data.RequestId.generate();
 
       setRequestId(requestId);
 
       screenshotService.dispatch(
-        ScreenshotService.CaptureScreenshotRequest.Action.Start({
+        CaptureScreenshotRequest.Action.Start({
           clientId: state.clientId,
           originUrl: originUrl,
           requestId: requestId,
           delaySec: form.values.delaySec,
           imageType: form.values.imageType,
           strategy: form.values.strategy,
-          targetUrl: validationResult.right.targetUrl,
-          projectId: validationResult.right.projectId,
+          targetUrl: validationResult.value.targetUrl,
+          projectId: validationResult.value.projectId,
         })
       );
     }
@@ -95,21 +95,18 @@ export const TryPage = () => {
   const onCancel = () => {
     if (requestId && state.type === 'Connected') {
       screenshotService.dispatch(
-        ScreenshotService.CaptureScreenshotRequest.Action.Cancel(
-          state.clientId,
-          requestId
-        )
+        CaptureScreenshotRequest.Action.Cancel(state.clientId, requestId)
       );
     }
   };
 
   const requestState =
     requestId && state.type === 'Connected'
-      ? ScreenshotService.CaptureScreenshotRequest.toRequest(
+      ? CaptureScreenshotRequest.toRequest(
           requestId,
           state.captureScreenshotRequest
         )
-      : ScreenshotService.CaptureScreenshotRequest.initialRequestState;
+      : CaptureScreenshotRequest.initialRequestState;
 
   const problems =
     state.type === 'Connecting'
@@ -159,7 +156,7 @@ export const TryPage = () => {
       <ToggleButtonGroup
         value={form.values.imageType}
         onChange={(_event, value) => {
-          if (ScreenshotService.Data.ImageType.is(value)) {
+          if (Data.ImageType.is(value)) {
             setForm(mergeValues({ imageType: value }));
           }
         }}
@@ -179,14 +176,14 @@ export const TryPage = () => {
       <Select
         value={form.values.delaySec}
         onChange={(event) => {
-          const delaySec = ScreenshotService.Data.DelaySec.fromNumber(
+          const delaySec = Data.DelaySec.fromNumber(
             Number(event?.target.value ?? 0)
           );
 
           setForm(mergeValues({ delaySec }));
         }}
       >
-        {ScreenshotService.Data.DelaySec.delaySecs.map((delaySec) => (
+        {Data.DelaySec.delaySecs.map((delaySec) => (
           <MenuItem value={delaySec} key={delaySec}>
             <ListItemText primary={`${delaySec} seconds`} />
           </MenuItem>
@@ -200,7 +197,7 @@ export const TryPage = () => {
       <ToggleButtonGroup
         value={form.values.strategy}
         onChange={(_event, value) => {
-          if (ScreenshotService.Data.Strategy.is(value)) {
+          if (Data.Strategy.is(value)) {
             setForm(mergeValues({ strategy: value }));
           }
         }}
@@ -217,8 +214,8 @@ export const TryPage = () => {
         }}
       />
 
-      {option.isSome(form.values.projectId) && (
-        <NotOnWhitelistAlert projectId={form.values.projectId.value} />
+      {form.values.projectId && (
+        <NotOnWhitelistAlert projectId={form.values.projectId} />
       )}
 
       <LoadingButton
@@ -313,7 +310,7 @@ const Screenshot = ({
 }: {
   alt: string;
   src?: string;
-  stateType: ScreenshotService.CaptureScreenshotRequest.RequestState['type'];
+  stateType: CaptureScreenshotRequest.RequestState['type'];
 } & PaperProps) => {
   return (
     <Paper
@@ -392,11 +389,11 @@ const Screenshot = ({
 
 type FormState = {
   values: {
+    projectId: Data.ProjectId.ProjectId | null;
     targetUrl: string;
-    imageType: ScreenshotService.Data.ImageType.ImageType;
-    delaySec: ScreenshotService.Data.DelaySec.DelaySec;
-    projectId: option.Option<ScreenshotService.Data.ProjectId.ProjectId>;
-    strategy: ScreenshotService.Data.Strategy.Strategy;
+    imageType: Data.ImageType.ImageType;
+    delaySec: Data.DelaySec.DelaySec;
+    strategy: Data.Strategy.Strategy;
   };
 
   errors: {
@@ -410,7 +407,7 @@ const initialFormState: FormState = {
     targetUrl: '',
     imageType: 'jpeg',
     delaySec: 3,
-    projectId: option.none,
+    projectId: null,
     strategy: 'network-first',
   },
   errors: {
@@ -445,33 +442,30 @@ const mergeErrors =
 
 const validateForm = (
   form: FormState
-): either.Either<
+): Data.Result.Result<
   FormState['errors'],
   {
-    targetUrl: ScreenshotService.Data.TargetUrl.TargetUrl;
-    projectId: ScreenshotService.Data.ProjectId.ProjectId;
+    targetUrl: Data.TargetUrl.TargetUrl;
+    projectId: Data.ProjectId.ProjectId;
   }
 > => {
-  const decodedTargetUrl = ScreenshotService.Data.TargetUrl.decode(
-    form.values.targetUrl
-  );
+  const decodedTargetUrl = Data.TargetUrl.decode(form.values.targetUrl);
 
-  if (
-    option.isSome(form.values.projectId) &&
-    either.isRight(decodedTargetUrl)
-  ) {
-    return either.right({
-      projectId: form.values.projectId.value,
-      targetUrl: decodedTargetUrl.right,
+  if (form.values.projectId && Data.Result.isOk(decodedTargetUrl)) {
+    return Data.Result.Ok({
+      projectId: form.values.projectId,
+      targetUrl: decodedTargetUrl.value,
     });
   }
 
   const errors: FormState['errors'] = {
-    projectId: option.isNone(form.values.projectId)
+    projectId: form.values.projectId
       ? [{ message: 'Must select a project' }]
       : [],
-    targetUrl: either.isLeft(decodedTargetUrl) ? [decodedTargetUrl.left] : [],
+    targetUrl: Data.Result.isErr(decodedTargetUrl)
+      ? [decodedTargetUrl.error]
+      : [],
   };
 
-  return either.left(errors);
+  return Data.Result.Err(errors);
 };

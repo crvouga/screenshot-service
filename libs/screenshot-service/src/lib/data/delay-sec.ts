@@ -1,4 +1,4 @@
-import { either } from 'fp-ts';
+import { makeDecode } from './result';
 
 export type DelaySec = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
@@ -8,7 +8,7 @@ export const is = (value: unknown): value is DelaySec => {
   return delaySecs.some((delaySec) => delaySec === value);
 };
 
-export const decode = either.fromPredicate(is, () => ({
+export const decode = makeDecode(is, () => ({
   message: 'failed to decode delay sec',
 }));
 

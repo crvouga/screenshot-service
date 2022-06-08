@@ -1,7 +1,6 @@
 import { Data } from '@screenshot-service/screenshot-service';
 import { Session } from '@supabase/supabase-js';
 import constate from 'constate';
-import { either } from 'fp-ts';
 import { useEffect, useState } from 'react';
 import { supabaseClient } from './supabase';
 
@@ -17,10 +16,10 @@ const toAuthState = (session: Session | null): IAuthState => {
     session?.user?.user_metadata?.['full_name'] ??
     '';
 
-  if (either.isRight(decodedUserId)) {
+  if (decodedUserId.type === 'Ok') {
     return {
       type: 'LoggedIn',
-      userId: decodedUserId.right,
+      userId: decodedUserId.value,
       defaultName: defaultName,
     };
   }

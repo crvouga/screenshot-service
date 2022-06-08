@@ -16,7 +16,6 @@ import {
   Typography,
 } from '@mui/material';
 import { Data } from '@screenshot-service/screenshot-service';
-import { either } from 'fp-ts';
 import { useSnackbar } from 'notistack';
 import { useEffect, useState } from 'react';
 import { CopyToClipboardField } from '../../../../lib/Clipboard';
@@ -91,29 +90,29 @@ const AddToWhitelistInput = ({
   const onAdd = async () => {
     const decodedUrl = Data.Url.decode(urlInput);
 
-    if (either.isLeft(decodedUrl)) {
-      setProblems([decodedUrl.left]);
+    if (decodedUrl.type === 'Err') {
+      setProblems([decodedUrl.error]);
       return;
     }
 
-    const url = decodedUrl.right;
+    const url = decodedUrl.value;
 
     const result = await mutation.mutateAsync({
       projectId: projectId,
       whitelistedUrls: [...whitelistedUrls, url],
     });
 
-    switch (result._tag) {
-      case 'Left':
+    switch (result.type) {
+      case 'Err':
         snackbar.enqueueSnackbar('failed to update project name', {
           variant: 'error',
         });
         return;
 
-      case 'Right':
+      case 'Ok':
         setUrlInput('');
 
-        setWhitelistedUrls(result.right.whitelistedUrls);
+        setWhitelistedUrls(result.value.whitelistedUrls);
 
         snackbar.enqueueSnackbar('project updated', {
           variant: 'default',
@@ -190,10 +189,10 @@ const WhitelistedUrlField = ({
       whitelistedUrls: nextWhitelistedUrls,
     });
 
-    switch (result._tag) {
-      case 'Left':
+    switch (result.type) {
+      case 'Err':
         snackbar.enqueueSnackbar(
-          result.left.map((error) => error.message).join(', ') ??
+          result.error.map((error) => error.message).join(', ') ??
             'failed to remove url from whitelist',
           {
             variant: 'error',
@@ -201,7 +200,7 @@ const WhitelistedUrlField = ({
         );
         return;
 
-      case 'Right':
+      case 'Ok':
         setWhitelistedUrls(nextWhitelistedUrls);
 
         snackbar.enqueueSnackbar('removed url from whitelist', {

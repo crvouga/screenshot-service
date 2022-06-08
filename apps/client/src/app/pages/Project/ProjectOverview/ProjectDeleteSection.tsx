@@ -1,4 +1,3 @@
-import { Data } from '@screenshot-service/screenshot-service';
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
@@ -9,6 +8,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
+import { Data } from '@screenshot-service/screenshot-service';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -32,10 +32,10 @@ export const ProjectDeleteSection = ({
   const onDelete = async () => {
     const result = await mutation.mutateAsync({ projectId });
 
-    switch (result._tag) {
-      case 'Left':
+    switch (result.type) {
+      case 'Err':
         snackbar.enqueueSnackbar(
-          result.left.map((error) => error.message).join(', ') ??
+          result.error.map((error) => error.message).join(', ') ??
             'failed to delete project',
           {
             variant: 'error',
@@ -43,7 +43,7 @@ export const ProjectDeleteSection = ({
         );
         return;
 
-      case 'Right':
+      case 'Ok':
         snackbar.enqueueSnackbar('project deleted', { variant: 'default' });
         navigate(routes['/projects'].make());
     }

@@ -1,7 +1,6 @@
 import { LoadingButton } from '@mui/lab';
 import { Alert, Box, Collapse } from '@mui/material';
 import { Data } from '@screenshot-service/screenshot-service';
-import { either } from 'fp-ts';
 import { useSnackbar } from 'notistack';
 import React from 'react';
 import { useAuthUser } from '../../authentication';
@@ -18,9 +17,9 @@ export const NotOnWhitelistAlert = ({
   const projects =
     query.status !== 'success'
       ? []
-      : either.isLeft(query.data)
+      : query.data.type === 'Err'
       ? []
-      : query.data.right;
+      : query.data.value;
 
   const currentProject = projects.find(
     (project) => project.projectId === projectId
@@ -32,12 +31,12 @@ export const NotOnWhitelistAlert = ({
   const onAddToWhitelist = async () => {
     const decoded = Data.Url.decode(window.location.origin);
 
-    if (either.isLeft(decoded)) {
+    if (decoded.type === 'Err') {
       snackbar.enqueueSnackbar('failed to decode url');
       return;
     }
 
-    const url = decoded.right;
+    const url = decoded.value;
 
     const whitelistedUrlsUpdated = [
       ...(currentProject?.whitelistedUrls ?? []),
@@ -49,7 +48,7 @@ export const NotOnWhitelistAlert = ({
       whitelistedUrls: whitelistedUrlsUpdated,
     });
 
-    if (either.isLeft(result)) {
+    if (result.type === 'Err') {
       snackbar.enqueueSnackbar(`failed to add current url to whitelist`, {
         variant: 'error',
       });
