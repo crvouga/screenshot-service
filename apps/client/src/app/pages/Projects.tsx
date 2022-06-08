@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useAuthUser } from '../authentication';
-import { Header } from '../Header';
+import { Header } from '../components/Header';
 import { useProjectsQuery } from '../projects';
 import { routes } from '../routes';
 
@@ -20,7 +20,7 @@ export const ProjectsPage = () => {
 
   return (
     <>
-      <Header breadcrumbs={[]} />
+      <Header />
 
       {query.status === 'loading' && (
         <Box
@@ -68,32 +68,36 @@ export const ProjectsPage = () => {
             </Container>
           )}
 
-          {query.data.value.length === 0 && (
-            <Container maxWidth="sm">
-              <Card sx={{ width: '100%', my: 4 }}>
-                <Container maxWidth="xs" sx={{ py: 4, textAlign: 'center' }}>
-                  <CameraAlt sx={{ width: 64, height: 64 }} />
-
-                  <Typography variant="h4" align="center" sx={{ mb: 3 }}>
-                    You don't have any projects.
-                  </Typography>
-
-                  <Link to={routes['/projects/create'].make()}>
-                    <Button
-                      fullWidth
-                      startIcon={<Create />}
-                      variant="contained"
-                      size="large"
-                    >
-                      create a project
-                    </Button>
-                  </Link>
-                </Container>
-              </Card>
-            </Container>
-          )}
+          {query.data.value.length === 0 && <CreateProjectCallToAction />}
         </>
       )}
     </>
+  );
+};
+
+const CreateProjectCallToAction = () => {
+  return (
+    <Container maxWidth="sm">
+      <Card sx={{ width: '100%', my: 4 }}>
+        <Container maxWidth="xs" sx={{ py: 4, textAlign: 'center' }}>
+          <CameraAlt sx={{ width: 72, height: 72 }} />
+
+          <Typography variant="h4" align="center" sx={{ mb: 3 }}>
+            You don't have any projects.
+          </Typography>
+
+          <Link to={routes['/projects/create'].make()}>
+            <Button
+              fullWidth
+              startIcon={<Create />}
+              variant="contained"
+              size="large"
+            >
+              create a project
+            </Button>
+          </Link>
+        </Container>
+      </Card>
+    </Container>
   );
 };

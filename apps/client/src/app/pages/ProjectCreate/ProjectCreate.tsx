@@ -1,12 +1,18 @@
-import { Create } from '@mui/icons-material';
+import { ChevronLeft, Create } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
-import { Container, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Container,
+  TextField,
+  Toolbar,
+  Typography,
+} from '@mui/material';
 import { Data } from '@screenshot-service/screenshot-service';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthUser } from '../../authentication';
-import { Header } from '../../Header';
 import { useCreateProjectMutation } from '../../projects';
 import { routes } from '../../routes';
 
@@ -23,12 +29,18 @@ export const ProjectsCreatePage = () => {
     const result = await mutation.mutateAsync({
       ownerId: authUser.userId,
       projectName,
+      whilelistedUrls: [],
     });
 
     if (result.type === 'Err') {
-      snackbar.enqueueSnackbar('failed to create project', {
-        variant: 'error',
-      });
+      snackbar.enqueueSnackbar(
+        `failed to create project. ${result.error
+          .map((e) => e.message)
+          .join('. ')}`,
+        {
+          variant: 'error',
+        }
+      );
     }
 
     if (result.type === 'Ok') {
@@ -39,9 +51,22 @@ export const ProjectsCreatePage = () => {
 
   return (
     <>
-      <Header
-        breadcrumbs={[<Typography color="text.primary">create</Typography>]}
-      />
+      <Toolbar>
+        <Box sx={{ flex: 1 }}>
+          <Button
+            sx={{ marginLeft: -1 }}
+            onClick={() => navigate(-1)}
+            startIcon={<ChevronLeft />}
+          >
+            Back
+          </Button>
+        </Box>
+        <Typography noWrap sx={{ flex: 2 }} align="center" variant="h6">
+          Create New Project
+        </Typography>
+        <Box sx={{ flex: 1 }}></Box>
+      </Toolbar>
+
       <Container maxWidth="sm">
         <TextField
           value={projectName}

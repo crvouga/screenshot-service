@@ -8,11 +8,11 @@ import {
   useOutletContext,
   useParams,
 } from 'react-router-dom';
-import { Header } from '../../Header';
+import { Header } from '../../components/Header';
 import { useSingleProjectQuery, Project } from '../../projects';
 import { isMatch, routes } from '../../routes';
 import { ErrorPage } from '../Error';
-import { NotFoundPage } from '../NotFound';
+import { NotFoundPage } from '../../components/NotFound';
 
 export type OutletContext = { project: Project };
 
@@ -44,7 +44,8 @@ const ProjectPageWithParams = ({
   if (!query.data) {
     return (
       <>
-        <ProjectSingleHeader title="..." />
+        <Header />
+
         <Box sx={{ p: 4, display: 'grid', placeItems: 'center' }}>
           <CircularProgress />
         </Box>
@@ -57,7 +58,7 @@ const ProjectPageWithParams = ({
   if (result.type === 'Err') {
     return (
       <>
-        <ProjectSingleHeader title="..." />
+        <Header />
 
         <ErrorPage
           message={`Something went wrong when loading project. ${result.error
@@ -85,9 +86,15 @@ const ProjectPageWithParams = ({
 
   return (
     <>
-      <ProjectSingleHeader title={project.projectName} />
+      <Header />
 
-      <Tabs value={tabValue} sx={{ marginBottom: 4 }}>
+      <Box sx={{ p: 2 }}>
+        <Typography align="center" variant="h3">
+          {project.projectName}
+        </Typography>
+      </Box>
+
+      <Tabs value={tabValue} sx={{ marginBottom: 4 }} centered>
         <Tab
           value={tabValues.overview}
           label="overview"
@@ -111,9 +118,3 @@ const ProjectPageWithParams = ({
     </>
   );
 };
-
-const ProjectSingleHeader = ({ title }: { title: string }) => (
-  <Header
-    breadcrumbs={[<Typography color="text.primary">{title}</Typography>]}
-  />
-);

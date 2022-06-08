@@ -116,13 +116,19 @@ export const insert =
   async ({
     ownerId,
     projectName,
+    whilelistedUrls,
   }: {
     ownerId: Data.UserId.UserId;
     projectName: Data.ProjectName.ProjectName;
+    whilelistedUrls: Data.Url.Url[];
   }): Promise<Data.Result.Result<Problem[], Project>> => {
     const response = await supabaseClient
       .from<definitions['projects']>('projects')
-      .insert({ owner_id: ownerId, name: projectName })
+      .insert({
+        owner_id: ownerId,
+        name: projectName,
+        whitelisted_urls: whilelistedUrls,
+      })
       .single();
 
     if (response.error) {

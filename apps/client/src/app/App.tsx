@@ -3,7 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthUserContext, useAuthState, useAuthUser } from './authentication';
 import { AccountPage } from './pages/Account';
 import { AccountCreatePage } from './pages/AccountCreate';
-import { BrandedLoadingPage } from './pages/Loading';
+import { BrandedLoadingPage } from './components/Loading';
 import { LoginPage } from './pages/Login';
 import { LogoutPage } from './pages/Logout';
 import {
