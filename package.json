@@ -16,7 +16,7 @@
     "heroku-postbuild": "npx nx run server:build && yarn prune-node_modules",
     "heroku:env": "npx heroku config -s -a crvouga-screenshot-service > .env",
     "heroku:logs": "heroku logs --tail --app crvouga-screenshot-service",
-    "heroku:preview": "npm install && npm run heroku:env && npm run heroku-postbuild && heroku local",
+    "heroku:local": "npm install && npm run heroku:env && npm run heroku-postbuild && heroku local",
     "heroku:start": "node dist/apps/server/main.js",
     "prune-node_modules": "curl -sf https://gobinaries.com/tj/node-prune | PREFIX=. sh&&./node-prune",
     "deploy": "npm run heroku:deploy"
