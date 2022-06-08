@@ -227,11 +227,11 @@ export const main = async ({ port }: { port: number }) => {
 
   const webBrowser = await WebBrowser.create();
 
-  const app = express();
+  const httpApp = express();
 
-  const server = http.createServer(app);
+  const httpServer = http.createServer(httpApp);
 
-  const socketServer: SocketServer = new socket.Server(server, {
+  const socketServer: SocketServer = new socket.Server(httpServer, {
     cors: {
       origin: '*',
       methods: ['GET', 'POST'],
@@ -240,7 +240,7 @@ export const main = async ({ port }: { port: number }) => {
 
   sagaMiddleware.run(saga, { webBrowser, socketServer });
 
-  server.listen(port, () => {
+  httpServer.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}/`);
   });
 };
