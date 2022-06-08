@@ -192,38 +192,11 @@ const makeSocketChan = (socketServer: SocketServer) =>
 export const main = async ({ port }: { port: number }) => {
   const sagaMiddleware = createSagaMiddleware();
 
-  // const devToolsConfig = {
-  //   hostname: 'localhost',
-  //   port: 9000,
-  //   secure: false,
-  // };
-
-  configureStore({
+  const store = configureStore({
     preloadedState: initialState,
     reducer: (state) => state,
     middleware: [sagaMiddleware],
-    // enhancers: [
-    //   remoteDevToolsEnhancer({
-    //     realtime: true,
-    //     name: 'Screenshot Service API',
-    //     hostname: devToolsConfig.hostname,
-    //     port: devToolsConfig.port,
-    //     secure: devToolsConfig.secure,
-    //   }),
-    // ],
   });
-
-  // const remoteDevTools = await reduxDevTools({
-  //   hostname: devToolsConfig.hostname,
-  //   port: devToolsConfig.port,
-  //   secure: devToolsConfig.secure,
-  // });
-
-  // remoteDevTools.on('ready', () => {
-  //   console.log(
-  //     `Serving devtools at http://${devToolsConfig.hostname}:${devToolsConfig.port}/`
-  //   );
-  // });
 
   const webBrowser = await WebBrowser.create();
 
@@ -243,6 +216,8 @@ export const main = async ({ port }: { port: number }) => {
   httpServer.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}/`);
   });
+
+  return store;
 };
 
 type SocketServer = socket.Server<
