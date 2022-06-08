@@ -3,7 +3,15 @@ import {
   Data,
 } from '@screenshot-service/screenshot-service';
 import { DataAccess } from '@screenshot-service/shared';
-import { cancelled, delay, fork, put, race, take } from 'redux-saga/effects';
+import {
+  ActionPattern,
+  cancelled,
+  delay,
+  fork,
+  put,
+  race,
+  take,
+} from 'redux-saga/effects';
 import { call, takeEvery } from 'typed-redux-saga';
 import { takeClientDisconnected } from './main';
 import { supabaseClient } from './supabase';
@@ -76,6 +84,32 @@ export const saga = function* ({
         yield put(Action.Cancelled(clientId, requestId));
       }
     });
+
+    yield fork(persistRequestOutcomeFlow, { requestId });
+  }
+};
+
+const persistRequestOutcomeFlow = function* ({
+  requestId,
+}: {
+  requestId: Data.RequestId.RequestId;
+}) {
+  const [cancelled, failed, succeeded] = yield race([
+    call(takeCancelled, { requestId }),
+    call(takeFailed, { requestId }),
+    call(takeSucceeded, { requestId }),
+  ]);
+
+  if (cancelled) {
+    console.log('saved cancelled');
+  }
+
+  if (failed) {
+    console.log('failed');
+  }
+
+  if (succeeded) {
+    console.log('succeeded');
   }
 };
 
@@ -99,7 +133,7 @@ const takeSucceeded = function* ({
   requestId: Data.RequestId.RequestId;
 }) {
   while (true) {
-    const action: ActionMap['Cancelled'] = yield take(Action.Succeeded);
+    const action: ActionMap['Succeeded'] = yield take(Action.Succeeded);
 
     if (action.payload.requestId === requestId) {
       return action;
@@ -113,7 +147,7 @@ const takeFailed = function* ({
   requestId: Data.RequestId.RequestId;
 }) {
   while (true) {
-    const action: ActionMap['Cancelled'] = yield take(Action.Succeeded);
+    const action: ActionMap['Failed'] = yield take(Action.Failed);
 
     if (action.payload.requestId === requestId) {
       return action;
