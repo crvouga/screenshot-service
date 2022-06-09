@@ -18,7 +18,11 @@ export const ProjectOverviewTab = () => {
       </Box>
 
       <Box
-        sx={{ paddingBottom: 8, paddingTop: 4, backgroundColor: grey['200'] }}
+        sx={{
+          paddingBottom: 8,
+          // paddingTop: 4,
+          // backgroundColor: grey['100'],
+        }}
       >
         <Container maxWidth="sm">
           <ProjectIdSection project={project} />
