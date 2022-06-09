@@ -1,5 +1,4 @@
-import { Box, Typography, Container } from '@mui/material';
-import { grey } from '@mui/material/colors';
+import { Box, Container, Typography } from '@mui/material';
 import { useProfileSingleOutletContext } from '../Project';
 import { ProjectDeleteSection } from './ProjectDeleteSection';
 import { ProjectIdSection } from './ProjectIdSection';
