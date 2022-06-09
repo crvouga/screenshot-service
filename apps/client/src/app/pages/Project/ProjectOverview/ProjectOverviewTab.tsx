@@ -1,4 +1,5 @@
-import { Container } from '@mui/material';
+import { Box, Typography, Container } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import { useProfileSingleOutletContext } from '../Project';
 import { ProjectDeleteSection } from './ProjectDeleteSection';
 import { ProjectIdSection } from './ProjectIdSection';
@@ -9,14 +10,26 @@ export const ProjectOverviewTab = () => {
   const { project } = useProfileSingleOutletContext();
 
   return (
-    <Container maxWidth="sm">
-      <ProjectIdSection project={project} />
+    <Box>
+      <Box sx={{ paddingY: 4 }}>
+        <Typography variant="h4" align="center">
+          {project.projectName}
+        </Typography>
+      </Box>
 
-      <ProjectWhitelistedUrlsSection project={project} />
+      <Box
+        sx={{ paddingBottom: 8, paddingTop: 4, backgroundColor: grey['200'] }}
+      >
+        <Container maxWidth="sm">
+          <ProjectIdSection project={project} />
 
-      <ProjectNameSection project={project} />
+          <ProjectWhitelistedUrlsSection project={project} />
 
-      <ProjectDeleteSection projectId={project.projectId} />
-    </Container>
+          <ProjectNameSection project={project} />
+
+          <ProjectDeleteSection projectId={project.projectId} />
+        </Container>
+      </Box>
+    </Box>
   );
 };

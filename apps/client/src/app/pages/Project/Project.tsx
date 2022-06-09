@@ -1,6 +1,5 @@
+import { Box, CircularProgress, Divider, Tab, Tabs } from '@mui/material';
 import { Data } from '@screenshot-service/screenshot-service';
-import { Box, CircularProgress, Tab, Tabs, Typography } from '@mui/material';
-
 import {
   Outlet,
   useLocation,
@@ -9,10 +8,10 @@ import {
   useParams,
 } from 'react-router-dom';
 import { Header } from '../../components/Header';
-import { useSingleProjectQuery, Project } from '../../projects';
+import { NotFoundPage } from '../../components/NotFound';
+import { Project, useSingleProjectQuery } from '../../projects';
 import { isMatch, routes } from '../../routes';
 import { ErrorPage } from '../Error';
-import { NotFoundPage } from '../../components/NotFound';
 
 export type OutletContext = { project: Project };
 
@@ -88,13 +87,7 @@ const ProjectPageWithParams = ({
     <>
       <Header />
 
-      <Box sx={{ p: 2 }}>
-        <Typography align="center" variant="h3">
-          {project.projectName}
-        </Typography>
-      </Box>
-
-      <Tabs value={tabValue} sx={{ marginBottom: 4 }} centered>
+      <Tabs value={tabValue}>
         <Tab
           value={tabValues.overview}
           label="overview"
@@ -113,6 +106,8 @@ const ProjectPageWithParams = ({
           }}
         />
       </Tabs>
+
+      <Divider />
 
       <Outlet context={outletContext} />
     </>

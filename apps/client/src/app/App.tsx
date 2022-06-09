@@ -1,9 +1,10 @@
 import { Box } from '@mui/material';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthUserContext, useAuthState, useAuthUser } from './authentication';
+import { BrandedLoadingPage } from './components/Loading';
 import { AccountPage } from './pages/Account';
 import { AccountCreatePage } from './pages/AccountCreate';
-import { BrandedLoadingPage } from './components/Loading';
+import { CaptureScreenshotFormDrawer } from './pages/CaptureScreenshot';
 import { LoginPage } from './pages/Login';
 import { LogoutPage } from './pages/Logout';
 import {
@@ -13,7 +14,6 @@ import {
 } from './pages/Project';
 import { ProjectsCreatePage } from './pages/ProjectCreate';
 import { ProjectsPage } from './pages/Projects';
-import { CaptureScreenshotFormDrawer } from './pages/CaptureScreenshot';
 import * as Profiles from './profiles';
 import { routes } from './routes';
 
@@ -147,8 +147,6 @@ export const Loaded = () => {
           element={<Navigate to={routes['/projects'].pattern} />}
         />
       </Routes>
-
-      <Box sx={{ p: 8 }}></Box>
     </Box>
   );
 };

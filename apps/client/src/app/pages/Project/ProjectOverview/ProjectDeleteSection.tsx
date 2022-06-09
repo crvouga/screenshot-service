@@ -2,6 +2,7 @@ import { LoadingButton } from '@mui/lab';
 import {
   Box,
   Button,
+  Card,
   Dialog,
   DialogActions,
   DialogTitle,
@@ -50,7 +51,7 @@ export const ProjectDeleteSection = ({
   };
 
   return (
-    <Box
+    <Card
       sx={{
         p: 2,
         borderRadius: 2,
@@ -81,6 +82,6 @@ export const ProjectDeleteSection = ({
           </LoadingButton>
         </DialogActions>
       </Dialog>
-    </Box>
+    </Card>
   );
 };
