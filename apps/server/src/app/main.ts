@@ -69,7 +69,7 @@ export const saga = function* ({
   socketServer: SocketServer;
 }) {
   yield takeEvery('*', function* (action) {
-    console.log(JSON.stringify(action, null, 8));
+    console.log(JSON.stringify(action, null, 2));
     yield;
   });
 
