@@ -1,11 +1,9 @@
-// import reduxDevTools from '@redux-devtools/cli';
 import { AnyAction, configureStore, createAction } from '@reduxjs/toolkit';
 import { Socket } from '@screenshot-service/screenshot-service';
-import express from 'express';
+
 import http from 'http';
 import createSagaMiddleware, { eventChannel } from 'redux-saga';
-import { cancel, fork, put, takeEvery } from 'redux-saga/effects';
-// import remoteDevToolsEnhancer from 'remote-redux-devtools';
+import { fork, put, takeEvery } from 'redux-saga/effects';
 import socket from 'socket.io';
 import { take } from 'typed-redux-saga';
 import * as CaptureScreenshot from './capture-screenshot-request';
@@ -172,6 +170,12 @@ const makeSocketChan = (socketServer: SocketServer) =>
 //
 //
 
+const requestListener: http.RequestListener = (_, response) => {
+  response.end(
+    JSON.stringify({ message: 'Hello from screenshot service backend' })
+  );
+};
+
 export const main = async ({ port }: { port: number }) => {
   const sagaMiddleware = createSagaMiddleware();
 
@@ -182,8 +186,9 @@ export const main = async ({ port }: { port: number }) => {
   });
 
   const webBrowser = await WebBrowser.create();
-  const httpApp = express();
-  const httpServer = http.createServer(httpApp);
+
+  const httpServer = http.createServer(requestListener);
+
   const socketServer: SocketServer = new socket.Server(httpServer, {
     cors: {
       origin: '*',
