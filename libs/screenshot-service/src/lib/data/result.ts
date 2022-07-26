@@ -90,3 +90,14 @@ export const combineValues = <TError, TValue>(
     return x;
   }, Ok([]));
 };
+
+export const mapErr = <TError, TValue, A>(
+  mapper: (error: TError) => A,
+  result: Result<TError, TValue>
+): Result<A, TValue> => {
+  if (isOk(result)) {
+    return result;
+  }
+
+  return Err(mapper(result.error));
+};

@@ -16,16 +16,16 @@ export type CaptureScreenshotRequest = {
 
 type Status = 'Loading' | 'Cancelled' | 'Failed' | 'Succeeded';
 
-export const SCREENSHOT_BUCKET_NAME = 'screenshots';
+export const BUCKET_NAME = 'screenshots';
 
 export const toFilename = ({
   imageType,
-  screenshotId,
+  requestId,
 }: {
   imageType: Data.ImageType.ImageType;
-  screenshotId: Data.ScreenshotId.ScreenshotId;
+  requestId: Data.RequestId.RequestId;
 }) => {
-  return `${screenshotId}.${imageType}`;
+  return `${requestId}.${imageType}`;
 };
 
 const decodeRow = (
@@ -133,16 +133,35 @@ export const updateSucceeded =
   async (
     requestId: Data.RequestId.RequestId,
     buffer: Buffer
-  ): Promise<Data.Result.Result<Data.Problem, Data.Unit>> => {
+  ): Promise<Data.Result.Result<Data.Problem[], Data.Unit>> => {
     const response = await supabaseClient
       .from<definitions['capture_screenshot_requests']>(
         'capture_screenshot_requests'
       )
       .update({ status: 'Succeeded' })
-      .eq('id', requestId);
+      .eq('id', requestId)
+      .single();
 
     if (response.error) {
-      return Data.Result.Err({ message: response.error.message });
+      return Data.Result.Err([{ message: response.error.message }]);
+    }
+
+    const decoded = decodeRow(response.data);
+
+    if (decoded.type === 'Err') {
+      return decoded;
+    }
+
+    const captureScreenshotRequest = decoded.value;
+
+    const filename = toFilename(captureScreenshotRequest);
+
+    const uploadResponse = await supabaseClient.storage
+      .from(BUCKET_NAME)
+      .upload(filename, buffer, { upsert: true });
+
+    if (uploadResponse.error) {
+      return Data.Result.Err([{ message: uploadResponse.error.message }]);
     }
 
     return Data.Result.Ok(Data.Unit);
@@ -237,3 +256,38 @@ export const findOneElseInsert =
 
     return insertResult;
   };
+
+export const getPublicUrl =
+  (supabaseClient: SupabaseClient) =>
+  async ({
+    requestId,
+    imageType,
+  }: {
+    imageType: Data.ImageType.ImageType;
+    requestId: Data.RequestId.RequestId;
+  }): Promise<Data.Result.Result<Data.Problem[], Data.Url.Url>> => {
+    const filename = toFilename({ requestId, imageType });
+
+    const response = await supabaseClient.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(filename);
+
+    if (response.error) {
+      return Data.Result.Err([{ message: response.error.message }]);
+    }
+
+    const decoded = Data.Url.decode(response.publicURL);
+
+    return Data.Result.mapErr(Array.of, decoded);
+  };
+
+export const CaptureScreenshotRequestDataAccess = (
+  supabaseClient: SupabaseClient
+) => {
+  return {
+    insertNew: insertNew(supabaseClient),
+    getPublicUrl: getPublicUrl(supabaseClient),
+    updateSucceeded: updateSucceeded(supabaseClient),
+    findOne: findOne(supabaseClient),
+  };
+};
