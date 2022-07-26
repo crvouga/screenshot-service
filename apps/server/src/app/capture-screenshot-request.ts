@@ -2,19 +2,10 @@ import {
   CaptureScreenshotRequest,
   Data,
 } from '@screenshot-service/screenshot-service';
-import { DataAccess } from '@screenshot-service/shared';
-import {
-  ActionPattern,
-  cancelled,
-  delay,
-  fork,
-  put,
-  race,
-  take,
-} from 'redux-saga/effects';
-import { call, takeEvery } from 'typed-redux-saga';
+import { delay, fork, put, race, take } from 'redux-saga/effects';
+import { call } from 'typed-redux-saga';
 import { takeClientDisconnected } from './main';
-import { supabaseClient } from './supabase';
+import { dataAccess } from './data-access';
 import { InferActionMap } from './utils';
 import * as WebBrowser from './web-browser';
 
@@ -188,10 +179,7 @@ const captureScreenshotFlow = function* ({
   webBrowser: WebBrowser.WebBrowser;
   request: CaptureScreenshotRequest;
 }) {
-  const findProjectResult = yield* call(
-    DataAccess.Projects.findOne(supabaseClient),
-    request
-  );
+  const findProjectResult = yield* call(dataAccess.project.findOne, request);
 
   if (findProjectResult.type === 'Err') {
     yield put(
@@ -235,16 +223,13 @@ const cacheFirstFlow = function* (
     Action.Log(clientId, request.requestId, 'info', 'checking cache...')
   );
 
-  const cacheResult = yield* call(
-    DataAccess.Screenshots.get(supabaseClient),
-    request
-  );
+  const cacheResult = yield* call(dataAccess.screenshot.get, request);
 
   if (cacheResult.type === 'Ok') {
     const [screenshot] = cacheResult.value;
 
     const publicUrlResult = yield* call(
-      DataAccess.Screenshots.getPublicUrl(supabaseClient),
+      dataAccess.screenshot.getPublicUrl,
       screenshot
     );
 
@@ -287,7 +272,14 @@ const networkFirstFlow = function* (
 
   yield put(Action.Log(clientId, requestId, 'info', 'opening new page...'));
 
-  const page = yield* call(WebBrowser.openNewPage, webBrowser);
+  const openPageResult = yield* call(WebBrowser.openNewPage, webBrowser);
+
+  if (openPageResult.type === 'Err') {
+    yield put(Action.Failed(clientId, requestId, [openPageResult.error]));
+    return;
+  }
+
+  const page = openPageResult.value;
 
   yield put(Action.Log(clientId, requestId, 'info', 'going to url...'));
 
@@ -331,7 +323,7 @@ const networkFirstFlow = function* (
   yield put(Action.Log(clientId, requestId, 'info', `caching screenshot...`));
 
   const putCacheResult = yield* call(
-    DataAccess.Screenshots.put(supabaseClient),
+    dataAccess.screenshot.put,
     request,
     captureResult.value
   );
@@ -347,7 +339,7 @@ const networkFirstFlow = function* (
   const screenshot = putCacheResult.value;
 
   const publicUrlResult = yield* call(
-    DataAccess.Screenshots.getPublicUrl(supabaseClient),
+    dataAccess.screenshot.getPublicUrl,
     screenshot
   );
 

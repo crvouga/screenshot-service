@@ -6,12 +6,12 @@ import {
   CardActionArea,
   CircularProgress,
   Container,
-  Typography,
+  Typography
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useAuthUser } from '../authentication';
 import { Header } from '../components/Header';
-import { useProjectsQuery } from '../projects';
+import { useProjectsQuery } from '../data-access';
 import { routes } from '../routes';
 
 export const ProjectsPage = () => {

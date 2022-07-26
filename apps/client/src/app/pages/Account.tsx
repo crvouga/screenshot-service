@@ -26,7 +26,7 @@ import {
   useDeleteProfileMutation,
   useProfileContext,
   useUpdateProfileMutation,
-} from '../profiles';
+} from '../data-access';
 import { Link, routes } from '../routes';
 import {
   ThemeMode,

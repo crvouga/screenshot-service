@@ -13,7 +13,7 @@ import { Data } from '@screenshot-service/screenshot-service';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDeleteProjectMutation } from '../../../projects';
+import { useDeleteProjectMutation } from '../../../data-access';
 import { routes } from '../../../routes';
 
 export const ProjectDeleteSection = ({
@@ -37,7 +37,7 @@ export const ProjectDeleteSection = ({
       case 'Err':
         snackbar.enqueueSnackbar(
           result.error.map((error) => error.message).join(', ') ??
-            'failed to delete project',
+          'failed to delete project',
           {
             variant: 'error',
           }

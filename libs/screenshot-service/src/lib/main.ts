@@ -14,7 +14,9 @@ import { InferActionUnion } from './utils';
 //
 
 export type State =
-  | { type: 'Connecting' }
+  | {
+      type: 'Connecting';
+    }
   | {
       type: 'Connected';
       clientId: string;

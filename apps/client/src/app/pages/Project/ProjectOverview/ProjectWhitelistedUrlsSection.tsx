@@ -19,7 +19,7 @@ import { Data } from '@screenshot-service/screenshot-service';
 import { useSnackbar } from 'notistack';
 import { useEffect, useState } from 'react';
 import { CopyToClipboardField } from '../../../../lib/Clipboard';
-import { Project, useUpdateProjectMutation } from '../../../projects';
+import { Project, useUpdateProjectMutation } from '../../../data-access';
 
 export const ProjectWhitelistedUrlsSection = ({
   project,
@@ -193,7 +193,7 @@ const WhitelistedUrlField = ({
       case 'Err':
         snackbar.enqueueSnackbar(
           result.error.map((error) => error.message).join(', ') ??
-            'failed to remove url from whitelist',
+          'failed to remove url from whitelist',
           {
             variant: 'error',
           }

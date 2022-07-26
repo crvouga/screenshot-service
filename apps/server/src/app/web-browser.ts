@@ -19,9 +19,17 @@ type Problem = { message: string };
 //
 //
 
-export const openNewPage = async (browser: puppeteer.Browser) => {
-  const page = await browser.newPage();
-  return page;
+export const openNewPage = async (
+  browser: puppeteer.Browser
+): Promise<Data.Result.Result<Problem, puppeteer.Page>> => {
+  try {
+    const page = await browser.newPage();
+    return Data.Result.Ok(page);
+  } catch (error) {
+    return Data.Result.Err({
+      message: 'Something went wrong when trying to open up a new web page',
+    });
+  }
 };
 
 export const goTo = async (

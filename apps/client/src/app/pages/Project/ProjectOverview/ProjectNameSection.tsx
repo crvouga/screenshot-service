@@ -3,7 +3,7 @@ import { Box, Paper, TextField, Typography } from '@mui/material';
 import { Data } from '@screenshot-service/screenshot-service';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
-import { Project, useUpdateProjectMutation } from '../../../projects';
+import { Project, useUpdateProjectMutation } from '../../../data-access';
 
 export const ProjectNameSection = ({ project }: { project: Project }) => {
   const [projectName, setProjectName] = useState(project.projectName);

@@ -13,7 +13,7 @@ import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthUser } from '../../authentication';
-import { useCreateProjectMutation } from '../../projects';
+import { useCreateProjectMutation } from '../../data-access';
 import { routes } from '../../routes';
 
 export const ProjectsCreatePage = () => {

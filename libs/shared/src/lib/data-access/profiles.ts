@@ -19,7 +19,7 @@ const rowToProfile = (row: definitions['profiles']): Profile => {
   };
 };
 
-export const getOne =
+export const findOne =
   (supabaseClient: SupabaseClient) =>
   async ({
     userId,
@@ -136,3 +136,12 @@ export const update =
       type: 'success',
     };
   };
+
+export const ProfileDataAccess = (supabaseClient: SupabaseClient) => {
+  return {
+    update: update(supabaseClient),
+    create: create(supabaseClient),
+    deleteForever: deleteForever(supabaseClient),
+    findOne: findOne(supabaseClient),
+  };
+};

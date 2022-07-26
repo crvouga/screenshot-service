@@ -167,3 +167,13 @@ export const update =
 
     return decoded;
   };
+
+export const ProjectDataAccess = (supabaseClient: SupabaseClient) => {
+  return {
+    update: update(supabaseClient),
+    findOne: findOne(supabaseClient),
+    deleteForever: deleteForever(supabaseClient),
+    findMany: findMany(supabaseClient),
+    insert: insert(supabaseClient),
+  };
+};

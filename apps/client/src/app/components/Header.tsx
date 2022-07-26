@@ -3,7 +3,7 @@ import { Avatar, Box, Toolbar } from '@mui/material';
 import React from 'react';
 import { ToggleCaptureScreenshotFormDrawerButton } from '../pages/CaptureScreenshot';
 import * as ProfileAvatar from '../profile-avatar';
-import { useProfileContext } from '../profiles';
+import { useProfileContext } from '../data-access';
 import { Link, routes } from '../routes';
 
 export const Header = () => {

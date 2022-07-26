@@ -17,14 +17,13 @@ import {
   Skeleton,
   ToggleButton,
   ToggleButtonGroup,
-  Typography,
+  Typography
 } from '@mui/material';
 import {
   CaptureScreenshotRequest,
-  Data,
+  Data
 } from '@screenshot-service/screenshot-service';
-import { useState, useEffect } from 'react';
-import useLocalStorage from '../../../lib/use-local-storage';
+import { useEffect, useState } from 'react';
 import { screenshotService } from '../../screenshot-service';
 import { NotOnWhitelistAlert } from './NotOnWhitelistAlert';
 import { ProjectInput } from './ProjectInput';
@@ -98,17 +97,17 @@ export const CaptureScreenshotForm = () => {
   const requestState =
     requestId && state.type === 'Connected'
       ? CaptureScreenshotRequest.toRequest(
-          requestId,
-          state.captureScreenshotRequest
-        )
+        requestId,
+        state.captureScreenshotRequest
+      )
       : CaptureScreenshotRequest.initialRequestState;
 
   const problems =
     state.type === 'Connecting'
       ? [{ message: 'Connecting to server...' }]
       : requestState.type === 'Failed'
-      ? requestState.problems
-      : [];
+        ? requestState.problems
+        : [];
 
   return (
     <>
@@ -287,9 +286,9 @@ export const CaptureScreenshotForm = () => {
         disabled={requestState.type !== 'Succeeded'}
         {...(requestState.type === 'Succeeded'
           ? {
-              href: requestState.src,
-              download: requestState.src,
-            }
+            href: requestState.src,
+            download: requestState.src,
+          }
           : {})}
       >
         Download Screenshot
@@ -415,27 +414,27 @@ const initialFormState: FormState = {
 
 const mergeValues =
   (valuesNew: Partial<FormState['values']>) =>
-  (formState: FormState = initialFormState): FormState => {
-    return {
-      ...formState,
-      values: {
-        ...formState.values,
-        ...valuesNew,
-      },
+    (formState: FormState = initialFormState): FormState => {
+      return {
+        ...formState,
+        values: {
+          ...formState.values,
+          ...valuesNew,
+        },
+      };
     };
-  };
 
 const mergeErrors =
   (errorsNew: Partial<FormState['errors']>) =>
-  (formState: FormState = initialFormState): FormState => {
-    return {
-      ...formState,
-      errors: {
-        ...formState.errors,
-        ...errorsNew,
-      },
+    (formState: FormState = initialFormState): FormState => {
+      return {
+        ...formState,
+        errors: {
+          ...formState.errors,
+          ...errorsNew,
+        },
+      };
     };
-  };
 
 const validateForm = (
   form: FormState

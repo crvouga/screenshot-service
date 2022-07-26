@@ -14,7 +14,7 @@ import {
 } from './pages/Project';
 import { ProjectsCreatePage } from './pages/ProjectCreate';
 import { ProjectsPage } from './pages/Projects';
-import * as Profiles from './profiles';
+import * as Profiles from './data-access';
 import { routes } from './routes';
 
 export const App = () => {

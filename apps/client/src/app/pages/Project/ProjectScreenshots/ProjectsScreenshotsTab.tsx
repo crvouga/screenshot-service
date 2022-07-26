@@ -15,7 +15,7 @@ import { Data } from '@screenshot-service/screenshot-service';
 import {
   useScreenshotsQuery,
   useScreenshotSrcQuery,
-} from '../../../screenshots';
+} from '../../../data-access';
 import { useProfileSingleOutletContext } from '../Project';
 
 export const ProjectScreenshotsTab = () => {

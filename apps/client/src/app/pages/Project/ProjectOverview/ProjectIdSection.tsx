@@ -1,6 +1,6 @@
 import { Box, Paper, Typography } from '@mui/material';
 import { CopyToClipboardField } from '../../../../lib/Clipboard';
-import { Project } from '../../../projects';
+import { Project } from '../../../data-access';
 
 export const ProjectIdSection = ({ project }: { project: Project }) => {
   return (

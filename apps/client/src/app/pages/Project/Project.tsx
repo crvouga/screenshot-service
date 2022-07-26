@@ -9,7 +9,7 @@ import {
 } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { NotFoundPage } from '../../components/NotFound';
-import { Project, useSingleProjectQuery } from '../../projects';
+import { Project, useSingleProjectQuery } from '../../data-access';
 import { isMatch, routes } from '../../routes';
 import { ErrorPage } from '../Error';
 
@@ -78,8 +78,8 @@ const ProjectPageWithParams = ({
   const tabValue = isMatch(location.pathname, routes['/projects/:id'])
     ? tabValues.overview
     : isMatch(location.pathname, routes['/projects/:id/screenshots'])
-    ? tabValues.screenshots
-    : tabValues.overview;
+      ? tabValues.screenshots
+      : tabValues.overview;
 
   const outletContext: OutletContext = { project };
 

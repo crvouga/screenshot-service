@@ -16,7 +16,7 @@ import { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from 'react-query';
 import { useAuthUser } from '../authentication';
 import * as ProfileAvatar from '../profile-avatar';
-import { useCreateProfileMutation, profileQueryFilter } from '../profiles';
+import { useCreateProfileMutation, profileQueryFilter } from '../data-access';
 import { Link, routes } from '../routes';
 import {
   ThemeMode,

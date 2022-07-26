@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
 import { useEffect } from 'react';
 import { IEventEmitter } from '../lib/event-emitter';
-import { Profile } from './profiles';
+import { Profile } from './data-access';
 
 export type IAppEvent = {
   ToggleCaptureScreenshotFormDrawer: 'opened' | 'closed';

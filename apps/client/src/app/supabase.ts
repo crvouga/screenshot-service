@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 
 // todo put in env
@@ -8,3 +9,4 @@ const SUPABASE_ANON_KEY =
 const SUPABASE_URL = 'https://rcqvjrnexkyfcimdrnri.supabase.co';
 
 export const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+

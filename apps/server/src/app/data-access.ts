@@ -1,3 +1,4 @@
+import { DataAccess } from '@screenshot-service/shared';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 
@@ -14,7 +15,14 @@ if (!SUPABASE_URL) {
   throw new Error('process.env.SUPABASE_URL is undefined');
 }
 
-export const supabaseClient = createClient(
-  SUPABASE_URL,
-  SUPABASE_SERVICE_ROLE_KEY
-);
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+//
+//
+//
+// Data Access
+//
+//
+//
+
+export const dataAccess = DataAccess(supabaseClient);

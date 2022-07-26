@@ -4,7 +4,7 @@ import { Data } from '@screenshot-service/screenshot-service';
 import { useSnackbar } from 'notistack';
 import React from 'react';
 import { useAuthUser } from '../../authentication';
-import { useProjectsQuery, useUpdateProjectMutation } from '../../projects';
+import { useProjectsQuery, useUpdateProjectMutation } from '../../data-access';
 
 export const NotOnWhitelistAlert = ({
   projectId,
@@ -18,8 +18,8 @@ export const NotOnWhitelistAlert = ({
     query.status !== 'success'
       ? []
       : query.data.type === 'Err'
-      ? []
-      : query.data.value;
+        ? []
+        : query.data.value;
 
   const currentProject = projects.find(
     (project) => project.projectId === projectId

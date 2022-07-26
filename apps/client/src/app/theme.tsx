@@ -13,6 +13,7 @@ import constate from 'constate';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useAppEventListener } from './app-event-emitter';
 import useLocalStorage from '../lib/use-local-storage';
+import { blue } from '@mui/material/colors';
 
 //
 //
@@ -49,6 +50,7 @@ export const makeTheme = ({ mode }: { mode: 'light' | 'dark' }) => {
     createTheme({
       palette: {
         mode,
+        primary: blue
       },
       typography: {
         fontFamily: "'Nunito', sans-serif",
@@ -56,10 +58,10 @@ export const makeTheme = ({ mode }: { mode: 'light' | 'dark' }) => {
       components: {
         MuiPaper: {
           defaultProps: {
+            // elevation: 8
             variant: 'outlined',
           },
         },
-
         MuiAvatar: {
           styleOverrides: {
             root: {
@@ -89,6 +91,9 @@ export const makeTheme = ({ mode }: { mode: 'light' | 'dark' }) => {
           },
         },
         MuiButton: {
+          defaultProps: {
+            disableElevation: true
+          },
           styleOverrides: {
             root: {
               textTransform: 'lowercase',

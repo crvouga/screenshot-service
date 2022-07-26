@@ -18,10 +18,10 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { appEventEmitter } from '../../app-event-emitter';
 import { useAuthUser } from '../../authentication';
-import { Project, useProjectsQuery } from '../../projects';
+import { Project, useProjectsQuery } from '../../data-access';
 import { routes } from '../../routes';
 
-const emptyValue = 'Empty';
+
 
 type Props = {
   projectId: Data.ProjectId.ProjectId | null;

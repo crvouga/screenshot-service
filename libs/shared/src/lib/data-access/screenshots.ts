@@ -348,3 +348,12 @@ const findOneElseInsertOne =
 
     return insertResult;
   };
+
+export const ScreenshotDataAccess = (supabaseClient: SupabaseClient) => {
+  return {
+    put: put(supabaseClient),
+    get: get(supabaseClient),
+    findManyByProjectId: findManyByProjectId(supabaseClient),
+    getPublicUrl: getPublicUrl(supabaseClient),
+  };
+};
