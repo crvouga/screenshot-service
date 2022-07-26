@@ -2,7 +2,6 @@ import { LoadingButton } from '@mui/lab';
 import { Alert, Box, Collapse } from '@mui/material';
 import { Data } from '@screenshot-service/screenshot-service';
 import { useSnackbar } from 'notistack';
-import React from 'react';
 import { useAuthUser } from '../../authentication';
 import { useProjectsQuery, useUpdateProjectMutation } from '../../data-access';
 
@@ -68,23 +67,21 @@ export const NotOnWhitelistAlert = ({
   return (
     <Collapse in={showAlert}>
       {currentProject && (
-        <Box sx={{ marginBottom: 4 }}>
-          <Alert severity="warning" variant="standard">
-            <Box sx={{ marginBottom: 1 }}>
-              The url for this website, {window.location.origin} is not on the
-              selected project's url whitelist.
-            </Box>
+        <Alert sx={{ marginBottom: 2 }} severity="warning" variant="standard">
+          <Box sx={{ marginBottom: 1 }}>
+            The url for this website, {window.location.origin} is not on the
+            selected project's url whitelist.
+          </Box>
 
-            <LoadingButton
-              sx={{ marginLeft: 'auto' }}
-              variant="contained"
-              onClick={onAddToWhitelist}
-              loading={mutation.isLoading}
-            >
-              Add To Whitelist
-            </LoadingButton>
-          </Alert>
-        </Box>
+          <LoadingButton
+            sx={{ marginLeft: 'auto' }}
+            variant="contained"
+            onClick={onAddToWhitelist}
+            loading={mutation.isLoading}
+          >
+            Add To Whitelist
+          </LoadingButton>
+        </Alert>
       )}
     </Collapse>
   );

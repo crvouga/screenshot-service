@@ -8,6 +8,8 @@ import {
   AlertTitle,
   Box,
   Button,
+  CircularProgress,
+  Collapse,
   Divider,
   ListItemText,
   MenuItem,
@@ -103,11 +105,9 @@ export const CaptureScreenshotForm = () => {
       : CaptureScreenshotRequest.initialRequestState;
 
   const problems =
-    state.type === 'Connecting'
-      ? [{ message: 'Connecting to server...' }]
-      : requestState.type === 'Failed'
-        ? requestState.problems
-        : [];
+    requestState.type === 'Failed'
+      ? requestState.problems
+      : [];
 
   return (
     <>
@@ -213,6 +213,13 @@ export const CaptureScreenshotForm = () => {
       {form.values.projectId && (
         <NotOnWhitelistAlert projectId={form.values.projectId} />
       )}
+
+      <Collapse in={state.type === 'Connecting'}>
+        <Alert sx={{ marginBottom: 2, alignItems: "center" }} severity='warning' action={<CircularProgress disableShrink sx={{ marginRight: 1 }} size="1.2rem" />} >
+          Connecting to server...
+        </Alert>
+      </Collapse>
+
 
       <LoadingButton
         startIcon={<PhotoCameraIcon />}
