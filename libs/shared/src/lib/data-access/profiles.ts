@@ -40,20 +40,19 @@ export const findOne =
     const response = await supabaseClient
       .from<definitions['profiles']>('profiles')
       .select('*')
-      .match({ id: userId })
-      .single();
+      .match({ id: userId });
 
     if (response.error) {
       return Data.Result.Err([{ message: response.error.message }]);
     }
 
-    const row = response.data;
+    const rows = response.data;
 
-    if (!row) {
+    if (rows.length === 0) {
       return Data.Result.Ok(null);
     }
 
-    const decoded = decodeRow(row);
+    const decoded = decodeRow(rows[0]);
 
     return decoded;
   };

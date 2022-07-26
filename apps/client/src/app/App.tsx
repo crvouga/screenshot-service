@@ -81,11 +81,13 @@ const LoadingProfile = () => {
 
       switch (result.type) {
         case 'Err':
-          return <BrandedLoadingPage />;
+          return <Box>
+            {result.error.map(problem => problem.message).join(", ")}
+          </Box>
 
         case 'Ok': {
           const profile = result.value
-
+          console.log(profile)
           if (profile) {
             return (
               <Profiles.ProfileContext profile={profile}>
