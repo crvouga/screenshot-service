@@ -12,207 +12,6 @@ export interface paths {
       };
     };
   };
-  "/profiles": {
-    get: {
-      parameters: {
-        query: {
-          id?: parameters["rowFilter.profiles.id"];
-          created_at?: parameters["rowFilter.profiles.created_at"];
-          avatar_seed?: parameters["rowFilter.profiles.avatar_seed"];
-          name?: parameters["rowFilter.profiles.name"];
-          theme_mode?: parameters["rowFilter.profiles.theme_mode"];
-          /** Filtering Columns */
-          select?: parameters["select"];
-          /** Ordering */
-          order?: parameters["order"];
-          /** Limiting and Pagination */
-          offset?: parameters["offset"];
-          /** Limiting and Pagination */
-          limit?: parameters["limit"];
-        };
-        header: {
-          /** Limiting and Pagination */
-          Range?: parameters["range"];
-          /** Limiting and Pagination */
-          "Range-Unit"?: parameters["rangeUnit"];
-          /** Preference */
-          Prefer?: parameters["preferCount"];
-        };
-      };
-      responses: {
-        /** OK */
-        200: {
-          schema: definitions["profiles"][];
-        };
-        /** Partial Content */
-        206: unknown;
-      };
-    };
-    post: {
-      parameters: {
-        body: {
-          /** profiles */
-          profiles?: definitions["profiles"];
-        };
-        query: {
-          /** Filtering Columns */
-          select?: parameters["select"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** Created */
-        201: unknown;
-      };
-    };
-    delete: {
-      parameters: {
-        query: {
-          id?: parameters["rowFilter.profiles.id"];
-          created_at?: parameters["rowFilter.profiles.created_at"];
-          avatar_seed?: parameters["rowFilter.profiles.avatar_seed"];
-          name?: parameters["rowFilter.profiles.name"];
-          theme_mode?: parameters["rowFilter.profiles.theme_mode"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** No Content */
-        204: never;
-      };
-    };
-    patch: {
-      parameters: {
-        query: {
-          id?: parameters["rowFilter.profiles.id"];
-          created_at?: parameters["rowFilter.profiles.created_at"];
-          avatar_seed?: parameters["rowFilter.profiles.avatar_seed"];
-          name?: parameters["rowFilter.profiles.name"];
-          theme_mode?: parameters["rowFilter.profiles.theme_mode"];
-        };
-        body: {
-          /** profiles */
-          profiles?: definitions["profiles"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** No Content */
-        204: never;
-      };
-    };
-  };
-  "/project_logs": {
-    get: {
-      parameters: {
-        query: {
-          created_at?: parameters["rowFilter.project_logs.created_at"];
-          message?: parameters["rowFilter.project_logs.message"];
-          log_level?: parameters["rowFilter.project_logs.log_level"];
-          project_id?: parameters["rowFilter.project_logs.project_id"];
-          request_id?: parameters["rowFilter.project_logs.request_id"];
-          id?: parameters["rowFilter.project_logs.id"];
-          /** Filtering Columns */
-          select?: parameters["select"];
-          /** Ordering */
-          order?: parameters["order"];
-          /** Limiting and Pagination */
-          offset?: parameters["offset"];
-          /** Limiting and Pagination */
-          limit?: parameters["limit"];
-        };
-        header: {
-          /** Limiting and Pagination */
-          Range?: parameters["range"];
-          /** Limiting and Pagination */
-          "Range-Unit"?: parameters["rangeUnit"];
-          /** Preference */
-          Prefer?: parameters["preferCount"];
-        };
-      };
-      responses: {
-        /** OK */
-        200: {
-          schema: definitions["project_logs"][];
-        };
-        /** Partial Content */
-        206: unknown;
-      };
-    };
-    post: {
-      parameters: {
-        body: {
-          /** project_logs */
-          project_logs?: definitions["project_logs"];
-        };
-        query: {
-          /** Filtering Columns */
-          select?: parameters["select"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** Created */
-        201: unknown;
-      };
-    };
-    delete: {
-      parameters: {
-        query: {
-          created_at?: parameters["rowFilter.project_logs.created_at"];
-          message?: parameters["rowFilter.project_logs.message"];
-          log_level?: parameters["rowFilter.project_logs.log_level"];
-          project_id?: parameters["rowFilter.project_logs.project_id"];
-          request_id?: parameters["rowFilter.project_logs.request_id"];
-          id?: parameters["rowFilter.project_logs.id"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** No Content */
-        204: never;
-      };
-    };
-    patch: {
-      parameters: {
-        query: {
-          created_at?: parameters["rowFilter.project_logs.created_at"];
-          message?: parameters["rowFilter.project_logs.message"];
-          log_level?: parameters["rowFilter.project_logs.log_level"];
-          project_id?: parameters["rowFilter.project_logs.project_id"];
-          request_id?: parameters["rowFilter.project_logs.request_id"];
-          id?: parameters["rowFilter.project_logs.id"];
-        };
-        body: {
-          /** project_logs */
-          project_logs?: definitions["project_logs"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** No Content */
-        204: never;
-      };
-    };
-  };
   "/projects": {
     get: {
       parameters: {
@@ -300,6 +99,105 @@ export interface paths {
         body: {
           /** projects */
           projects?: definitions["projects"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+  };
+  "/profiles": {
+    get: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.profiles.id"];
+          created_at?: parameters["rowFilter.profiles.created_at"];
+          avatar_seed?: parameters["rowFilter.profiles.avatar_seed"];
+          name?: parameters["rowFilter.profiles.name"];
+          theme_mode?: parameters["rowFilter.profiles.theme_mode"];
+          /** Filtering Columns */
+          select?: parameters["select"];
+          /** Ordering */
+          order?: parameters["order"];
+          /** Limiting and Pagination */
+          offset?: parameters["offset"];
+          /** Limiting and Pagination */
+          limit?: parameters["limit"];
+        };
+        header: {
+          /** Limiting and Pagination */
+          Range?: parameters["range"];
+          /** Limiting and Pagination */
+          "Range-Unit"?: parameters["rangeUnit"];
+          /** Preference */
+          Prefer?: parameters["preferCount"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: {
+          schema: definitions["profiles"][];
+        };
+        /** Partial Content */
+        206: unknown;
+      };
+    };
+    post: {
+      parameters: {
+        body: {
+          /** profiles */
+          profiles?: definitions["profiles"];
+        };
+        query: {
+          /** Filtering Columns */
+          select?: parameters["select"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** Created */
+        201: unknown;
+      };
+    };
+    delete: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.profiles.id"];
+          created_at?: parameters["rowFilter.profiles.created_at"];
+          avatar_seed?: parameters["rowFilter.profiles.avatar_seed"];
+          name?: parameters["rowFilter.profiles.name"];
+          theme_mode?: parameters["rowFilter.profiles.theme_mode"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+    patch: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.profiles.id"];
+          created_at?: parameters["rowFilter.profiles.created_at"];
+          avatar_seed?: parameters["rowFilter.profiles.avatar_seed"];
+          name?: parameters["rowFilter.profiles.name"];
+          theme_mode?: parameters["rowFilter.profiles.theme_mode"];
+        };
+        body: {
+          /** profiles */
+          profiles?: definitions["profiles"];
         };
         header: {
           /** Preference */
@@ -417,9 +315,140 @@ export interface paths {
       };
     };
   };
+  "/capture_screenshot_requests": {
+    get: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.capture_screenshot_requests.id"];
+          created_at?: parameters["rowFilter.capture_screenshot_requests.created_at"];
+          project_id?: parameters["rowFilter.capture_screenshot_requests.project_id"];
+          image_type?: parameters["rowFilter.capture_screenshot_requests.image_type"];
+          delay_sec?: parameters["rowFilter.capture_screenshot_requests.delay_sec"];
+          target_url?: parameters["rowFilter.capture_screenshot_requests.target_url"];
+          status?: parameters["rowFilter.capture_screenshot_requests.status"];
+          origin_url?: parameters["rowFilter.capture_screenshot_requests.origin_url"];
+          strategy?: parameters["rowFilter.capture_screenshot_requests.strategy"];
+          /** Filtering Columns */
+          select?: parameters["select"];
+          /** Ordering */
+          order?: parameters["order"];
+          /** Limiting and Pagination */
+          offset?: parameters["offset"];
+          /** Limiting and Pagination */
+          limit?: parameters["limit"];
+        };
+        header: {
+          /** Limiting and Pagination */
+          Range?: parameters["range"];
+          /** Limiting and Pagination */
+          "Range-Unit"?: parameters["rangeUnit"];
+          /** Preference */
+          Prefer?: parameters["preferCount"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: {
+          schema: definitions["capture_screenshot_requests"][];
+        };
+        /** Partial Content */
+        206: unknown;
+      };
+    };
+    post: {
+      parameters: {
+        body: {
+          /** capture_screenshot_requests */
+          capture_screenshot_requests?: definitions["capture_screenshot_requests"];
+        };
+        query: {
+          /** Filtering Columns */
+          select?: parameters["select"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** Created */
+        201: unknown;
+      };
+    };
+    delete: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.capture_screenshot_requests.id"];
+          created_at?: parameters["rowFilter.capture_screenshot_requests.created_at"];
+          project_id?: parameters["rowFilter.capture_screenshot_requests.project_id"];
+          image_type?: parameters["rowFilter.capture_screenshot_requests.image_type"];
+          delay_sec?: parameters["rowFilter.capture_screenshot_requests.delay_sec"];
+          target_url?: parameters["rowFilter.capture_screenshot_requests.target_url"];
+          status?: parameters["rowFilter.capture_screenshot_requests.status"];
+          origin_url?: parameters["rowFilter.capture_screenshot_requests.origin_url"];
+          strategy?: parameters["rowFilter.capture_screenshot_requests.strategy"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+    patch: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.capture_screenshot_requests.id"];
+          created_at?: parameters["rowFilter.capture_screenshot_requests.created_at"];
+          project_id?: parameters["rowFilter.capture_screenshot_requests.project_id"];
+          image_type?: parameters["rowFilter.capture_screenshot_requests.image_type"];
+          delay_sec?: parameters["rowFilter.capture_screenshot_requests.delay_sec"];
+          target_url?: parameters["rowFilter.capture_screenshot_requests.target_url"];
+          status?: parameters["rowFilter.capture_screenshot_requests.status"];
+          origin_url?: parameters["rowFilter.capture_screenshot_requests.origin_url"];
+          strategy?: parameters["rowFilter.capture_screenshot_requests.strategy"];
+        };
+        body: {
+          /** capture_screenshot_requests */
+          capture_screenshot_requests?: definitions["capture_screenshot_requests"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+  };
 }
 
 export interface definitions {
+  projects: {
+    /**
+     * Format: uuid
+     * @description Note:
+     * This is a Primary Key.<pk/>
+     * @default extensions.uuid_generate_v4()
+     */
+    id: string;
+    /**
+     * Format: timestamp with time zone
+     * @default now()
+     */
+    created_at?: string;
+    /** Format: text */
+    name: string;
+    /** Format: uuid */
+    owner_id: string;
+    /** Format: ARRAY */
+    whitelisted_urls: unknown[];
+  };
   profiles: {
     /**
      * Format: uuid
@@ -441,58 +470,6 @@ export interface definitions {
      * @enum {string}
      */
     theme_mode: "light" | "dark" | "system";
-  };
-  project_logs: {
-    /**
-     * Format: timestamp with time zone
-     * @default now()
-     */
-    created_at?: string;
-    /** Format: text */
-    message: string;
-    /**
-     * Format: public.log_level
-     * @enum {string}
-     */
-    log_level: "info" | "notice" | "warn" | "error";
-    /**
-     * Format: uuid
-     * @description Note:
-     * This is a Foreign Key to `projects.id`.<fk table='projects' column='id'/>
-     */
-    project_id: string;
-    /**
-     * Format: uuid
-     * @default extensions.uuid_generate_v4()
-     */
-    request_id: string;
-    /**
-     * Format: uuid
-     * @description Note:
-     * This is a Primary Key.<pk/>
-     * @default extensions.uuid_generate_v4()
-     */
-    id: string;
-  };
-  projects: {
-    /**
-     * Format: uuid
-     * @description Note:
-     * This is a Primary Key.<pk/>
-     * @default extensions.uuid_generate_v4()
-     */
-    id: string;
-    /**
-     * Format: timestamp with time zone
-     * @default now()
-     */
-    created_at?: string;
-    /** Format: text */
-    name: string;
-    /** Format: uuid */
-    owner_id: string;
-    /** Format: ARRAY */
-    whitelisted_urls: unknown[];
   };
   screenshots: {
     /**
@@ -524,6 +501,47 @@ export interface definitions {
     delay_sec: number;
     /** Format: text */
     target_url: string;
+  };
+  capture_screenshot_requests: {
+    /**
+     * Format: uuid
+     * @description Note:
+     * This is a Primary Key.<pk/>
+     * @default extensions.uuid_generate_v4()
+     */
+    id: string;
+    /**
+     * Format: timestamp with time zone
+     * @default now()
+     */
+    created_at: string;
+    /**
+     * Format: uuid
+     * @description Note:
+     * This is a Foreign Key to `projects.id`.<fk table='projects' column='id'/>
+     */
+    project_id: string;
+    /**
+     * Format: public.capture_screenshot_request_image_type
+     * @enum {string}
+     */
+    image_type: "jpeg" | "png";
+    /** Format: bigint */
+    delay_sec: number;
+    /** Format: text */
+    target_url: string;
+    /**
+     * Format: public.capture_screenshot_request_status
+     * @enum {string}
+     */
+    status: "Loading" | "Cancelled" | "Failed" | "Succeeded";
+    /** Format: text */
+    origin_url: string;
+    /**
+     * Format: public.capture_screenshot_request_strategy
+     * @enum {string}
+     */
+    strategy: "NetworkFirst" | "CacheFirst";
   };
 }
 
@@ -560,32 +578,6 @@ export interface parameters {
   offset: string;
   /** @description Limiting and Pagination */
   limit: string;
-  /** @description profiles */
-  "body.profiles": definitions["profiles"];
-  /** Format: uuid */
-  "rowFilter.profiles.id": string;
-  /** Format: timestamp with time zone */
-  "rowFilter.profiles.created_at": string;
-  /** Format: text */
-  "rowFilter.profiles.avatar_seed": string;
-  /** Format: text */
-  "rowFilter.profiles.name": string;
-  /** Format: public.theme_mode */
-  "rowFilter.profiles.theme_mode": string;
-  /** @description project_logs */
-  "body.project_logs": definitions["project_logs"];
-  /** Format: timestamp with time zone */
-  "rowFilter.project_logs.created_at": string;
-  /** Format: text */
-  "rowFilter.project_logs.message": string;
-  /** Format: public.log_level */
-  "rowFilter.project_logs.log_level": string;
-  /** Format: uuid */
-  "rowFilter.project_logs.project_id": string;
-  /** Format: uuid */
-  "rowFilter.project_logs.request_id": string;
-  /** Format: uuid */
-  "rowFilter.project_logs.id": string;
   /** @description projects */
   "body.projects": definitions["projects"];
   /** Format: uuid */
@@ -598,6 +590,18 @@ export interface parameters {
   "rowFilter.projects.owner_id": string;
   /** Format: ARRAY */
   "rowFilter.projects.whitelisted_urls": string;
+  /** @description profiles */
+  "body.profiles": definitions["profiles"];
+  /** Format: uuid */
+  "rowFilter.profiles.id": string;
+  /** Format: timestamp with time zone */
+  "rowFilter.profiles.created_at": string;
+  /** Format: text */
+  "rowFilter.profiles.avatar_seed": string;
+  /** Format: text */
+  "rowFilter.profiles.name": string;
+  /** Format: public.theme_mode */
+  "rowFilter.profiles.theme_mode": string;
   /** @description screenshots */
   "body.screenshots": definitions["screenshots"];
   /** Format: uuid */
@@ -614,6 +618,26 @@ export interface parameters {
   "rowFilter.screenshots.delay_sec": string;
   /** Format: text */
   "rowFilter.screenshots.target_url": string;
+  /** @description capture_screenshot_requests */
+  "body.capture_screenshot_requests": definitions["capture_screenshot_requests"];
+  /** Format: uuid */
+  "rowFilter.capture_screenshot_requests.id": string;
+  /** Format: timestamp with time zone */
+  "rowFilter.capture_screenshot_requests.created_at": string;
+  /** Format: uuid */
+  "rowFilter.capture_screenshot_requests.project_id": string;
+  /** Format: public.capture_screenshot_request_image_type */
+  "rowFilter.capture_screenshot_requests.image_type": string;
+  /** Format: bigint */
+  "rowFilter.capture_screenshot_requests.delay_sec": string;
+  /** Format: text */
+  "rowFilter.capture_screenshot_requests.target_url": string;
+  /** Format: public.capture_screenshot_request_status */
+  "rowFilter.capture_screenshot_requests.status": string;
+  /** Format: text */
+  "rowFilter.capture_screenshot_requests.origin_url": string;
+  /** Format: public.capture_screenshot_request_strategy */
+  "rowFilter.capture_screenshot_requests.strategy": string;
 }
 
 export interface operations {}

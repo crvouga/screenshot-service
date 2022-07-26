@@ -1,5 +1,5 @@
 import { AnyAction, createAction } from '@reduxjs/toolkit';
-import { Data } from '@screenshot-service/screenshot-service';
+import * as Data from './data';
 import { InferActionUnion } from './utils';
 
 //

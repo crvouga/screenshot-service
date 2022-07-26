@@ -15,3 +15,5 @@ export * as Result from './result';
 export type Unit = { type: 'Unit' };
 
 export const Unit: Unit = { type: 'Unit' };
+
+export type Problem = { message: string };

@@ -205,11 +205,11 @@ const captureScreenshotFlow = function* ({
     return;
   }
 
-  if (request.strategy === 'cache-first') {
+  if (request.strategy === 'CacheFirst') {
     yield* cacheFirstFlow(clientId, webBrowser, request);
   }
 
-  if (request.strategy === 'network-first') {
+  if (request.strategy === 'NetworkFirst') {
     yield* networkFirstFlow(clientId, webBrowser, request);
   }
 };

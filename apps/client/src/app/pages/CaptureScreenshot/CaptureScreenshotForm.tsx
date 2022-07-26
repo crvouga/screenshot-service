@@ -200,8 +200,8 @@ export const CaptureScreenshotForm = () => {
         exclusive
         sx={{ mb: 2 }}
       >
-        <ToggleButton value="cache-first">Cache First</ToggleButton>
-        <ToggleButton value="network-first">Network First</ToggleButton>
+        <ToggleButton value="CacheFirst">Cache First</ToggleButton>
+        <ToggleButton value="NetworkFirst">Network First</ToggleButton>
       </ToggleButtonGroup>
 
       <Divider
@@ -404,7 +404,7 @@ const initialFormState: FormState = {
     imageType: 'jpeg',
     delaySec: 3,
     projectId: null,
-    strategy: 'network-first',
+    strategy: 'NetworkFirst',
   },
   errors: {
     targetUrl: [],
