@@ -98,13 +98,13 @@ const DeleteSection = () => {
     const response = await mutation.mutateAsync(profile);
 
     switch (response.type) {
-      case 'error':
+      case 'Err':
         snackbar.enqueueSnackbar('failed to delete profile', {
           variant: 'error',
         });
         return;
 
-      case 'success':
+      case 'Ok':
         snackbar.enqueueSnackbar('deleted profile', { variant: 'default' });
         queryClient.invalidateQueries(profileQueryFilter);
         return;
@@ -172,13 +172,13 @@ const NameSection = () => {
     });
 
     switch (response.type) {
-      case 'error':
+      case 'Err':
         snackbar.enqueueSnackbar('failed to change name', {
           variant: 'error',
         });
         return;
 
-      case 'success':
+      case 'Ok':
         snackbar.enqueueSnackbar('changed name');
         queryClient.invalidateQueries(profileQueryFilter);
         return;
@@ -247,13 +247,13 @@ const AvatarSection = () => {
     });
 
     switch (response.type) {
-      case 'error':
+      case 'Err':
         snackbar.enqueueSnackbar('failed to change avatar', {
           variant: 'error',
         });
         return;
 
-      case 'success':
+      case 'Ok':
         snackbar.enqueueSnackbar('changed avatar');
         queryClient.invalidateQueries(profileQueryFilter);
         return;
@@ -355,14 +355,14 @@ const ThemeSection = () => {
     });
 
     switch (result.type) {
-      case 'error':
+      case 'Err':
         setThemeMode(profile.themeMode);
         snackbar.enqueueSnackbar('failed to change theme', {
           variant: 'error',
         });
         return;
 
-      case 'success':
+      case 'Ok':
         snackbar.enqueueSnackbar('changed theme');
         queryClient.invalidateQueries(profileQueryFilter);
         setThemeMode(nextThemeMode);

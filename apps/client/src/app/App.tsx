@@ -80,10 +80,20 @@ const LoadingProfile = () => {
       const result = query.data;
 
       switch (result.type) {
-        case 'error':
+        case 'Err':
           return <BrandedLoadingPage />;
 
-        case 'not-found':
+        case 'Ok': {
+          const profile = result.value
+
+          if (profile) {
+            return (
+              <Profiles.ProfileContext profile={profile}>
+                <Loaded />
+              </Profiles.ProfileContext>
+            )
+          }
+
           return (
             <Routes>
               <Route path="/account/create" element={<AccountCreatePage />} />
@@ -91,13 +101,8 @@ const LoadingProfile = () => {
               <Route path="*" element={<Navigate to="/account/create" />} />
             </Routes>
           );
+        }
 
-        case 'found':
-          return (
-            <Profiles.ProfileContext profile={result.profile}>
-              <Loaded />
-            </Profiles.ProfileContext>
-          );
       }
     }
   }

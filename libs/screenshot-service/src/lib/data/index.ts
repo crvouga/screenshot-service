@@ -11,3 +11,7 @@ export * as Url from './url';
 export * as UserId from './user-id';
 export * as Uuid from './uuid';
 export * as Result from './result';
+
+export type Unit = { type: 'Unit' };
+
+export const Unit: Unit = { type: 'Unit' };

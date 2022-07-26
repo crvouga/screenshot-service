@@ -57,12 +57,12 @@ export const AccountCreatePage = () => {
     });
 
     switch (result.type) {
-      case 'error':
+      case 'Err':
         snackbar.enqueueSnackbar('failed to create profile', {
           variant: 'error',
         });
         return;
-      case 'success':
+      case 'Ok':
         snackbar.enqueueSnackbar('profile created', {
           variant: 'default',
         });

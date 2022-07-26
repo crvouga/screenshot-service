@@ -1,8 +1,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { definitions } from '../supabase-types';
+import { Data } from '@screenshot-service/screenshot-service';
 
 export type Profile = {
-  userId: string;
+  userId: Data.UserId.UserId;
   avatarSeed: string;
   name: string;
   themeMode: ThemeMode;
@@ -10,13 +11,23 @@ export type Profile = {
 
 type ThemeMode = 'light' | 'dark' | 'system';
 
-const rowToProfile = (row: definitions['profiles']): Profile => {
-  return {
-    userId: row.id,
-    name: row.name,
-    avatarSeed: row.avatar_seed,
-    themeMode: row.theme_mode,
-  };
+type Problem = { message: string };
+
+const decodeRow = (
+  row: definitions['profiles']
+): Data.Result.Result<Problem[], Profile> => {
+  const userId = Data.UserId.decode(row.id);
+
+  if (Data.Result.isOk(userId)) {
+    return Data.Result.Ok({
+      userId: userId.value,
+      name: row.name,
+      avatarSeed: row.avatar_seed,
+      themeMode: row.theme_mode,
+    });
+  }
+
+  return Data.Result.Err(Data.Result.toErrors([userId]));
 };
 
 export const findOne =
@@ -25,32 +36,26 @@ export const findOne =
     userId,
   }: {
     userId: string;
-  }): Promise<
-    | { type: 'error'; error: string }
-    | { type: 'found'; profile: Profile }
-    | { type: 'not-found' }
-  > => {
+  }): Promise<Data.Result.Result<Problem[], Profile | null>> => {
     const response = await supabaseClient
       .from<definitions['profiles']>('profiles')
       .select('*')
-      .match({ id: userId });
+      .match({ id: userId })
+      .single();
 
     if (response.error) {
-      return { type: 'error', error: response.error.message };
+      return Data.Result.Err([{ message: response.error.message }]);
     }
 
-    const [row] = response.data;
+    const row = response.data;
 
-    if (row) {
-      return {
-        type: 'found',
-        profile: rowToProfile(row),
-      };
+    if (!row) {
+      return Data.Result.Ok(null);
     }
 
-    return {
-      type: 'not-found',
-    };
+    const decoded = decodeRow(row);
+
+    return decoded;
   };
 
 export const deleteForever =
@@ -59,19 +64,17 @@ export const deleteForever =
     userId,
   }: {
     userId: string;
-  }): Promise<{ type: 'error'; error: string } | { type: 'success' }> => {
+  }): Promise<Data.Result.Result<Problem, Data.Unit>> => {
     const response = await supabaseClient
       .from<definitions['profiles']>('profiles')
       .delete()
       .match({ id: userId });
 
     if (response.error) {
-      return { type: 'error', error: response.error.message };
+      return Data.Result.Err({ message: response.error.message });
     }
 
-    return {
-      type: 'success',
-    };
+    return Data.Result.Ok(Data.Unit);
   };
 
 export const create =
@@ -86,9 +89,7 @@ export const create =
     name: string;
     avatarSeed: string;
     themeMode: ThemeMode;
-  }): Promise<
-    { type: 'error'; error: string } | { type: 'success'; userId: string }
-  > => {
+  }): Promise<Data.Result.Result<Problem, Data.UserId.UserId>> => {
     const response = await supabaseClient
       .from<definitions['profiles']>('profiles')
       .insert({
@@ -100,13 +101,12 @@ export const create =
       .single();
 
     if (response.error) {
-      return { type: 'error', error: response.error.message };
+      return Data.Result.Err({ message: response.error.message });
     }
 
-    return {
-      type: 'success',
-      userId: response.data.id,
-    };
+    const decoded = Data.UserId.decode(response.data.id);
+
+    return decoded;
   };
 
 export const update =
@@ -115,7 +115,7 @@ export const update =
     userId,
     ...updates
   }: Partial<Profile> & { userId: string }): Promise<
-    { type: 'error'; error: string } | { type: 'success' }
+    Data.Result.Result<Problem, Data.Unit>
   > => {
     const response = await supabaseClient
       .from<definitions['profiles']>('profiles')
@@ -129,12 +129,10 @@ export const update =
       });
 
     if (response.error) {
-      return { type: 'error', error: response.error.message };
+      return Data.Result.Err({ message: response.error.message });
     }
 
-    return {
-      type: 'success',
-    };
+    return Data.Result.Ok(Data.Unit);
   };
 
 export const ProfileDataAccess = (supabaseClient: SupabaseClient) => {
