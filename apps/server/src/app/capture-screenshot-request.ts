@@ -190,10 +190,10 @@ const cacheFirstFlow = function* (
         clientId,
         request.requestId,
         'info',
-        'Failed to get screenshot from cache. Now trying the network...'
+        'Failed get from cache. Trying network...'
       )
     );
-    yield delay(1000);
+    yield delay(1500);
 
     yield* networkFirstFlow(clientId, webBrowser, request);
 
@@ -212,7 +212,7 @@ const cacheFirstFlow = function* (
       )
     );
 
-    yield delay(1000);
+    yield delay(1500);
 
     yield* networkFirstFlow(clientId, webBrowser, request);
 
