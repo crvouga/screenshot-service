@@ -87,7 +87,7 @@ const LoadingProfile = () => {
 
         case 'Ok': {
           const profile = result.value
-          console.log(profile)
+
           if (profile) {
             return (
               <Profiles.ProfileContext profile={profile}>
