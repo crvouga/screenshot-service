@@ -53,7 +53,6 @@ export const saga = function* ({
   });
 
   yield takeEvery(Action.Succeeded, function* (action) {
-    console.log('HELLO');
     yield* call(dataAccess.captureScreenshotRequest.updateStatus, {
       requestId: action.payload.requestId,
       status: 'Succeeded',
