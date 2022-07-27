@@ -134,6 +134,7 @@ export const CaptureScreenshotForm = () => {
       </Typography>
 
       <TargetUrlInput
+        projectId={form.values.projectId}
         targetUrl={form.values.targetUrl}
         setTargetUrl={(targetUrl) => {
           setForm(mergeValues({ targetUrl }));

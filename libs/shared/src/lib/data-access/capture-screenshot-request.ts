@@ -64,7 +64,7 @@ const decodeRow = (
   }
 
   return Data.Result.Err(
-    Data.Result.toErrors([projectId, requestId, targetUrl, originUrl])
+    Data.Result.toErrors([targetUrl, projectId, requestId, originUrl])
   );
 };
 
@@ -300,6 +300,40 @@ export const getPublicUrl =
     return Data.Result.mapErr(Array.of, decoded);
   };
 
+const findManyWhere =
+  (supabaseClient: SupabaseClient) =>
+  async ({
+    projectId,
+  }: {
+    projectId: Data.ProjectId.ProjectId;
+  }): Promise<
+    Data.Result.Result<Data.Problem[], CaptureScreenshotRequest[]>
+  > => {
+    const targetStatus: Status = 'Succeeded_Network';
+
+    const response = await supabaseClient
+      .from<definitions['capture_screenshot_requests']>(
+        'capture_screenshot_requests'
+      )
+      .select('*')
+      .eq('status', targetStatus)
+      .eq('project_id', projectId);
+
+    if (response.error) {
+      return Data.Result.Err([{ message: response.error.message }]);
+    }
+
+    const results = response.data.map(decodeRow);
+
+    const errors = Data.Result.toErrors(results).flat();
+
+    if (errors.length > 0) {
+      return Data.Result.Err(errors);
+    }
+
+    return Data.Result.Ok(Data.Result.toValues(results));
+  };
+
 export const CaptureScreenshotRequestDataAccess = (
   supabaseClient: SupabaseClient
 ) => {
@@ -309,5 +343,6 @@ export const CaptureScreenshotRequestDataAccess = (
     uploadScreenshot: uploadScreenshot(supabaseClient),
     findSucceededRequest: findSucceededRequest(supabaseClient),
     updateStatus: updateStatus(supabaseClient),
+    findMany: findManyWhere(supabaseClient),
   };
 };
