@@ -2,7 +2,7 @@ import {
   CaptureScreenshotRequest,
   Data,
 } from '@screenshot-service/screenshot-service';
-import { delay, fork, put, race, take } from 'redux-saga/effects';
+import { delay, takeEvery, fork, put, race, take } from 'redux-saga/effects';
 import { call } from 'typed-redux-saga';
 import { takeClientDisconnected } from './main';
 import { dataAccess } from './data-access';
@@ -38,6 +38,38 @@ export const saga = function* ({
   clientId: string;
   webBrowser: WebBrowser.WebBrowser;
 }) {
+  yield takeEvery(Action.Cancelled, function* (action) {
+    yield* call(dataAccess.captureScreenshotRequest.updateStatus, {
+      requestId: action.payload.requestId,
+      status: 'Cancelled',
+    });
+  });
+
+  yield takeEvery(Action.Failed, function* (action) {
+    yield* call(dataAccess.captureScreenshotRequest.updateStatus, {
+      requestId: action.payload.requestId,
+      status: 'Failed',
+    });
+  });
+
+  yield takeEvery(Action.Succeeded, function* (action) {
+    console.log('HELLO');
+    yield* call(dataAccess.captureScreenshotRequest.updateStatus, {
+      requestId: action.payload.requestId,
+      status: 'Succeeded',
+    });
+  });
+
+  yield fork(startFlow, { clientId, webBrowser });
+};
+
+const startFlow = function* ({
+  clientId,
+  webBrowser,
+}: {
+  clientId: string;
+  webBrowser: WebBrowser.WebBrowser;
+}) {
   while (true) {
     const action = yield* call(takeStart, { clientId });
     const request = action.payload;
@@ -49,7 +81,7 @@ export const saga = function* ({
       const [cancel, disconnected] = yield race([
         call(takeCancel, { requestId }),
         call(takeClientDisconnected, { clientId }),
-        call(captureScreenshotFlow, { clientId, webBrowser, request }),
+        call(startedFlow, { clientId, webBrowser, request }),
       ]);
 
       if (disconnected) {
@@ -75,102 +107,10 @@ export const saga = function* ({
         yield put(Action.Cancelled(clientId, requestId));
       }
     });
-
-    yield fork(persistRequestOutcomeFlow, { requestId });
   }
 };
 
-const persistRequestOutcomeFlow = function* ({
-  requestId,
-}: {
-  requestId: Data.RequestId.RequestId;
-}) {
-  const [cancelled, failed, succeeded] = yield race([
-    call(takeCancelled, { requestId }),
-    call(takeFailed, { requestId }),
-    call(takeSucceeded, { requestId }),
-  ]);
-
-  if (cancelled) {
-    console.log('saved cancelled');
-  }
-
-  if (failed) {
-    console.log('failed');
-  }
-
-  if (succeeded) {
-    console.log('succeeded');
-  }
-};
-
-const takeCancelled = function* ({
-  requestId,
-}: {
-  requestId: Data.RequestId.RequestId;
-}) {
-  while (true) {
-    const action: ActionMap['Cancelled'] = yield take(Action.Cancelled);
-
-    if (action.payload.requestId === requestId) {
-      return action;
-    }
-  }
-};
-
-const takeSucceeded = function* ({
-  requestId,
-}: {
-  requestId: Data.RequestId.RequestId;
-}) {
-  while (true) {
-    const action: ActionMap['Succeeded'] = yield take(Action.Succeeded);
-
-    if (action.payload.requestId === requestId) {
-      return action;
-    }
-  }
-};
-
-const takeFailed = function* ({
-  requestId,
-}: {
-  requestId: Data.RequestId.RequestId;
-}) {
-  while (true) {
-    const action: ActionMap['Failed'] = yield take(Action.Failed);
-
-    if (action.payload.requestId === requestId) {
-      return action;
-    }
-  }
-};
-
-const takeStart = function* ({ clientId }: { clientId: string }) {
-  while (true) {
-    const action: ActionMap['Start'] = yield take(Action.Start);
-
-    if (action.payload.clientId === clientId) {
-      return action;
-    }
-  }
-};
-
-const takeCancel = function* ({
-  requestId,
-}: {
-  requestId: Data.RequestId.RequestId;
-}) {
-  while (true) {
-    const action: ActionMap['Cancel'] = yield take(Action.Cancel);
-
-    if (action.payload.requestId === requestId) {
-      return action;
-    }
-  }
-};
-
-const captureScreenshotFlow = function* ({
+const startedFlow = function* ({
   clientId,
   webBrowser,
   request,
@@ -205,12 +145,29 @@ const captureScreenshotFlow = function* ({
     return;
   }
 
-  if (request.strategy === 'CacheFirst') {
-    yield* cacheFirstFlow(clientId, webBrowser, request);
+  const insertResult = yield* call(
+    dataAccess.captureScreenshotRequest.insertNew,
+    request
+  );
+
+  if (insertResult.type === 'Err') {
+    yield put(
+      Action.Failed(clientId, request.requestId, [
+        { message: 'Failed to insert capture screenshot request' },
+        ...insertResult.error,
+      ])
+    );
+    return;
   }
 
-  if (request.strategy === 'NetworkFirst') {
-    yield* networkFirstFlow(clientId, webBrowser, request);
+  switch (request.strategy) {
+    case 'CacheFirst':
+      yield* cacheFirstFlow(clientId, webBrowser, request);
+      return;
+
+    case 'NetworkFirst':
+      yield* networkFirstFlow(clientId, webBrowser, request);
+      return;
   }
 };
 
@@ -223,45 +180,87 @@ const cacheFirstFlow = function* (
     Action.Log(clientId, request.requestId, 'info', 'checking cache...')
   );
 
-  const cacheResult = yield* call(dataAccess.screenshot.get, request);
+  const findSucceededResult = yield* call(
+    dataAccess.captureScreenshotRequest.findSucceededRequest,
+    request
+  );
 
-  if (cacheResult.type === 'Ok') {
-    const [screenshot] = cacheResult.value;
-
-    const publicUrlResult = yield* call(
-      dataAccess.screenshot.getPublicUrl,
-      screenshot
-    );
-
-    if (publicUrlResult.type === 'Err') {
-      yield put(
-        Action.Failed(clientId, request.requestId, [publicUrlResult.error])
-      );
-      return;
-    }
-
-    const publicUrl = publicUrlResult.value;
-
+  if (findSucceededResult.type === 'Err') {
     yield put(
-      Action.Log(clientId, request.requestId, 'info', 'found cached screenshot')
-    );
-
-    yield put(
-      Action.Succeeded({
-        source: 'Cache',
+      Action.Log(
         clientId,
-        requestId: request.requestId,
-        screenshotId: screenshot.screenshotId,
-        imageType: screenshot.imageType,
-        src: publicUrl,
-      })
+        request.requestId,
+        'info',
+        'Failed to get screenshot from cache. Now trying the network...'
+      )
     );
+    yield delay(1000);
+
+    yield* networkFirstFlow(clientId, webBrowser, request);
 
     return;
   }
 
-  yield* networkFirstFlow(clientId, webBrowser, request);
+  const cached = findSucceededResult.value;
+
+  if (cached.type === 'Nothing') {
+    yield put(
+      Action.Log(
+        clientId,
+        request.requestId,
+        'info',
+        'Not cached. Trying network...'
+      )
+    );
+
+    yield delay(1000);
+
+    yield* networkFirstFlow(clientId, webBrowser, request);
+
+    return;
+  }
+
+  const earlierRequest = cached.value;
+
+  const publicUrlResult = yield* call(
+    dataAccess.captureScreenshotRequest.getPublicUrl,
+    earlierRequest
+  );
+
+  if (publicUrlResult.type === 'Err') {
+    yield put(
+      Action.Failed(clientId, request.requestId, publicUrlResult.error)
+    );
+    return;
+  }
+
+  const publicUrl = publicUrlResult.value;
+
+  yield put(
+    Action.Log(clientId, request.requestId, 'info', 'found cached screenshot')
+  );
+
+  yield put(
+    Action.Succeeded({
+      source: 'Cache',
+      clientId,
+      requestId: request.requestId,
+      imageType: earlierRequest.imageType,
+      src: publicUrl,
+    })
+  );
+  return;
 };
+
+//
+//
+//
+//
+// Network First
+//
+//
+//
+//
 
 const networkFirstFlow = function* (
   clientId: string,
@@ -300,7 +299,7 @@ const networkFirstFlow = function* (
         clientId,
         requestId,
         'info',
-        `delaying for ${remaining} seconds...`
+        `delaying for ${pluralize(remaining, 'second', 'seconds')}...`
       )
     );
 
@@ -322,29 +321,34 @@ const networkFirstFlow = function* (
 
   yield put(Action.Log(clientId, requestId, 'info', `caching screenshot...`));
 
-  const putCacheResult = yield* call(
-    dataAccess.screenshot.put,
-    request,
+  const uploadResult = yield* call(
+    dataAccess.captureScreenshotRequest.uploadScreenshot,
+    request.requestId,
     captureResult.value
   );
 
-  if (putCacheResult.type === 'Err') {
+  if (uploadResult.type === 'Err') {
     yield put(
-      Action.Log(clientId, requestId, 'error', `failed to cache screenshot.`)
+      Action.Log(
+        clientId,
+        requestId,
+        'error',
+        `failed to upload screenshot to cache.`
+      )
     );
-    yield put(Action.Failed(clientId, requestId, putCacheResult.error));
+    yield put(Action.Failed(clientId, requestId, uploadResult.error));
     return;
   }
 
-  const screenshot = putCacheResult.value;
+  const captureScreenshotRequest = uploadResult.value;
 
   const publicUrlResult = yield* call(
-    dataAccess.screenshot.getPublicUrl,
-    screenshot
+    dataAccess.captureScreenshotRequest.getPublicUrl,
+    captureScreenshotRequest
   );
 
   if (publicUrlResult.type === 'Err') {
-    yield put(Action.Failed(clientId, requestId, [publicUrlResult.error]));
+    yield put(Action.Failed(clientId, requestId, publicUrlResult.error));
     return;
   }
 
@@ -353,14 +357,60 @@ const networkFirstFlow = function* (
   yield put(
     Action.Log(clientId, requestId, 'notice', `captured new screenshot`)
   );
+
   yield put(
     Action.Succeeded({
       clientId,
-      requestId,
+      requestId: captureScreenshotRequest.requestId,
       source: 'Network',
-      screenshotId: screenshot.screenshotId,
-      imageType: screenshot.imageType,
+      imageType: captureScreenshotRequest.imageType,
       src: publicUrl,
     })
   );
+};
+
+//
+//
+//
+//
+// Helpers
+//
+//
+//
+//
+
+const takeStart = function* ({ clientId }: { clientId: string }) {
+  while (true) {
+    const action: ActionMap['Start'] = yield take(Action.Start);
+
+    if (action.payload.clientId === clientId) {
+      return action;
+    }
+  }
+};
+
+const takeCancel = function* ({
+  requestId,
+}: {
+  requestId: Data.RequestId.RequestId;
+}) {
+  while (true) {
+    const action: ActionMap['Cancel'] = yield take(Action.Cancel);
+
+    if (action.payload.requestId === requestId) {
+      return action;
+    }
+  }
+};
+
+const pluralize = (
+  quantity: number,
+  singular: string,
+  plural: string
+): string => {
+  if (quantity === 1) {
+    return `1 ${singular}`;
+  }
+
+  return `${quantity} ${plural}`;
 };

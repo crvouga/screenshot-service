@@ -126,34 +126,3 @@ export const useDeleteProjectMutation = () => {
     },
   });
 };
-
-//
-//
-//
-//
-// Screenshot
-//
-//
-//
-//
-
-export const useScreenshotsQuery = ({ projectId }: { projectId: string }) => {
-  return useQuery(['screenshots', projectId], () =>
-    dataAccess.screenshot.findManyByProjectId({ projectId })
-  );
-};
-
-export const useScreenshotSrcQuery = ({
-  screenshotId,
-  imageType,
-}: {
-  screenshotId: Data.ScreenshotId.ScreenshotId;
-  imageType: Data.ImageType.ImageType;
-}) => {
-  return useQuery(['screenshots', screenshotId], () =>
-    dataAccess.screenshot.getPublicUrl({
-      screenshotId,
-      imageType,
-    })
-  );
-};

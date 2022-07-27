@@ -97,7 +97,6 @@ export const ServerToClientAction = {
     (payload: {
       clientId: string;
       requestId: Data.RequestId.RequestId;
-      screenshotId: Data.ScreenshotId.ScreenshotId;
       imageType: Data.ImageType.ImageType;
       src: string;
       source: 'Network' | 'Cache';

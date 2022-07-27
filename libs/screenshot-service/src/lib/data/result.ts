@@ -101,3 +101,14 @@ export const mapErr = <TError, TValue, A>(
 
   return Err(mapper(result.error));
 };
+
+export const mapOk = <TError, TValue, A>(
+  mapper: (error: TValue) => A,
+  result: Result<TError, TValue>
+): Result<TError, A> => {
+  if (isErr(result)) {
+    return result;
+  }
+
+  return Ok(mapper(result.value));
+};

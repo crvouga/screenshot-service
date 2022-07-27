@@ -210,111 +210,6 @@ export interface paths {
       };
     };
   };
-  "/screenshots": {
-    get: {
-      parameters: {
-        query: {
-          id?: parameters["rowFilter.screenshots.id"];
-          created_at?: parameters["rowFilter.screenshots.created_at"];
-          updated_at?: parameters["rowFilter.screenshots.updated_at"];
-          project_id?: parameters["rowFilter.screenshots.project_id"];
-          image_type?: parameters["rowFilter.screenshots.image_type"];
-          delay_sec?: parameters["rowFilter.screenshots.delay_sec"];
-          target_url?: parameters["rowFilter.screenshots.target_url"];
-          /** Filtering Columns */
-          select?: parameters["select"];
-          /** Ordering */
-          order?: parameters["order"];
-          /** Limiting and Pagination */
-          offset?: parameters["offset"];
-          /** Limiting and Pagination */
-          limit?: parameters["limit"];
-        };
-        header: {
-          /** Limiting and Pagination */
-          Range?: parameters["range"];
-          /** Limiting and Pagination */
-          "Range-Unit"?: parameters["rangeUnit"];
-          /** Preference */
-          Prefer?: parameters["preferCount"];
-        };
-      };
-      responses: {
-        /** OK */
-        200: {
-          schema: definitions["screenshots"][];
-        };
-        /** Partial Content */
-        206: unknown;
-      };
-    };
-    post: {
-      parameters: {
-        body: {
-          /** screenshots */
-          screenshots?: definitions["screenshots"];
-        };
-        query: {
-          /** Filtering Columns */
-          select?: parameters["select"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** Created */
-        201: unknown;
-      };
-    };
-    delete: {
-      parameters: {
-        query: {
-          id?: parameters["rowFilter.screenshots.id"];
-          created_at?: parameters["rowFilter.screenshots.created_at"];
-          updated_at?: parameters["rowFilter.screenshots.updated_at"];
-          project_id?: parameters["rowFilter.screenshots.project_id"];
-          image_type?: parameters["rowFilter.screenshots.image_type"];
-          delay_sec?: parameters["rowFilter.screenshots.delay_sec"];
-          target_url?: parameters["rowFilter.screenshots.target_url"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** No Content */
-        204: never;
-      };
-    };
-    patch: {
-      parameters: {
-        query: {
-          id?: parameters["rowFilter.screenshots.id"];
-          created_at?: parameters["rowFilter.screenshots.created_at"];
-          updated_at?: parameters["rowFilter.screenshots.updated_at"];
-          project_id?: parameters["rowFilter.screenshots.project_id"];
-          image_type?: parameters["rowFilter.screenshots.image_type"];
-          delay_sec?: parameters["rowFilter.screenshots.delay_sec"];
-          target_url?: parameters["rowFilter.screenshots.target_url"];
-        };
-        body: {
-          /** screenshots */
-          screenshots?: definitions["screenshots"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** No Content */
-        204: never;
-      };
-    };
-  };
   "/capture_screenshot_requests": {
     get: {
       parameters: {
@@ -471,37 +366,6 @@ export interface definitions {
      */
     theme_mode: "light" | "dark" | "system";
   };
-  screenshots: {
-    /**
-     * Format: uuid
-     * @description Note:
-     * This is a Primary Key.<pk/>
-     * @default extensions.uuid_generate_v4()
-     */
-    id: string;
-    /**
-     * Format: timestamp with time zone
-     * @default now()
-     */
-    created_at: string;
-    /**
-     * Format: timestamp with time zone
-     * @default now()
-     */
-    updated_at: string;
-    /**
-     * Format: uuid
-     * @description Note:
-     * This is a Foreign Key to `projects.id`.<fk table='projects' column='id'/>
-     */
-    project_id: string;
-    /** Format: text */
-    image_type: string;
-    /** Format: numeric */
-    delay_sec: number;
-    /** Format: text */
-    target_url: string;
-  };
   capture_screenshot_requests: {
     /**
      * Format: uuid
@@ -602,22 +466,6 @@ export interface parameters {
   "rowFilter.profiles.name": string;
   /** Format: public.theme_mode */
   "rowFilter.profiles.theme_mode": string;
-  /** @description screenshots */
-  "body.screenshots": definitions["screenshots"];
-  /** Format: uuid */
-  "rowFilter.screenshots.id": string;
-  /** Format: timestamp with time zone */
-  "rowFilter.screenshots.created_at": string;
-  /** Format: timestamp with time zone */
-  "rowFilter.screenshots.updated_at": string;
-  /** Format: uuid */
-  "rowFilter.screenshots.project_id": string;
-  /** Format: text */
-  "rowFilter.screenshots.image_type": string;
-  /** Format: numeric */
-  "rowFilter.screenshots.delay_sec": string;
-  /** Format: text */
-  "rowFilter.screenshots.target_url": string;
   /** @description capture_screenshot_requests */
   "body.capture_screenshot_requests": definitions["capture_screenshot_requests"];
   /** Format: uuid */

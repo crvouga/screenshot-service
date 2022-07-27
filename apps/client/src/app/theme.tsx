@@ -7,13 +7,13 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   ToggleButtonGroupProps,
-  useMediaQuery,
+  useMediaQuery
 } from '@mui/material';
+import { blue } from '@mui/material/colors';
 import constate from 'constate';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
-import { useAppEventListener } from './app-event-emitter';
 import useLocalStorage from '../lib/use-local-storage';
-import { blue } from '@mui/material/colors';
+import { useAppEventListener } from './app-event-emitter';
 
 //
 //

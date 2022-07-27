@@ -112,7 +112,7 @@ export const updateStatus =
     status,
   }: {
     requestId: Data.RequestId.RequestId;
-    status: 'Cancelled' | 'Failed';
+    status: 'Cancelled' | 'Failed' | 'Succeeded';
   }): Promise<Data.Result.Result<Data.Problem, Data.Unit>> => {
     const response = await supabaseClient
       .from<definitions['capture_screenshot_requests']>(
@@ -128,25 +128,33 @@ export const updateStatus =
     return Data.Result.Ok(Data.Unit);
   };
 
-export const updateSucceeded =
+export const uploadScreenshot =
   (supabaseClient: SupabaseClient) =>
   async (
     requestId: Data.RequestId.RequestId,
     buffer: Buffer
-  ): Promise<Data.Result.Result<Data.Problem[], Data.Unit>> => {
-    const response = await supabaseClient
+  ): Promise<Data.Result.Result<Data.Problem[], CaptureScreenshotRequest>> => {
+    const findResult = await supabaseClient
       .from<definitions['capture_screenshot_requests']>(
         'capture_screenshot_requests'
       )
-      .update({ status: 'Succeeded' })
+      .select('*')
       .eq('id', requestId)
       .single();
 
-    if (response.error) {
-      return Data.Result.Err([{ message: response.error.message }]);
+    if (findResult.error) {
+      return Data.Result.Err([
+        {
+          message:
+            'Failed to upload screenshot because there is no request associated with provided request id',
+        },
+        {
+          message: findResult.error.message,
+        },
+      ]);
     }
 
-    const decoded = decodeRow(response.data);
+    const decoded = decodeRow(findResult.data);
 
     if (decoded.type === 'Err') {
       return decoded;
@@ -164,10 +172,10 @@ export const updateSucceeded =
       return Data.Result.Err([{ message: uploadResponse.error.message }]);
     }
 
-    return Data.Result.Ok(Data.Unit);
+    return Data.Result.Ok(captureScreenshotRequest);
   };
 
-export const findOne =
+export const findSucceededRequest =
   (supabaseClient: SupabaseClient) =>
   async ({
     targetUrl,
@@ -180,19 +188,21 @@ export const findOne =
     projectId: Data.ProjectId.ProjectId;
     imageType: Data.ImageType.ImageType;
   }): Promise<
-    Data.Result.Result<Data.Problem[], CaptureScreenshotRequest | null>
+    Data.Result.Result<
+      Data.Problem[],
+      Data.Maybe.Maybe<CaptureScreenshotRequest>
+    >
   > => {
     const response = await supabaseClient
       .from<definitions['capture_screenshot_requests']>(
         'capture_screenshot_requests'
       )
       .select('*')
-      .match({
-        project_id: projectId,
-        target_url: targetUrl,
-        image_type: imageType,
-        delay_sec: delaySec,
-      });
+      .eq('project_id', projectId)
+      .eq('target_url', targetUrl)
+      .eq('image_type', imageType)
+      .eq('delay_sec', delaySec)
+      .eq('status', 'Succeeded');
 
     if (response.error) {
       return Data.Result.Err([{ message: response.error.message }]);
@@ -201,10 +211,10 @@ export const findOne =
     const row = response.data[0];
 
     if (!row) {
-      return Data.Result.Ok(null);
+      return Data.Result.Ok(Data.Maybe.Nothing);
     }
 
-    return decodeRow(row);
+    return Data.Result.mapOk(Data.Maybe.Just, decodeRow(row));
   };
 
 export const findOneElseInsert =
@@ -227,7 +237,7 @@ export const findOneElseInsert =
     strategy: Data.Strategy.Strategy;
     status: Status;
   }): Promise<Data.Result.Result<Data.Problem[], CaptureScreenshotRequest>> => {
-    const findResult = await findOne(supabaseClient)({
+    const findResult = await findSucceededRequest(supabaseClient)({
       targetUrl,
       delaySec,
       projectId,
@@ -240,8 +250,8 @@ export const findOneElseInsert =
 
     const found = findResult.value;
 
-    if (found) {
-      return Data.Result.Ok(found);
+    if (found.type === 'Just') {
+      return Data.Result.Ok(found.value);
     }
 
     const insertResult = await insertNew(supabaseClient)({
@@ -287,7 +297,8 @@ export const CaptureScreenshotRequestDataAccess = (
   return {
     insertNew: insertNew(supabaseClient),
     getPublicUrl: getPublicUrl(supabaseClient),
-    updateSucceeded: updateSucceeded(supabaseClient),
-    findOne: findOne(supabaseClient),
+    uploadScreenshot: uploadScreenshot(supabaseClient),
+    findSucceededRequest: findSucceededRequest(supabaseClient),
+    updateStatus: updateStatus(supabaseClient),
   };
 };
