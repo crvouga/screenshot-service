@@ -304,20 +304,20 @@ const findManyWhere =
   (supabaseClient: SupabaseClient) =>
   async ({
     projectId,
+    order,
   }: {
     projectId: Data.ProjectId.ProjectId;
+    order: 'OldestFirst' | 'NewestFirst';
   }): Promise<
     Data.Result.Result<Data.Problem[], CaptureScreenshotRequest[]>
   > => {
-    const targetStatus: Status = 'Succeeded_Network';
-
     const response = await supabaseClient
       .from<definitions['capture_screenshot_requests']>(
         'capture_screenshot_requests'
       )
       .select('*')
-      .eq('status', targetStatus)
-      .eq('project_id', projectId);
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: order === 'NewestFirst' });
 
     if (response.error) {
       return Data.Result.Err([{ message: response.error.message }]);

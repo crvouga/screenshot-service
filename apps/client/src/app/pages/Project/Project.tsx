@@ -72,13 +72,13 @@ const ProjectPageWithParams = ({
 
   const tabValues = {
     overview: 'overview',
-    screenshots: 'screenshots',
+    usage: 'usage',
   } as const;
 
   const tabValue = isMatch(location.pathname, routes['/projects/:id'])
     ? tabValues.overview
-    : isMatch(location.pathname, routes['/projects/:id/screenshots'])
-      ? tabValues.screenshots
+    : isMatch(location.pathname, routes['/projects/:id/usage'])
+      ? tabValues.usage
       : tabValues.overview;
 
   const outletContext: OutletContext = { project };
@@ -97,11 +97,11 @@ const ProjectPageWithParams = ({
         />
 
         <Tab
-          value={tabValues.screenshots}
-          label="screenshots"
+          value={tabValues.usage}
+          label="usage"
           onClick={() => {
             navigate(
-              routes['/projects/:id/screenshots'].make(project.projectId)
+              routes['/projects/:id/usage'].make(project.projectId)
             );
           }}
         />

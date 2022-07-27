@@ -10,7 +10,7 @@ import { LogoutPage } from './pages/Logout';
 import {
   ProjectOverviewTab,
   ProjectPage,
-  ProjectScreenshotsTab,
+  ProjectUsageTab,
 } from './pages/Project';
 import { ProjectsCreatePage } from './pages/ProjectCreate';
 import { ProjectsPage } from './pages/Projects';
@@ -137,8 +137,8 @@ export const Loaded = () => {
             element={<ProjectOverviewTab />}
           />
           <Route
-            path={routes['/projects/:id/screenshots'].pattern}
-            element={<ProjectScreenshotsTab />}
+            path={routes['/projects/:id/usage'].pattern}
+            element={<ProjectUsageTab />}
           />
         </Route>
 

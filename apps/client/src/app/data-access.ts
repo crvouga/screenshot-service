@@ -126,21 +126,3 @@ export const useDeleteProjectMutation = () => {
     },
   });
 };
-
-//
-//
-//
-//
-//
-//
-//
-
-export const useCaptureScreenshotRequestQuery = ({
-  projectId,
-}: {
-  projectId: Data.ProjectId.ProjectId;
-}) => {
-  return useQuery(['captureScreenshotRequests', projectId], () =>
-    dataAccess.captureScreenshotRequest.findMany({ projectId })
-  );
-};
