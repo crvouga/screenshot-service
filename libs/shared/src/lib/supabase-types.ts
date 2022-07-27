@@ -220,9 +220,9 @@ export interface paths {
           image_type?: parameters["rowFilter.capture_screenshot_requests.image_type"];
           delay_sec?: parameters["rowFilter.capture_screenshot_requests.delay_sec"];
           target_url?: parameters["rowFilter.capture_screenshot_requests.target_url"];
-          status?: parameters["rowFilter.capture_screenshot_requests.status"];
           origin_url?: parameters["rowFilter.capture_screenshot_requests.origin_url"];
           strategy?: parameters["rowFilter.capture_screenshot_requests.strategy"];
+          status?: parameters["rowFilter.capture_screenshot_requests.status"];
           /** Filtering Columns */
           select?: parameters["select"];
           /** Ordering */
@@ -279,9 +279,9 @@ export interface paths {
           image_type?: parameters["rowFilter.capture_screenshot_requests.image_type"];
           delay_sec?: parameters["rowFilter.capture_screenshot_requests.delay_sec"];
           target_url?: parameters["rowFilter.capture_screenshot_requests.target_url"];
-          status?: parameters["rowFilter.capture_screenshot_requests.status"];
           origin_url?: parameters["rowFilter.capture_screenshot_requests.origin_url"];
           strategy?: parameters["rowFilter.capture_screenshot_requests.strategy"];
+          status?: parameters["rowFilter.capture_screenshot_requests.status"];
         };
         header: {
           /** Preference */
@@ -302,9 +302,9 @@ export interface paths {
           image_type?: parameters["rowFilter.capture_screenshot_requests.image_type"];
           delay_sec?: parameters["rowFilter.capture_screenshot_requests.delay_sec"];
           target_url?: parameters["rowFilter.capture_screenshot_requests.target_url"];
-          status?: parameters["rowFilter.capture_screenshot_requests.status"];
           origin_url?: parameters["rowFilter.capture_screenshot_requests.origin_url"];
           strategy?: parameters["rowFilter.capture_screenshot_requests.strategy"];
+          status?: parameters["rowFilter.capture_screenshot_requests.status"];
         };
         body: {
           /** capture_screenshot_requests */
@@ -394,11 +394,6 @@ export interface definitions {
     delay_sec: number;
     /** Format: text */
     target_url: string;
-    /**
-     * Format: public.capture_screenshot_request_status
-     * @enum {string}
-     */
-    status: "Loading" | "Cancelled" | "Failed" | "Succeeded";
     /** Format: text */
     origin_url: string;
     /**
@@ -406,6 +401,16 @@ export interface definitions {
      * @enum {string}
      */
     strategy: "NetworkFirst" | "CacheFirst";
+    /**
+     * Format: public.capture_screenshot_request_status
+     * @enum {string}
+     */
+    status:
+      | "Loading"
+      | "Cancelled"
+      | "Failed"
+      | "Succeeded_Cached"
+      | "Succeeded_Network";
   };
 }
 
@@ -480,12 +485,12 @@ export interface parameters {
   "rowFilter.capture_screenshot_requests.delay_sec": string;
   /** Format: text */
   "rowFilter.capture_screenshot_requests.target_url": string;
-  /** Format: public.capture_screenshot_request_status */
-  "rowFilter.capture_screenshot_requests.status": string;
   /** Format: text */
   "rowFilter.capture_screenshot_requests.origin_url": string;
   /** Format: public.capture_screenshot_request_strategy */
   "rowFilter.capture_screenshot_requests.strategy": string;
+  /** Format: public.capture_screenshot_request_status */
+  "rowFilter.capture_screenshot_requests.status": string;
 }
 
 export interface operations {}

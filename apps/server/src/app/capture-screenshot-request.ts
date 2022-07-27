@@ -8,6 +8,7 @@ import { takeClientDisconnected } from './main';
 import { dataAccess } from './data-access';
 import { InferActionMap } from './utils';
 import * as WebBrowser from './web-browser';
+import { FinalStatus } from '@screenshot-service/shared';
 
 //
 //
@@ -39,23 +40,30 @@ export const saga = function* ({
   webBrowser: WebBrowser.WebBrowser;
 }) {
   yield takeEvery(Action.Cancelled, function* (action) {
+    const newStatus: FinalStatus = 'Cancelled';
     yield* call(dataAccess.captureScreenshotRequest.updateStatus, {
       requestId: action.payload.requestId,
-      status: 'Cancelled',
+      status: newStatus,
     });
   });
 
   yield takeEvery(Action.Failed, function* (action) {
+    const newStatus: FinalStatus = 'Failed';
     yield* call(dataAccess.captureScreenshotRequest.updateStatus, {
       requestId: action.payload.requestId,
-      status: 'Failed',
+      status: newStatus,
     });
   });
 
   yield takeEvery(Action.Succeeded, function* (action) {
+    const newStatus: FinalStatus =
+      action.payload.source === 'Cache'
+        ? 'Succeeded_Cached'
+        : 'Succeeded_Network';
+
     yield* call(dataAccess.captureScreenshotRequest.updateStatus, {
       requestId: action.payload.requestId,
-      status: 'Succeeded',
+      status: newStatus,
     });
   });
 
@@ -146,7 +154,10 @@ const startedFlow = function* ({
 
   const insertResult = yield* call(
     dataAccess.captureScreenshotRequest.insertNew,
-    request
+    {
+      ...request,
+      status: 'Loading',
+    }
   );
 
   if (insertResult.type === 'Err') {

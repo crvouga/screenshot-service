@@ -14,7 +14,15 @@ export type CaptureScreenshotRequest = {
   status: Status;
 };
 
-type Status = 'Loading' | 'Cancelled' | 'Failed' | 'Succeeded';
+export type Status = InitialStatus | FinalStatus;
+
+export type InitialStatus = 'Loading';
+
+export type FinalStatus =
+  | 'Cancelled'
+  | 'Failed'
+  | 'Succeeded_Cached'
+  | 'Succeeded_Network';
 
 export const BUCKET_NAME = 'screenshots';
 
@@ -112,7 +120,7 @@ export const updateStatus =
     status,
   }: {
     requestId: Data.RequestId.RequestId;
-    status: 'Cancelled' | 'Failed' | 'Succeeded';
+    status: FinalStatus;
   }): Promise<Data.Result.Result<Data.Problem, Data.Unit>> => {
     const response = await supabaseClient
       .from<definitions['capture_screenshot_requests']>(
@@ -193,6 +201,8 @@ export const findSucceededRequest =
       Data.Maybe.Maybe<CaptureScreenshotRequest>
     >
   > => {
+    const targetStatus: Status = 'Succeeded_Network';
+
     const response = await supabaseClient
       .from<definitions['capture_screenshot_requests']>(
         'capture_screenshot_requests'
@@ -202,7 +212,7 @@ export const findSucceededRequest =
       .eq('target_url', targetUrl)
       .eq('image_type', imageType)
       .eq('delay_sec', delaySec)
-      .eq('status', 'Succeeded');
+      .eq('status', targetStatus);
 
     if (response.error) {
       return Data.Result.Err([{ message: response.error.message }]);
@@ -235,7 +245,6 @@ export const findOneElseInsert =
     targetUrl: Data.TargetUrl.TargetUrl;
     originUrl: Data.Url.Url;
     strategy: Data.Strategy.Strategy;
-    status: Status;
   }): Promise<Data.Result.Result<Data.Problem[], CaptureScreenshotRequest>> => {
     const findResult = await findSucceededRequest(supabaseClient)({
       targetUrl,
