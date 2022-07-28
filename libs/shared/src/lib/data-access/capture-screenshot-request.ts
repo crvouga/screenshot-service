@@ -305,19 +305,26 @@ const findManyWhere =
   async ({
     projectId,
     order,
+    pageSize,
+    page,
   }: {
     projectId: Data.ProjectId.ProjectId;
     order: 'OldestFirst' | 'NewestFirst';
+    pageSize: number;
+    page: number;
   }): Promise<
     Data.Result.Result<Data.Problem[], CaptureScreenshotRequest[]>
   > => {
+    const from = page * pageSize;
+    const to = from + pageSize;
     const response = await supabaseClient
       .from<definitions['capture_screenshot_requests']>(
         'capture_screenshot_requests'
       )
       .select('*')
       .eq('project_id', projectId)
-      .order('created_at', { ascending: order === 'NewestFirst' });
+      .order('created_at', { ascending: order === 'NewestFirst' })
+      .range(from, to);
 
     if (response.error) {
       return Data.Result.Err([{ message: response.error.message }]);
@@ -333,6 +340,14 @@ const findManyWhere =
 
     return Data.Result.Ok(Data.Result.toValues(results));
   };
+
+export const getPagination = (page: number, size: number) => {
+  const limit = size ? +size : 3;
+  const from = page ? page * limit : 0;
+  const to = page ? from + size : size;
+
+  return { from, to };
+};
 
 export const CaptureScreenshotRequestDataAccess = (
   supabaseClient: SupabaseClient

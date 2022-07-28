@@ -1,104 +1,108 @@
-import { LoadingButton } from '@mui/lab';
-import { Alert, Box, CircularProgress, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ToggleButton, ToggleButtonGroup, Toolbar, Typography } from '@mui/material';
-import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { Box, MenuItem, Select, Toolbar, Typography } from '@mui/material';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { Data } from "@screenshot-service/screenshot-service";
+import { CaptureScreenshotRequest } from '@screenshot-service/shared';
+import { useEffect, useState } from 'react';
 import { dataAccess } from '../../../data-access';
 import { useProfileSingleOutletContext } from '../Project';
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 
 const columns: GridColDef[] = [
-  { field: "id", headerName: "ID" },
-  { field: "targetUrl", headerName: "Target Url", },
-  { field: "createdAt", headerName: "Created At", },
+  { field: "requestId", headerName: "ID" },
+  { field: "targetUrl", headerName: "Target Url", resizable: true },
+  { field: "createdAt", headerName: "Created At", resizable: true },
   { field: "status", headerName: "Status", },
   { field: "strategy", headerName: "Strategy" },
   { field: "delaySec", headerName: "Delay (sec)" },
   { field: "imageType", headerName: "Image Type" },
-  { field: "originUrl", headerName: "Origin Url" },
+  { field: "originUrl", headerName: "Origin Url", resizable: true },
 ];
 
 const PAGE_SIZE = 5
 
+
+type Order = 'OldestFirst' | 'NewestFirst'
+
+
+const fetchPage = async ({ projectId, pageIndex, order }: { projectId: Data.ProjectId.ProjectId, pageIndex: number, order: Order }): Promise<CaptureScreenshotRequest[]> => {
+  const result = await dataAccess.captureScreenshotRequest.findMany({
+    pageSize: PAGE_SIZE,
+    page: pageIndex,
+    projectId,
+    order
+  })
+
+  if (result.type === 'Err') {
+    return []
+  }
+
+  return result.value
+}
+
+
 export const ProjectUsageTab = () => {
   const { project } = useProfileSingleOutletContext();
 
-  const [order, setOrder] = useState<'OldestFirst' | 'NewestFirst'>("NewestFirst")
+  const [order, setOrder] = useState<Order>("NewestFirst")
+  const [pageIndex, setPageIndex] = useState(0)
+  const [pages, setPages] = useState<CaptureScreenshotRequest[][]>([])
+  const [status, setStatus] = useState<"idle" | "loading">("idle")
 
-  const query = useQuery(['project', project.projectId, order], () => dataAccess.captureScreenshotRequest.findMany({ projectId: project.projectId, order }))
-
-
-  if (query.status === 'loading') {
-    return <Loading />
-  }
-
-  if (query.status === 'error') {
-    return <Err />
-  }
-
-
-
-  if (query.data.type === 'Err') {
-    return <Err />
-  }
-
-  const rows = query.data.value.map(row => ({ ...row, id: row.requestId }))
+  useEffect(() => {
+    if (pageIndex > pages.length - 1) {
+      setStatus("loading")
+      fetchPage({ pageIndex, order, projectId: project.projectId }).then(page => {
+        setStatus("idle")
+        setPages(pages => ([...pages, page]))
+      })
+    }
+  }, [pageIndex, order, pages.length, project.projectId])
 
 
-  const onRefresh = () => {
-    query.refetch()
+  useEffect(() => {
+    setPageIndex(0)
+    setPages([])
+  }, [order])
 
-  }
+
+  const rows = pages
+    .flatMap(page => page)
 
   return <Box>
     <Toolbar>
-      <Typography variant="h6">
+      <Typography variant="h6" sx={{ flex: 1 }}>
         Requests
       </Typography>
-
-      <Box sx={{ flex: 1 }} />
-
-      <ToggleButtonGroup size="small" value={order} sx={{ marginRight: 2 }}>
-        <ToggleButton value="OldestFirst">
-          Oldest First
-        </ToggleButton>
-        <ToggleButton value="NewestFirst">
-          Newest First
-        </ToggleButton>
-      </ToggleButtonGroup>
-
-      <LoadingButton loading={query.isRefetching} size="small" variant='contained' onClick={onRefresh}>
-        Refresh
-      </LoadingButton>
+      <Select
+        id="order-select"
+        labelId="order-select-label"
+        value={order}
+        size="small"
+        onChange={event => {
+          const orderNew = event.target.value
+          if (orderNew === 'OldestFirst' || orderNew === 'NewestFirst') {
+            setOrder(orderNew)
+            return
+          }
+        }}
+      >
+        <MenuItem value={"OldestFirst"}>{"Oldest First"}</MenuItem>
+        <MenuItem value={"NewestFirst"}>{"Newest First"}</MenuItem>
+      </Select>
     </Toolbar>
 
     <Box sx={{ height: 400, width: '100%' }}>
       <DataGrid
         rows={rows}
         columns={columns}
+        page={pageIndex}
         pageSize={PAGE_SIZE}
-        rowsPerPageOptions={[5]}
+        rowsPerPageOptions={[PAGE_SIZE]}
+        pagination
+        onPageChange={setPageIndex}
+        getRowId={row => row.requestId}
+        disableSelectionOnClick
+        loading={status === 'loading'}
       />
     </Box>
-
   </Box >
 };
-
-
-const Loading = () => {
-  return (
-    <Container >
-      <CircularProgress />
-    </Container>
-  )
-}
-
-const Err = () => {
-  return (
-    <Container sx={{ width: "100%" }}>
-      <Alert severity="error">
-        Something went wrong
-      </Alert>
-    </Container>
-  )
-}
-
