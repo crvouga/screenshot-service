@@ -70,9 +70,6 @@ const LoadingProfile = () => {
     case 'error':
       return <BrandedLoadingPage />;
 
-    case 'idle':
-      return <BrandedLoadingPage />;
-
     case 'loading':
       return <BrandedLoadingPage />;
 

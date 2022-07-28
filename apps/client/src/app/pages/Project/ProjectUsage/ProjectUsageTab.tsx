@@ -1,27 +1,11 @@
 import { LoadingButton } from '@mui/lab';
-import { ToggleButton, Button, Box, Alert, CircularProgress, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Select, MenuItem, ToggleButtonGroup } from '@mui/material';
+import { Alert, Box, CircularProgress, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ToggleButton, ToggleButtonGroup, Toolbar, Typography } from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { useQuery } from 'react-query';
 import { dataAccess } from '../../../data-access';
 import { useProfileSingleOutletContext } from '../Project';
 
-function createData(
-  name: string,
-  calories: number,
-  fat: number,
-  carbs: number,
-  protein: number,
-) {
-  return { name, calories, fat, carbs, protein };
-}
 
-const rows = [
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-  createData('Eclair', 262, 16.0, 24, 6.0),
-  createData('Cupcake', 305, 3.7, 67, 4.3),
-  createData('Gingerbread', 356, 16.0, 49, 3.9),
-];
 export const ProjectUsageTab = () => {
   const { project } = useProfileSingleOutletContext();
 
@@ -29,9 +13,6 @@ export const ProjectUsageTab = () => {
 
   const query = useQuery(['project', project.projectId, order], () => dataAccess.captureScreenshotRequest.findMany({ projectId: project.projectId, order }))
 
-  if (query.status === 'idle') {
-    return <Loading />
-  }
 
   if (query.status === 'loading') {
     return <Loading />
@@ -56,26 +37,26 @@ export const ProjectUsageTab = () => {
   }
 
   return <Box>
-    <Box sx={{ display: 'flex', padding: 2, paddingY: 4, alignItems: "center", flexDirection: { xs: 'column', sm: 'column', md: 'row' } }}>
-      <Typography variant="h5" sx={{ flex: 1 }}>
+    <Toolbar>
+      <Typography variant="h6">
         Requests
       </Typography>
 
-      <Box sx={{ display: 'flex', alignItems: "center", flexDirection: { xs: 'column', sm: 'column', md: 'row' } }}>
-        <ToggleButtonGroup value={order} sx={{ marginRight: 2 }}>
-          <ToggleButton value="OldestFirst">
-            Oldest First
-          </ToggleButton>
-          <ToggleButton value="NewestFirst">
-            Newest First
-          </ToggleButton>
-        </ToggleButtonGroup>
+      <Box sx={{ flex: 1 }} />
 
-        <LoadingButton loading={query.isRefetching} size="large" variant='contained' onClick={onRefresh}>
-          Refresh
-        </LoadingButton>
-      </Box>
-    </Box>
+      <ToggleButtonGroup size="small" value={order} sx={{ marginRight: 2 }}>
+        <ToggleButton value="OldestFirst">
+          Oldest First
+        </ToggleButton>
+        <ToggleButton value="NewestFirst">
+          Newest First
+        </ToggleButton>
+      </ToggleButtonGroup>
+
+      <LoadingButton loading={query.isRefetching} size="small" variant='contained' onClick={onRefresh}>
+        Refresh
+      </LoadingButton>
+    </Toolbar>
 
     <TableContainer component={Paper}>
       <Table >
@@ -114,8 +95,6 @@ export const ProjectUsageTab = () => {
     </TableContainer>
   </Box>
 };
-
-
 
 
 const Loading = () => {

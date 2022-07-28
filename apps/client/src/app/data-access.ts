@@ -2,7 +2,7 @@ import { Data } from '@screenshot-service/screenshot-service';
 import * as Shared from '@screenshot-service/shared';
 import constate from 'constate';
 import { useEffect } from 'react';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { appEventEmitter } from './app-event-emitter';
 import { supabaseClient } from './supabase';
 

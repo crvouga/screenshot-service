@@ -1,27 +1,23 @@
-import { ChevronLeft } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import {
   Avatar,
   Button,
   Container,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Toolbar,
-  Typography,
+  TextField, Toolbar,
+  Typography
 } from '@mui/material';
 import { Box } from '@mui/system';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 import { useEffect, useState } from 'react';
-import { useMutation, useQueryClient } from 'react-query';
 import { useAuthUser } from '../authentication';
+import { profileQueryFilter, useCreateProfileMutation } from '../data-access';
 import * as ProfileAvatar from '../profile-avatar';
-import { useCreateProfileMutation, profileQueryFilter } from '../data-access';
 import { Link, routes } from '../routes';
 import {
   ThemeMode,
   ThemeModeToggleButtonGroup,
-  useThemeModeContext,
+  useThemeModeContext
 } from '../theme';
 
 export const AccountCreatePage = () => {
@@ -66,7 +62,7 @@ export const AccountCreatePage = () => {
         snackbar.enqueueSnackbar('profile created', {
           variant: 'default',
         });
-        queryClient.invalidateQueries(profileQueryFilter);
+        queryClient.invalidateQueries([profileQueryFilter]);
         return;
     }
   };

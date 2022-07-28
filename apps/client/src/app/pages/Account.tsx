@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import * as ProfileAvatar from '../profile-avatar';
 import {
@@ -106,7 +106,7 @@ const DeleteSection = () => {
 
       case 'Ok':
         snackbar.enqueueSnackbar('deleted profile', { variant: 'default' });
-        queryClient.invalidateQueries(profileQueryFilter);
+        queryClient.invalidateQueries([profileQueryFilter]);
         return;
     }
   };
@@ -180,7 +180,7 @@ const NameSection = () => {
 
       case 'Ok':
         snackbar.enqueueSnackbar('changed name');
-        queryClient.invalidateQueries(profileQueryFilter);
+        queryClient.invalidateQueries([profileQueryFilter]);
         return;
     }
   };
@@ -255,7 +255,7 @@ const AvatarSection = () => {
 
       case 'Ok':
         snackbar.enqueueSnackbar('changed avatar');
-        queryClient.invalidateQueries(profileQueryFilter);
+        queryClient.invalidateQueries([profileQueryFilter]);
         return;
     }
   };
@@ -364,7 +364,7 @@ const ThemeSection = () => {
 
       case 'Ok':
         snackbar.enqueueSnackbar('changed theme');
-        queryClient.invalidateQueries(profileQueryFilter);
+        queryClient.invalidateQueries([profileQueryFilter]);
         setThemeMode(nextThemeMode);
         return;
     }

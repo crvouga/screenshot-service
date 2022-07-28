@@ -1,4 +1,4 @@
-import { CameraAlt, Create } from '@mui/icons-material';
+import { Create } from '@mui/icons-material';
 import {
   Alert,
   AlertTitle,
@@ -11,10 +11,10 @@ import {
   MenuItem,
   Select,
   SelectProps,
-  Typography,
+  Typography
 } from '@mui/material';
 import { Data } from '@screenshot-service/screenshot-service';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { appEventEmitter } from '../../app-event-emitter';
 import { useAuthUser } from '../../authentication';
@@ -42,9 +42,6 @@ export const ProjectInput = ({
   switch (query.status) {
     case 'error':
       return <Err message="Something went wrong for an unknown reason" />;
-
-    case 'idle':
-      return <Loading />;
 
     case 'loading':
       return <Loading />;
