@@ -4,7 +4,20 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { dataAccess } from '../../../data-access';
 import { useProfileSingleOutletContext } from '../Project';
+import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 
+const columns: GridColDef[] = [
+  { field: "id", headerName: "ID" },
+  { field: "targetUrl", headerName: "Target Url", },
+  { field: "createdAt", headerName: "Created At", },
+  { field: "status", headerName: "Status", },
+  { field: "strategy", headerName: "Strategy" },
+  { field: "delaySec", headerName: "Delay (sec)" },
+  { field: "imageType", headerName: "Image Type" },
+  { field: "originUrl", headerName: "Origin Url" },
+];
+
+const PAGE_SIZE = 5
 
 export const ProjectUsageTab = () => {
   const { project } = useProfileSingleOutletContext();
@@ -28,7 +41,7 @@ export const ProjectUsageTab = () => {
     return <Err />
   }
 
-  const rows = query.data.value
+  const rows = query.data.value.map(row => ({ ...row, id: row.requestId }))
 
 
   const onRefresh = () => {
@@ -58,42 +71,16 @@ export const ProjectUsageTab = () => {
       </LoadingButton>
     </Toolbar>
 
-    <TableContainer component={Paper}>
-      <Table >
-        <TableHead sx={{ position: "sticky", }}>
-          <TableRow>
-            <TableCell>Target Url</TableCell>
-            <TableCell>Time</TableCell>
-            <TableCell>Status</TableCell>
-            <TableCell>Strategy</TableCell>
-            <TableCell>Delay (sec)</TableCell>
-            <TableCell>Origin Url</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.requestId}>
-              <TableCell
-                sx={{
-                  maxWidth: "200px",
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}>
-                <Typography noWrap>
-                  {row.targetUrl}
-                </Typography>
-              </TableCell>
-              <TableCell>{new Date(row.createdAt).toISOString()}</TableCell>
-              <TableCell>{row.status}</TableCell>
-              <TableCell>{row.strategy}</TableCell>
-              <TableCell>{row.delaySec}</TableCell>
-              <TableCell>{row.originUrl}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  </Box>
+    <Box sx={{ height: 400, width: '100%' }}>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        pageSize={PAGE_SIZE}
+        rowsPerPageOptions={[5]}
+      />
+    </Box>
+
+  </Box >
 };
 
 
