@@ -56,7 +56,15 @@ export const ProjectRequestTable = ({ projectId }: { projectId: Data.ProjectId.P
     setPages([])
   }, [order])
 
-  const rows = pages.flatMap(page => page)
+  const rows = Object.values(pages
+    .flatMap(page => page)
+    .reduce<{ [requestId: string]: CaptureScreenshotRequest }>(
+      (uniq, request) => ({
+        ...uniq,
+        [request.requestId]: request
+      }),
+      {}
+    ))
 
   return <Paper sx={{ p: 2, marginBottom: 4 }}>
     <Toolbar disableGutters>

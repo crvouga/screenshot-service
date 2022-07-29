@@ -80,7 +80,7 @@ const CreateProjectCallToAction = () => {
     <Container maxWidth="sm">
       <Card sx={{ width: '100%', my: 4 }}>
         <Container maxWidth="xs" sx={{ py: 4, textAlign: 'center' }}>
-          <CameraAlt sx={{ width: 72, height: 72 }} />
+          {/* <CameraAlt sx={{ width: 72, height: 72 }} /> */}
 
           <Typography variant="h4" align="center" sx={{ mb: 3 }}>
             You don't have any projects.

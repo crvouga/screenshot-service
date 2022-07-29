@@ -97,7 +97,6 @@ export const makeTheme = ({ mode }: { mode: 'light' | 'dark' }) => {
           styleOverrides: {
             root: {
               textTransform: 'lowercase',
-              borderRadius: 24,
             },
           },
         },
