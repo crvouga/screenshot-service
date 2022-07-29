@@ -1,17 +1,19 @@
-import { Box, CircularProgress, Divider, Tab, Tabs } from '@mui/material';
+import { Box, CircularProgress, Container, Typography } from '@mui/material';
 import { Data } from '@screenshot-service/screenshot-service';
 import {
-  Outlet,
-  useLocation,
-  useNavigate,
   useOutletContext,
-  useParams,
+  useParams
 } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { NotFoundPage } from '../../components/NotFound';
 import { Project, useSingleProjectQuery } from '../../data-access';
-import { isMatch, routes } from '../../routes';
 import { ErrorPage } from '../Error';
+import { ProjectDeleteSection } from './ProjectOverview/ProjectDeleteSection';
+import { ProjectIdSection } from './ProjectOverview/ProjectIdSection';
+import { ProjectNameSection } from './ProjectOverview/ProjectNameSection';
+import { ProjectWhitelistedUrlsSection } from './ProjectOverview/ProjectWhitelistedUrlsSection';
+import { ProjectRequestTable } from './ProjectUsage/ProjectRequestTable';
+import { ProjectUsageLimit } from './ProjectUsage/ProjectUsageLimit';
 
 export type OutletContext = { project: Project };
 
@@ -37,8 +39,6 @@ const ProjectPageWithParams = ({
   projectId: Data.ProjectId.ProjectId;
 }) => {
   const query = useSingleProjectQuery({ projectId });
-  const location = useLocation();
-  const navigate = useNavigate();
 
   if (!query.data) {
     return (
@@ -70,46 +70,35 @@ const ProjectPageWithParams = ({
 
   const project = result.value;
 
-  const tabValues = {
-    overview: 'overview',
-    usage: 'usage',
-  } as const;
-
-  const tabValue = isMatch(location.pathname, routes['/projects/:id'])
-    ? tabValues.overview
-    : isMatch(location.pathname, routes['/projects/:id/usage'])
-      ? tabValues.usage
-      : tabValues.overview;
-
-  const outletContext: OutletContext = { project };
-
   return (
     <>
       <Header />
 
-      <Tabs value={tabValue}>
-        <Tab
-          value={tabValues.overview}
-          label="overview"
-          onClick={() => {
-            navigate(routes['/projects/:id'].make(project.projectId));
-          }}
-        />
+      <Box sx={{ paddingY: 4 }}>
+        <Typography variant="h4" align="center">
+          {project.projectName}
+        </Typography>
+      </Box>
 
-        <Tab
-          value={tabValues.usage}
-          label="usage"
-          onClick={() => {
-            navigate(
-              routes['/projects/:id/usage'].make(project.projectId)
-            );
-          }}
-        />
-      </Tabs>
+      <Box sx={{ paddingBottom: 8, }}>
+        <Container maxWidth="md">
+          <ProjectUsageLimit projectId={project.projectId} />
 
-      <Divider />
+          <ProjectIdSection project={project} />
 
-      <Outlet context={outletContext} />
+          <ProjectWhitelistedUrlsSection project={project} />
+
+          <ProjectNameSection project={project} />
+
+          <ProjectRequestTable projectId={project.projectId} />
+
+          <ProjectDeleteSection projectId={project.projectId} />
+        </Container>
+      </Box>
     </>
   );
 };
+
+
+
+
