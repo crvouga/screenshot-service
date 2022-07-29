@@ -1,4 +1,4 @@
-import { Paper, Box, MenuItem, Select, Toolbar, Typography } from '@mui/material';
+import { Box, MenuItem, Paper, Select, Toolbar, Typography } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { Data } from "@screenshot-service/screenshot-service";
 import { CaptureScreenshotRequest } from '@screenshot-service/shared';
@@ -7,13 +7,13 @@ import { dataAccess } from '../../../data-access';
 
 const columns: GridColDef[] = [
   { field: "requestId", headerName: "ID" },
-  { field: "targetUrl", headerName: "Target Url", resizable: true },
-  { field: "createdAt", headerName: "Created At", resizable: true },
+  { field: "targetUrl", headerName: "Target Url", },
+  { field: "createdAt", headerName: "Created At", },
   { field: "status", headerName: "Status", },
   { field: "strategy", headerName: "Strategy" },
   { field: "delaySec", headerName: "Delay (sec)" },
   { field: "imageType", headerName: "Image Type" },
-  { field: "originUrl", headerName: "Origin Url", resizable: true },
+  { field: "originUrl", headerName: "Origin Url", },
 ];
 
 const PAGE_SIZE = 5
