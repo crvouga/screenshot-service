@@ -94,8 +94,9 @@ export const ProjectRequestTable = ({ projectId }: { projectId: Data.ProjectId.P
     page.type === 'Succeeded' && page.data.length >= PAGE_SIZE;
 
   return (
-    <Box>
-      <Box sx={{ p: 2, display: "flex", alignItems: "center" }}>
+
+    <Paper sx={{ p: 2, marginBottom: 4 }}>
+      <Box sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
         <Typography variant="h6" sx={{ flex: 1 }}>
           Requests
         </Typography>
@@ -136,67 +137,45 @@ export const ProjectRequestTable = ({ projectId }: { projectId: Data.ProjectId.P
           </TableHead>
           <TableBody>
             {page.type === 'Loading' && (
-              <>
-                <TableRow>
-                  <Cell value="" />
-                  <Cell value="" />
-                  <Cell value="" />
-                  <Cell value="" />
-                  <Cell value="" />
-                  <Cell value="" />
-                  <Cell value="" />
-                  <Cell value="" />
-                </TableRow>
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    bottom: 0,
-                    right: 0,
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <CircularProgress disableShrink />
-                </Box>
-              </>
+              <Box
+                component="tr"
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  bottom: 0,
+                  right: 0,
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <CircularProgress disableShrink />
+              </Box>
             )}
 
             {page.type === 'Succeeded' && (
               <>
                 {page.data.length === 0 && (
-                  <>
-                    <TableRow>
-                      <Cell value="" />
-                      <Cell value="" />
-                      <Cell value="" />
-                      <Cell value="" />
-                      <Cell value="" />
-                      <Cell value="" />
-                      <Cell value="" />
-                      <Cell value="" />
-                    </TableRow>
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        bottom: 0,
-                        right: 0,
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <Typography>No rows</Typography>
-                    </Box>
-                  </>
+                  <Box
+                    component="tr"
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      bottom: 0,
+                      right: 0,
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Typography>No rows</Typography>
+                  </Box>
                 )}
 
                 {page.data.map((row) => (
@@ -246,7 +225,7 @@ export const ProjectRequestTable = ({ projectId }: { projectId: Data.ProjectId.P
           Next
         </Button>
       </Box>
-    </Box>
+    </Paper>
   );
 };
 

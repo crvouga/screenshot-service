@@ -7,7 +7,7 @@ export const ProjectUsageTab = () => {
   const { project } = useProfileSingleOutletContext();
 
   return (
-    <Box>
+    <Box sx={{ p: 2 }}>
       <ProjectUsageLimit projectId={project.projectId} />
       <ProjectRequestTable projectId={project.projectId} />
     </Box>
