@@ -1,4 +1,19 @@
 {
-  "name": "@screenshot-service/screenshot-service",
-  "version": "0.0.1"
+  "name": "@crvouga/screenshot-service",
+  "version": "0.0.5",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "A JavaScript client for the screenshot service",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "repository": {
+    "url": "https://github.com/crvouga/screenshot-service"
+  },
+  "homepage": "https://screenshotservice.chrisvouga.dev/"
 }

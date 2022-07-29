@@ -18,9 +18,13 @@
     "heroku:logs": "heroku logs --tail --app crvouga-screenshot-service",
     "heroku:local": "npm install && npm run heroku:env && npm run heroku-postbuild && heroku local",
     "heroku:start": "node dist/apps/server/main.js",
-    "deploy": "npm run heroku:deploy"
+    "deploy": "npm run heroku:deploy",
+    "publish-client-library": "npx nx build screenshot-service && npm publish dist/libs/screenshot-service"
   },
-  "private": true,
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
