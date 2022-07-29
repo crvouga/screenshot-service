@@ -1,3 +1,5 @@
+import { Refresh } from '@mui/icons-material';
+import { LoadingButton } from '@mui/lab';
 import { Box, MenuItem, Paper, Select, Toolbar, Typography } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { Data } from "@screenshot-service/screenshot-service";
@@ -22,7 +24,8 @@ type Order = 'OldestFirst' | 'NewestFirst'
 
 const fetchPage = async ({ projectId, pageIndex, order }: { projectId: Data.ProjectId.ProjectId, pageIndex: number, order: Order }): Promise<CaptureScreenshotRequest[]> => {
   const result = await dataAccess.captureScreenshotRequest.findMany({
-    pageSize: PAGE_SIZE,
+    // todo fix removing +1 will prevent table from fetching next page
+    pageSize: PAGE_SIZE + 1,
     page: pageIndex,
     projectId,
     order
@@ -42,7 +45,7 @@ export const ProjectRequestTable = ({ projectId }: { projectId: Data.ProjectId.P
   const [status, setStatus] = useState<"idle" | "loading">("idle")
 
   useEffect(() => {
-    if (pageIndex >= pages.length - 1) {
+    if (pageIndex > pages.length - 1) {
       setStatus("loading")
       fetchPage({ pageIndex, order, projectId }).then(page => {
         setStatus("idle")
@@ -51,9 +54,13 @@ export const ProjectRequestTable = ({ projectId }: { projectId: Data.ProjectId.P
     }
   }, [pageIndex, order, pages.length, projectId])
 
-  useEffect(() => {
+  const onRestart = () => {
     setPageIndex(0)
     setPages([])
+  }
+
+  useEffect(() => {
+    onRestart()
   }, [order])
 
   const rows = Object.values(pages
@@ -102,6 +109,11 @@ export const ProjectRequestTable = ({ projectId }: { projectId: Data.ProjectId.P
         disableSelectionOnClick
         loading={status === 'loading'}
       />
+    </Box>
+    <Box sx={{ paddingY: 2, display: "flex", flexDirection: "row-reverse" }}>
+      <LoadingButton loading={status === "loading"} onClick={onRestart} startIcon={<Refresh />} variant="contained">
+        Restart
+      </LoadingButton>
     </Box>
   </Paper >
 };

@@ -187,8 +187,6 @@ export const uploadScreenshot =
 
     const filename = toFilename(captureScreenshotRequest);
 
-    console.log({ from: BUCKET_NAME, filename });
-
     const uploadResponse = await supabaseClient.storage
       .from(BUCKET_NAME)
       .upload(filename, buffer, { upsert: true });
