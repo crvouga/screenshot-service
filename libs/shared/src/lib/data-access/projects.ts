@@ -97,6 +97,19 @@ export const deleteForever =
   }: {
     projectId: Data.ProjectId.ProjectId;
   }): Promise<Data.Result.Result<Problem[], Project>> => {
+    const captureScreenshotResponse = await supabaseClient
+      .from<definitions['capture_screenshot_requests']>(
+        'capture_screenshot_requests'
+      )
+      .delete()
+      .eq('project_id', projectId);
+
+    if (captureScreenshotResponse.error) {
+      return Data.Result.Err([
+        { message: captureScreenshotResponse.error.message },
+      ]);
+    }
+
     const response = await supabaseClient
       .from<definitions['projects']>('projects')
       .delete()
@@ -154,7 +167,13 @@ export const insert =
 
     const decoded = decodeRow(response.data);
 
-    return decoded;
+    if (decoded.type === 'Err') {
+      return decoded;
+    }
+
+    const project = decoded.value;
+
+    return Data.Result.Ok(project);
   };
 
 export const update =

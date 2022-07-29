@@ -1,11 +1,12 @@
 import { Data } from '@screenshot-service/screenshot-service';
 import { SupabaseClient } from '@supabase/supabase-js';
 import {
-  configuration,
   CAPTURE_SCREENSHOT_RATE_LIMIT_ERROR_MESSAGE,
+  configuration,
 } from '../configuration';
 import { DateRange, getToday } from '../date';
 import { definitions } from '../supabase-types';
+import { BUCKET_NAME, toFilename } from './screenshot-storage';
 
 export type CaptureScreenshotRequest = {
   createdAt: string;
@@ -28,18 +29,6 @@ export type FinalStatus =
   | 'Failed'
   | 'Succeeded_Cached'
   | 'Succeeded_Network';
-
-export const BUCKET_NAME = 'screenshots';
-
-export const toFilename = ({
-  imageType,
-  requestId,
-}: {
-  imageType: Data.ImageType.ImageType;
-  requestId: Data.RequestId.RequestId;
-}) => {
-  return `${requestId}.${imageType}`;
-};
 
 const decodeRow = (
   row: definitions['capture_screenshot_requests']
@@ -161,7 +150,11 @@ export const updateStatus =
 export const uploadScreenshot =
   (supabaseClient: SupabaseClient) =>
   async (
-    requestId: Data.RequestId.RequestId,
+    {
+      requestId,
+    }: {
+      requestId: Data.RequestId.RequestId;
+    },
     buffer: Buffer
   ): Promise<Data.Result.Result<Data.Problem[], CaptureScreenshotRequest>> => {
     const findResult = await supabaseClient
@@ -193,6 +186,8 @@ export const uploadScreenshot =
     const captureScreenshotRequest = decoded.value;
 
     const filename = toFilename(captureScreenshotRequest);
+
+    console.log({ from: BUCKET_NAME, filename });
 
     const uploadResponse = await supabaseClient.storage
       .from(BUCKET_NAME)
@@ -303,11 +298,13 @@ export const getPublicUrl =
   async ({
     requestId,
     imageType,
+    projectId,
   }: {
     imageType: Data.ImageType.ImageType;
     requestId: Data.RequestId.RequestId;
+    projectId: Data.ProjectId.ProjectId;
   }): Promise<Data.Result.Result<Data.Problem[], Data.Url.Url>> => {
-    const filename = toFilename({ requestId, imageType });
+    const filename = toFilename({ projectId, requestId, imageType });
 
     const response = await supabaseClient.storage
       .from(BUCKET_NAME)

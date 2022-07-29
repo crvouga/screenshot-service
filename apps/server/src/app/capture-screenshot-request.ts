@@ -328,7 +328,7 @@ const networkFirstFlow = function* (
 
   const uploadResult = yield* call(
     dataAccess.captureScreenshotRequest.uploadScreenshot,
-    request.requestId,
+    request,
     captureResult.value
   );
 
