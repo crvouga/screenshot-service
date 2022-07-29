@@ -21,7 +21,7 @@ export const App = () => {
   return (
     <Box
       sx={{
-        maxWidth: 'md',
+        maxWidth: 'sm',
         position: 'fixed',
         width: '100%',
         height: '100%',
