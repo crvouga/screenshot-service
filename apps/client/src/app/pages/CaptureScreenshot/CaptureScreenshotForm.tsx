@@ -44,11 +44,11 @@ export const CaptureScreenshotForm = () => {
   const [requestId, setRequestId] = useState<Data.RequestId.RequestId | null>(
     null
   );
-  const [state, setState] = useState(screenshotService.getState);
+  const [state, setState] = useState(screenshotService.store.getState);
 
   useEffect(() => {
-    return screenshotService.subscribe(() => {
-      setState(screenshotService.getState);
+    return screenshotService.store.subscribe(() => {
+      setState(screenshotService.store.getState);
     });
   }, []);
 
@@ -73,7 +73,7 @@ export const CaptureScreenshotForm = () => {
 
       setRequestId(requestId);
 
-      screenshotService.dispatch(
+      screenshotService.store.dispatch(
         CaptureScreenshotRequest.Action.Start({
           clientId: state.clientId,
           originUrl: originUrl,
@@ -90,7 +90,7 @@ export const CaptureScreenshotForm = () => {
 
   const onCancel = () => {
     if (requestId && state.type === 'Connected') {
-      screenshotService.dispatch(
+      screenshotService.store.dispatch(
         CaptureScreenshotRequest.Action.Cancel(state.clientId, requestId)
       );
     }
