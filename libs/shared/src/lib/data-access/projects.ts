@@ -1,5 +1,6 @@
 import { Data } from '@screenshot-service/screenshot-service';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { configuration } from '../configuration';
 import { definitions } from '../supabase-types';
 
 export type Project = {
@@ -122,6 +123,24 @@ export const insert =
     projectName: Data.ProjectName.ProjectName;
     whilelistedUrls: Data.Url.Url[];
   }): Promise<Data.Result.Result<Problem[], Project>> => {
+    const projectsResult = await findMany(supabaseClient)({ ownerId });
+
+    if (projectsResult.type === 'Err') {
+      return projectsResult;
+    }
+
+    const projects = projectsResult.value;
+
+    const MAX_PROJECT_COUNT = configuration.freePlan.MAX_PROJECT_COUNT;
+
+    if (projects.length >= MAX_PROJECT_COUNT) {
+      return Data.Result.Err([
+        {
+          message: `Users are not allowed to have more than ${MAX_PROJECT_COUNT} projects.`,
+        },
+      ]);
+    }
+
     const response = await supabaseClient
       .from<definitions['projects']>('projects')
       .insert({

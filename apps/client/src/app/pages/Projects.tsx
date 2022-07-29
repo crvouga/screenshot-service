@@ -8,6 +8,7 @@ import {
   Container,
   Typography
 } from '@mui/material';
+import { configuration } from '@screenshot-service/shared';
 import { Link } from 'react-router-dom';
 import { useAuthUser } from '../authentication';
 import { Header } from '../components/Header';
@@ -17,6 +18,8 @@ import { routes } from '../routes';
 export const ProjectsPage = () => {
   const authUser = useAuthUser();
   const query = useProjectsQuery({ ownerId: authUser.userId });
+
+
 
   return (
     <>
@@ -41,15 +44,17 @@ export const ProjectsPage = () => {
 
           {query.data.value.length > 0 && (
             <Container sx={{ mt: 2 }} maxWidth="sm">
-              <Link to={routes['/projects/create'].make()}>
-                <Button
-                  startIcon={<Create />}
-                  variant="contained"
-                  sx={{ mb: 2 }}
-                >
-                  Create New
-                </Button>
-              </Link>
+              <Box sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
+                <Link style={{ display: "flex", alignItems: "center" }} to={routes['/projects/create'].make()}>
+                  <Button startIcon={<Create />} variant="contained">
+                    Create New
+                  </Button>
+                </Link>
+                <Box sx={{ flex: 1 }} />
+                <Typography color="text.secondaru">
+                  {query.data.value.length} / {configuration.freePlan.MAX_PROJECT_COUNT} projects
+                </Typography>
+              </Box>
 
               {query.data.value.map((project) => (
                 <Box key={project.projectId} sx={{ mb: 2 }}>
