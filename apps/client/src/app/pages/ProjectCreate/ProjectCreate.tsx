@@ -2,11 +2,13 @@ import { ChevronLeft, Create } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
+  Alert,
   Button,
   Container,
   TextField,
   Toolbar,
   Typography,
+  Grow,
 } from '@mui/material';
 import { Data } from '@screenshot-service/screenshot-service';
 import { useSnackbar } from 'notistack';
@@ -20,7 +22,7 @@ export const ProjectsCreatePage = () => {
   const authUser = useAuthUser();
   const mutation = useCreateProjectMutation();
   const [projectName, setProjectName] = useState<Data.ProjectName.ProjectName>(
-    Data.ProjectName.fromString('My Cool Project')
+    Data.ProjectName.fromString('My Cool Website')
   );
   const navigate = useNavigate();
   const snackbar = useSnackbar();
@@ -31,17 +33,6 @@ export const ProjectsCreatePage = () => {
       projectName,
       whilelistedUrls: [],
     });
-
-    if (result.type === 'Err') {
-      snackbar.enqueueSnackbar(
-        `failed to create project. ${result.error
-          .map((e) => e.message)
-          .join('. ')}`,
-        {
-          variant: 'error',
-        }
-      );
-    }
 
     if (result.type === 'Ok') {
       snackbar.enqueueSnackbar('project created');
@@ -77,8 +68,11 @@ export const ProjectsCreatePage = () => {
           }}
           fullWidth
           label="Project Name"
-          sx={{ mt: 2, mb: 4 }}
+          sx={{ marginY: 2 }}
         />
+
+
+
 
         <LoadingButton
           startIcon={<Create />}
@@ -86,9 +80,20 @@ export const ProjectsCreatePage = () => {
           variant="contained"
           onClick={onCreate}
           loading={mutation.status === 'loading'}
+          sx={{ marginBottom: 2 }}
         >
           Create Project
         </LoadingButton>
+
+        <Grow in={mutation.data?.type === 'Err'}>
+          <Box>
+            {mutation.data?.type === 'Err' && (
+              <Alert severity="error" sx={{ marginBottom: 2 }}>
+                {mutation.data.error.map(problem => problem.message).join(", ")}
+              </Alert>
+            )}
+          </Box>
+        </Grow>
       </Container>
     </>
   );
