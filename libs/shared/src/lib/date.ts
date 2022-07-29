@@ -5,7 +5,7 @@ export type DateRange = {
   end: string;
 };
 
-export const getDateRangeToday = (): DateRange => {
+export const getToday = (): DateRange => {
   const start = dayjs().startOf('day').toISOString();
   const end = dayjs().endOf('day').toISOString();
   return {

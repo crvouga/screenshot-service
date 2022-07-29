@@ -1,6 +1,8 @@
+import { LoadingButton } from '@mui/lab';
 import { Alert, Paper, Typography, Box, LinearProgress } from '@mui/material';
+import { Refresh } from '@mui/icons-material';
 import { Data } from '@screenshot-service/screenshot-service';
-import { getDateRangeToday, configuration } from '@screenshot-service/shared';
+import { getToday, configuration, CAPTURE_SCREENSHOT_RATE_LIMIT_ERROR_MESSAGE } from '@screenshot-service/shared';
 import { useQuery } from '@tanstack/react-query';
 import { dataAccess } from '../../../data-access';
 
@@ -8,12 +10,11 @@ import { dataAccess } from '../../../data-access';
 
 export const ProjectUsageLimit = ({ projectId }: { projectId: Data.ProjectId.ProjectId }) => {
     const query = useQuery([projectId, 'request-count'], () => {
-        const dateRange = getDateRangeToday()
+        const dateRange = getToday()
         return dataAccess.captureScreenshotRequest.countCreatedBetween({ dateRange, projectId })
     })
 
-
-    const maxCount = configuration.freePlan.MAX_DAILY_CAPTURE_SCREENSHOT_REQUESTS
+    const maxCount = configuration.MAX_DAILY_CAPTURE_SCREENSHOT_REQUESTS
 
     const count = query.status === 'success' && query.data.type === 'Ok' ? Math.min(query.data.value, maxCount) : 0
 
@@ -22,23 +23,33 @@ export const ProjectUsageLimit = ({ projectId }: { projectId: Data.ProjectId.Pro
 
     return (
 
-        <Paper sx={{ p: 2, marginBottom:4 }}>
-            <Typography variant="h6" sx={{ marginBottom: 2 }}>
-                Usage (Today)
-            </Typography>
+        <Paper sx={{ p: 2, marginBottom: 4 }}>
+            <Box sx={{ marginBottom: 2, display: 'flex', alignItems: 'center' }}>
+                <Typography variant="h6" sx={{ flex: 1 }}>
+                    Usage (Today)
+                </Typography>
+
+            </Box>
 
             <Box sx={{ marginBottom: 1, display: 'flex', alignItems: 'center' }}>
                 <Typography color="text.secondary" sx={{ flex: 1 }}>
                     Capture Screenshot Requests
                 </Typography>
                 <Typography color="text.secondary" >
-                    {count} / {configuration.freePlan.MAX_DAILY_CAPTURE_SCREENSHOT_REQUESTS}
+                    {count} / {configuration.MAX_DAILY_CAPTURE_SCREENSHOT_REQUESTS}
                 </Typography>
             </Box>
-            <LinearProgress sx={{ height: 20 }} variant={'determinate'} value={percentage} />
+            <LinearProgress sx={{ height: 15 }} variant={'determinate'} value={percentage} />
             {count === maxCount && <Alert severity="warning" sx={{ marginTop: 2 }}>
-                You have hit you limit for capture screenshot requests.
+                {CAPTURE_SCREENSHOT_RATE_LIMIT_ERROR_MESSAGE}
             </Alert>}
+
+            <Box sx={{ marginTop: 2, display: "flex" }}>
+                <Box sx={{ flex: 1 }} />
+                <LoadingButton loading={query.isRefetching} onClick={() => query.refetch()} startIcon={<Refresh />} variant="contained" >
+                    Refresh
+                </LoadingButton>
+            </Box>
         </Paper>
 
     )

@@ -161,12 +161,7 @@ const startedFlow = function* ({
   );
 
   if (insertResult.type === 'Err') {
-    yield put(
-      Action.Failed(clientId, request.requestId, [
-        { message: 'Failed to insert capture screenshot request' },
-        ...insertResult.error,
-      ])
-    );
+    yield put(Action.Failed(clientId, request.requestId, insertResult.error));
     return;
   }
 

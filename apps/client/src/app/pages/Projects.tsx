@@ -52,7 +52,7 @@ export const ProjectsPage = () => {
                 </Link>
                 <Box sx={{ flex: 1 }} />
                 <Typography color="text.secondaru">
-                  {query.data.value.length} / {configuration.freePlan.MAX_PROJECT_COUNT} projects
+                  {query.data.value.length} / {configuration.MAX_PROJECT_COUNT} projects
                 </Typography>
               </Box>
 

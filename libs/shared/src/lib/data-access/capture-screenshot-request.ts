@@ -1,6 +1,10 @@
 import { Data } from '@screenshot-service/screenshot-service';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { DateRange } from '../date';
+import {
+  configuration,
+  CAPTURE_SCREENSHOT_RATE_LIMIT_ERROR_MESSAGE,
+} from '../configuration';
+import { DateRange, getToday } from '../date';
 import { definitions } from '../supabase-types';
 
 export type CaptureScreenshotRequest = {
@@ -88,6 +92,23 @@ export const insertNew =
     originUrl: Data.Url.Url;
     strategy: Data.Strategy.Strategy;
   }): Promise<Data.Result.Result<Data.Problem[], CaptureScreenshotRequest>> => {
+    const countResult = await countCreatedBetween(supabaseClient)({
+      dateRange: getToday(),
+      projectId,
+    });
+
+    if (countResult.type === 'Err') {
+      return countResult;
+    }
+
+    const count = countResult.value;
+
+    if (count >= configuration.MAX_DAILY_CAPTURE_SCREENSHOT_REQUESTS) {
+      return Data.Result.Err([
+        { message: CAPTURE_SCREENSHOT_RATE_LIMIT_ERROR_MESSAGE },
+      ]);
+    }
+
     const response = await supabaseClient
       .from<definitions['capture_screenshot_requests']>(
         'capture_screenshot_requests'

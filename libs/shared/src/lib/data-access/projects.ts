@@ -131,12 +131,10 @@ export const insert =
 
     const projects = projectsResult.value;
 
-    const MAX_PROJECT_COUNT = configuration.freePlan.MAX_PROJECT_COUNT;
-
-    if (projects.length >= MAX_PROJECT_COUNT) {
+    if (projects.length >= configuration.MAX_PROJECT_COUNT) {
       return Data.Result.Err([
         {
-          message: `Users are not allowed to have more than ${MAX_PROJECT_COUNT} projects.`,
+          message: `Users are not allowed to have more than ${configuration.MAX_PROJECT_COUNT} projects.`,
         },
       ]);
     }
