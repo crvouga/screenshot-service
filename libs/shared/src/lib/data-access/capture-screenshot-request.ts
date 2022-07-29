@@ -316,14 +316,14 @@ const findManyWhere =
     Data.Result.Result<Data.Problem[], CaptureScreenshotRequest[]>
   > => {
     const from = page * pageSize;
-    const to = from + pageSize;
+    const to = from + pageSize - 1;
     const response = await supabaseClient
       .from<definitions['capture_screenshot_requests']>(
         'capture_screenshot_requests'
       )
       .select('*')
       .eq('project_id', projectId)
-      .order('created_at', { ascending: order === 'NewestFirst' })
+      .order('created_at', { ascending: order === 'OldestFirst' })
       .range(from, to);
 
     if (response.error) {

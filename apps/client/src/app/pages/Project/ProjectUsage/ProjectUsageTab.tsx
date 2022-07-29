@@ -1,27 +1,14 @@
-import { Box, MenuItem, Select, Toolbar, Typography } from '@mui/material';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { ArrowLeft, ArrowRight } from '@mui/icons-material';
+import { Box, Button, CircularProgress, MenuItem, Paper, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Toolbar, Typography } from '@mui/material';
 import { Data } from "@screenshot-service/screenshot-service";
 import { CaptureScreenshotRequest } from '@screenshot-service/shared';
 import { useEffect, useState } from 'react';
 import { dataAccess } from '../../../data-access';
 import { useProfileSingleOutletContext } from '../Project';
 
-const columns: GridColDef[] = [
-  { field: "requestId", headerName: "ID" },
-  { field: "targetUrl", headerName: "Target Url", resizable: true },
-  { field: "createdAt", headerName: "Created At", resizable: true },
-  { field: "status", headerName: "Status", },
-  { field: "strategy", headerName: "Strategy" },
-  { field: "delaySec", headerName: "Delay (sec)" },
-  { field: "imageType", headerName: "Image Type" },
-  { field: "originUrl", headerName: "Origin Url", resizable: true },
-];
-
 const PAGE_SIZE = 5
 
-
 type Order = 'OldestFirst' | 'NewestFirst'
-
 
 const fetchPage = async ({ projectId, pageIndex, order }: { projectId: Data.ProjectId.ProjectId, pageIndex: number, order: Order }): Promise<CaptureScreenshotRequest[]> => {
   const result = await dataAccess.captureScreenshotRequest.findMany({
@@ -38,24 +25,37 @@ const fetchPage = async ({ projectId, pageIndex, order }: { projectId: Data.Proj
   return result.value
 }
 
+type Page = { type: "Loading" } | { type: "Succeeded", data: CaptureScreenshotRequest[] }
 
 export const ProjectUsageTab = () => {
   const { project } = useProfileSingleOutletContext();
 
   const [order, setOrder] = useState<Order>("NewestFirst")
   const [pageIndex, setPageIndex] = useState(0)
-  const [pages, setPages] = useState<CaptureScreenshotRequest[][]>([])
-  const [status, setStatus] = useState<"idle" | "loading">("idle")
+  const [pages, setPages] = useState<{ [pageIndex: number]: Page }>({})
+
+  const onPrev = () => {
+    setPageIndex(pageIndex => Math.max(0, pageIndex - 1))
+  }
+
+  const onNext = () => {
+    setPageIndex(pageIndex => Math.max(0, pageIndex + 1))
+  }
 
   useEffect(() => {
-    if (pageIndex > pages.length - 1) {
-      setStatus("loading")
-      fetchPage({ pageIndex, order, projectId: project.projectId }).then(page => {
-        setStatus("idle")
-        setPages(pages => ([...pages, page]))
+    const currentPageIndex = pageIndex
+    if (pages[currentPageIndex] === undefined) {
+
+      setPages(pages => ({
+        ...pages,
+        [currentPageIndex]: { type: "Loading" }
+      }))
+
+      fetchPage({ pageIndex: currentPageIndex, order, projectId: project.projectId }).then(page => {
+        setPages(pages => ({ ...pages, [currentPageIndex]: { type: "Succeeded", data: page } }))
       })
     }
-  }, [pageIndex, order, pages.length, project.projectId])
+  }, [pageIndex, order, pages, project.projectId])
 
 
   useEffect(() => {
@@ -64,8 +64,9 @@ export const ProjectUsageTab = () => {
   }, [order])
 
 
-  const rows = pages
-    .flatMap(page => page)
+  const page = (pages[pageIndex] ?? { type: "Loading" })
+
+  const canFetchNextPage = page.type === 'Succeeded' && page.data.length >= PAGE_SIZE
 
   return <Box>
     <Toolbar>
@@ -90,19 +91,124 @@ export const ProjectUsageTab = () => {
       </Select>
     </Toolbar>
 
-    <Box sx={{ height: 400, width: '100%' }}>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        page={pageIndex}
-        pageSize={PAGE_SIZE}
-        rowsPerPageOptions={[PAGE_SIZE]}
-        pagination
-        onPageChange={setPageIndex}
-        getRowId={row => row.requestId}
-        disableSelectionOnClick
-        loading={status === 'loading'}
-      />
+    <TableContainer sx={{ position: "relative", height: 345, maxHeight: 345 }} component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>ID</TableCell>
+            <TableCell>Target Url</TableCell>
+            <TableCell>Created At</TableCell>
+            <TableCell>Status</TableCell>
+            <TableCell>Strategy</TableCell>
+            <TableCell>Delay (sec)</TableCell>
+            <TableCell>Image Type</TableCell>
+            <TableCell>Origin Url</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody >
+          {page.type === 'Loading' && (
+            <>
+              <TableRow>
+                <Cell value="" />
+                <Cell value="" />
+                <Cell value="" />
+                <Cell value="" />
+                <Cell value="" />
+                <Cell value="" />
+                <Cell value="" />
+                <Cell value="" />
+              </TableRow>
+              <Box sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+                width: "100%",
+                height: "100%",
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: "center",
+              }}
+              >
+                <CircularProgress disableShrink />
+              </Box>
+            </>
+          )}
+
+          {page.type === 'Succeeded' && (
+            <>
+              {page.data.length === 0 && (
+                <>
+                  <TableRow>
+                    <Cell value="" />
+                    <Cell value="" />
+                    <Cell value="" />
+                    <Cell value="" />
+                    <Cell value="" />
+                    <Cell value="" />
+                    <Cell value="" />
+                    <Cell value="" />
+                  </TableRow>
+                  <Box sx={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    bottom: 0,
+                    right: 0,
+                    width: "100%",
+                    height: "100%",
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: "center",
+                  }}
+                  >
+                    <Typography>
+                      No rows
+                    </Typography>
+                  </Box>
+                </>
+              )}
+
+              {page.data.map((row) => (
+                <TableRow key={row.requestId}>
+                  <Cell value={row.requestId} />
+                  <Cell value={row.targetUrl} />
+                  <Cell value={row.createdAt} />
+                  <Cell value={row.status} />
+                  <Cell value={row.strategy} />
+                  <Cell value={String(row.delaySec)} />
+                  <Cell value={row.imageType} />
+                  <Cell value={row.originUrl} />
+                </TableRow>
+              ))}
+            </>
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
+
+
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', marginTop: 1 }}>
+      <Button disabled={pageIndex === 0} size="large" startIcon={<ArrowLeft />} onClick={onPrev}>
+        Prev
+      </Button>
+      <Typography sx={{ marginX: 2 }} variant="h6">
+        {pageIndex + 1}
+      </Typography>
+      <Button size="large" endIcon={<ArrowRight />} onClick={onNext} disabled={!canFetchNextPage}>
+        Next
+      </Button>
     </Box>
+
   </Box >
 };
+
+
+const Cell = ({ value }: { value: string }) => {
+  return <TableCell sx={{ maxWidth: 100, width: 100 }}>
+    <Typography noWrap>
+      {value}
+    </Typography>
+  </TableCell>
+}
