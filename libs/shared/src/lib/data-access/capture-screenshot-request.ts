@@ -1,5 +1,6 @@
 import { Data } from '@screenshot-service/screenshot-service';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { DateRange } from '../date';
 import { definitions } from '../supabase-types';
 
 export type CaptureScreenshotRequest = {
@@ -349,6 +350,33 @@ export const getPagination = (page: number, size: number) => {
   return { from, to };
 };
 
+const countCreatedBetween =
+  (supabaseClient: SupabaseClient) =>
+  async ({
+    dateRange,
+    projectId,
+  }: {
+    dateRange: DateRange;
+    projectId: Data.ProjectId.ProjectId;
+  }): Promise<Data.Result.Result<Data.Problem[], number>> => {
+    const response = await supabaseClient
+      .from<definitions['capture_screenshot_requests']>(
+        'capture_screenshot_requests'
+      )
+      .select('*', { count: 'exact' })
+      .eq('project_id', projectId)
+      .gte('created_at', dateRange.start)
+      .lte('created_at', dateRange.end);
+
+    if (response.error) {
+      return Data.Result.Err([{ message: response.error.message }]);
+    }
+
+    const count = response.count ?? response.data.length;
+
+    return Data.Result.Ok(count);
+  };
+
 export const CaptureScreenshotRequestDataAccess = (
   supabaseClient: SupabaseClient
 ) => {
@@ -359,5 +387,6 @@ export const CaptureScreenshotRequestDataAccess = (
     findSucceededRequest: findSucceededRequest(supabaseClient),
     updateStatus: updateStatus(supabaseClient),
     findMany: findManyWhere(supabaseClient),
+    countCreatedBetween: countCreatedBetween(supabaseClient),
   };
 };

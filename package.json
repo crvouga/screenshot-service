@@ -34,6 +34,7 @@
     "constate": "^3.3.2",
     "core-js": "^3.6.5",
     "cors": "^2.8.5",
+    "dayjs": "^1.11.4",
     "dotenv": "^16.0.1",
     "notistack": "^2.0.4",
     "puppeteer": "^14.0.0",
