@@ -1,5 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "declaration": true,
+    "importHelpers": false
+  },
   "files": [],
   "include": [],
   "references": [

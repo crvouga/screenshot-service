@@ -52,7 +52,7 @@ export const ClientToServerAction = {
       strategy: Data.Strategy.Strategy;
       delaySec: Data.DelaySec.DelaySec;
       imageType: Data.ImageType.ImageType;
-      targetUrl: Data.TargetUrl.TargetUrl;
+      targetUrl: Data.Url.Url;
     }) => ({
       payload,
     })

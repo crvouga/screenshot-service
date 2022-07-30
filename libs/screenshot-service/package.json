@@ -1,14 +1,16 @@
 {
   "name": "@crvouga/screenshot-service",
-  "version": "0.0.5",
+  "version": "0.0.8",
   "private": false,
   "publishConfig": {
     "access": "public"
   },
   "description": "A JavaScript client for the screenshot service",
   "main": "src/index.js",
+  "types": "src/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "npx npm-install-peers"
   },
   "author": "",
   "license": "ISC",

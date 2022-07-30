@@ -448,11 +448,11 @@ const validateForm = (
 ): Data.Result.Result<
   FormState['errors'],
   {
-    targetUrl: Data.TargetUrl.TargetUrl;
+    targetUrl: Data.Url.Url;
     projectId: Data.ProjectId.ProjectId;
   }
 > => {
-  const decodedTargetUrl = Data.TargetUrl.decode(form.values.targetUrl);
+  const decodedTargetUrl = Data.Url.decode(form.values.targetUrl);
 
   if (form.values.projectId && Data.Result.isOk(decodedTargetUrl)) {
     return Data.Result.Ok({

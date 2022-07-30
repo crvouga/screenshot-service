@@ -14,7 +14,7 @@ export type CaptureScreenshotRequest = {
   projectId: Data.ProjectId.ProjectId;
   imageType: Data.ImageType.ImageType;
   delaySec: Data.DelaySec.DelaySec;
-  targetUrl: Data.TargetUrl.TargetUrl;
+  targetUrl: Data.Url.Url;
   originUrl: Data.Url.Url;
   strategy: Data.Strategy.Strategy;
   status: Status;
@@ -35,8 +35,8 @@ const decodeRow = (
 ): Data.Result.Result<Data.Problem[], CaptureScreenshotRequest> => {
   const projectId = Data.ProjectId.decode(row.project_id);
   const requestId = Data.RequestId.decode(row.id);
-  const targetUrl = Data.TargetUrl.decode(row.target_url);
-  const originUrl = Data.TargetUrl.decode(row.origin_url);
+  const targetUrl = Data.Url.decode(row.target_url);
+  const originUrl = Data.Url.decode(row.origin_url);
 
   if (
     Data.Result.isOk(projectId) &&
@@ -77,7 +77,7 @@ export const insertNew =
     projectId: Data.ProjectId.ProjectId;
     imageType: Data.ImageType.ImageType;
     delaySec: Data.DelaySec.DelaySec;
-    targetUrl: Data.TargetUrl.TargetUrl;
+    targetUrl: Data.Url.Url;
     originUrl: Data.Url.Url;
     strategy: Data.Strategy.Strategy;
   }): Promise<Data.Result.Result<Data.Problem[], CaptureScreenshotRequest>> => {
@@ -206,7 +206,7 @@ export const findSucceededRequest =
     projectId,
     imageType,
   }: {
-    targetUrl: Data.TargetUrl.TargetUrl;
+    targetUrl: Data.Url.Url;
     delaySec: Data.DelaySec.DelaySec;
     projectId: Data.ProjectId.ProjectId;
     imageType: Data.ImageType.ImageType;
@@ -257,7 +257,7 @@ export const findOneElseInsert =
     projectId: Data.ProjectId.ProjectId;
     imageType: Data.ImageType.ImageType;
     delaySec: Data.DelaySec.DelaySec;
-    targetUrl: Data.TargetUrl.TargetUrl;
+    targetUrl: Data.Url.Url;
     originUrl: Data.Url.Url;
     strategy: Data.Strategy.Strategy;
   }): Promise<Data.Result.Result<Data.Problem[], CaptureScreenshotRequest>> => {
