@@ -301,7 +301,7 @@ const networkFirstFlow = function* (
 
   const page = openPageResult.value;
 
-  yield put(Action.Log(clientId, requestId, 'info', 'loading website...'));
+  yield put(Action.Log(clientId, requestId, 'info', 'loading webpage...'));
 
   const goToResult = yield* call(WebBrowser.goTo, page, request.targetUrl);
 
