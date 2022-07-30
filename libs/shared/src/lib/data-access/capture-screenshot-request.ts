@@ -339,7 +339,7 @@ const findManyWhere =
     Data.Result.Result<Data.Problem[], CaptureScreenshotRequest[]>
   > => {
     const from = page * pageSize;
-    const to = from + pageSize - 1;
+    const to = from + pageSize;
     const response = await supabaseClient
       .from<definitions['capture_screenshot_requests']>(
         'capture_screenshot_requests'
@@ -399,6 +399,29 @@ const countCreatedBetween =
     return Data.Result.Ok(count);
   };
 
+const countAll =
+  (supabaseClient: SupabaseClient) =>
+  async ({
+    projectId,
+  }: {
+    projectId: Data.ProjectId.ProjectId;
+  }): Promise<Data.Result.Result<Data.Problem[], number>> => {
+    const response = await supabaseClient
+      .from<definitions['capture_screenshot_requests']>(
+        'capture_screenshot_requests'
+      )
+      .select('*', { count: 'exact' })
+      .eq('project_id', projectId);
+
+    if (response.error) {
+      return Data.Result.Err([{ message: response.error.message }]);
+    }
+
+    const count = response.count ?? response.data.length;
+
+    return Data.Result.Ok(count);
+  };
+
 export const CaptureScreenshotRequestDataAccess = (
   supabaseClient: SupabaseClient
 ) => {
@@ -410,5 +433,6 @@ export const CaptureScreenshotRequestDataAccess = (
     updateStatus: updateStatus(supabaseClient),
     findMany: findManyWhere(supabaseClient),
     countCreatedBetween: countCreatedBetween(supabaseClient),
+    countAll: countAll(supabaseClient),
   };
 };

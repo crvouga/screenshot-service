@@ -1,80 +1,54 @@
-import { Refresh } from '@mui/icons-material';
-import { LoadingButton } from '@mui/lab';
-import { Box, MenuItem, Paper, Select, Toolbar, Typography } from '@mui/material';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { Box, CircularProgress, MenuItem, Paper, Select, Toolbar, Typography } from '@mui/material';
 import { Data } from "@screenshot-service/screenshot-service";
-import { CaptureScreenshotRequest } from '@screenshot-service/shared';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import DataTable from "react-data-table-component";
 import { dataAccess } from '../../../data-access';
 
-const columns: GridColDef[] = [
-  { field: "requestId", headerName: "ID" },
-  { field: "targetUrl", headerName: "Target Url", },
-  { field: "createdAt", headerName: "Created At", },
-  { field: "status", headerName: "Status", },
-  { field: "strategy", headerName: "Strategy" },
-  { field: "delaySec", headerName: "Delay (sec)" },
-  { field: "imageType", headerName: "Image Type" },
-  { field: "originUrl", headerName: "Origin Url", },
-];
-
-const PAGE_SIZE = 5
 
 type Order = 'OldestFirst' | 'NewestFirst'
 
-const fetchPage = async ({ projectId, pageIndex, order }: { projectId: Data.ProjectId.ProjectId, pageIndex: number, order: Order }): Promise<CaptureScreenshotRequest[]> => {
-  const result = await dataAccess.captureScreenshotRequest.findMany({
-    // todo fix removing +1 will prevent table from fetching next page
-    pageSize: PAGE_SIZE + 1,
-    page: pageIndex,
-    projectId,
-    order
-  })
-
-  if (result.type === 'Err') {
-    return []
-  }
-
-  return result.value
-}
+const fallbackTotalRows = 10
 
 export const ProjectRequestTable = ({ projectId }: { projectId: Data.ProjectId.ProjectId }) => {
   const [order, setOrder] = useState<Order>("NewestFirst")
-  const [pageIndex, setPageIndex] = useState(0)
-  const [pages, setPages] = useState<CaptureScreenshotRequest[][]>([])
-  const [status, setStatus] = useState<"idle" | "loading">("idle")
+  const [pageSize, setPageSize] = useState(10)
+  const [page, setPage] = useState(0)
 
-  useEffect(() => {
-    if (pageIndex > pages.length - 1) {
-      setStatus("loading")
-      fetchPage({ pageIndex, order, projectId }).then(page => {
-        setStatus("idle")
-        setPages(pages => ([...pages, page]))
-      })
+  const totalRowsQuery = useQuery(['requests', projectId, "total-rows"], async () => {
+    const result = await dataAccess.captureScreenshotRequest.countAll({ projectId })
+
+    if (result.type === 'Err') {
+      return fallbackTotalRows
     }
-  }, [pageIndex, order, pages.length, projectId])
 
-  const onRestart = () => {
-    setPageIndex(0)
-    setPages([])
-  }
+    return result.value
+  })
 
-  useEffect(() => {
-    onRestart()
-  }, [order])
+  const totalRows = totalRowsQuery.data ?? fallbackTotalRows
 
-  const rows = Object.values(pages
-    .flatMap(page => page)
-    .reduce<{ [requestId: string]: CaptureScreenshotRequest }>(
-      (uniq, request) => ({
-        ...uniq,
-        [request.requestId]: request
-      }),
-      {}
-    ))
+  const query = useQuery(['requests', projectId, order, page, pageSize], async () => {
+    const result = await dataAccess.captureScreenshotRequest.findMany({
+      pageSize,
+      page,
+      projectId,
+      order
+    })
 
-  return <Paper sx={{ p: 2, marginBottom: 4 }}>
-    <Toolbar disableGutters>
+    if (result.type === 'Err') {
+      return []
+    }
+
+    return result.value
+  }, {
+    keepPreviousData: true
+  })
+
+  const rows = query?.data ?? []
+
+
+  return <Paper sx={{ marginBottom: 4, overflow: "hidden" }}>
+    <Toolbar >
       <Typography variant="h6" sx={{ flex: 1 }}>
         api requests
       </Typography>
@@ -96,24 +70,54 @@ export const ProjectRequestTable = ({ projectId }: { projectId: Data.ProjectId.P
       </Select>
     </Toolbar>
 
-    <Box sx={{ height: 400, width: '100%' }}>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        page={pageIndex}
-        pageSize={PAGE_SIZE}
-        rowsPerPageOptions={[PAGE_SIZE]}
-        pagination
-        onPageChange={setPageIndex}
-        getRowId={row => row.requestId}
-        disableSelectionOnClick
-        loading={status === 'loading'}
-      />
-    </Box>
-    <Box sx={{ paddingY: 2, display: "flex", flexDirection: "row-reverse" }}>
-      <LoadingButton loading={status === "loading"} onClick={onRestart} startIcon={<Refresh />} variant="contained">
-        Restart
-      </LoadingButton>
-    </Box>
+    <DataTable
+
+      columns={[
+        {
+          name: "id",
+          selector: row => row.requestId,
+        },
+        {
+          name: "created at",
+          selector: row => row.createdAt,
+        },
+        {
+          name: "target url",
+          selector: row => row.targetUrl,
+        },
+        {
+          name: "origin url",
+          selector: row => row.originUrl,
+        },
+        {
+          name: "status",
+          selector: row => row.status,
+        },
+        {
+          name: "strategy",
+          selector: row => row.strategy,
+        },
+        {
+          name: "image type",
+          selector: row => row.imageType,
+        },
+      ]}
+      data={rows}
+      progressPending={query.isLoading}
+      progressComponent={<Box sx={{ width: "100%", height: 480, display: 'flex', alignItems: 'center', justifyContent: "center" }}><CircularProgress /></Box>}
+      pagination
+      paginationServer
+      paginationTotalRows={totalRows}
+      onChangePage={(page) => {
+        setPage(page - 1)
+      }}
+      onChangeRowsPerPage={(newPerPage, page) => {
+        setPageSize(newPerPage)
+        setPage(page - 1)
+      }}
+    />
   </Paper >
 };
+
+
+
