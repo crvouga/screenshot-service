@@ -181,7 +181,7 @@ export const CaptureScreenshotForm = () => {
       >
         {Data.DelaySec.delaySecs.map((delaySec) => (
           <MenuItem value={delaySec} key={delaySec}>
-            <ListItemText primary={`${delaySec} seconds`} />
+            <ListItemText primary={pluralize(delaySec, "second", "seconds")} />
           </MenuItem>
         ))}
       </Select>
@@ -303,6 +303,13 @@ export const CaptureScreenshotForm = () => {
     </>
   );
 };
+
+const pluralize = (quantity: number, singular: string, plural: string): string => {
+  if (quantity === 1) {
+    return `1 ${singular}`
+  }
+  return `${quantity} ${plural}`
+}
 
 const Screenshot = ({
   alt,
