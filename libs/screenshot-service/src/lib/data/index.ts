@@ -8,7 +8,6 @@ export * as RequestId from './request-id';
 export * as Result from './result';
 export * as ScreenshotSource from './screenshot-source';
 export * as Strategy from './strategy';
-export * as TargetUrl from './target-url';
 export * as Url from './url';
 export * as UserId from './user-id';
 export * as Uuid from './uuid';
