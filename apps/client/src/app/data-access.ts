@@ -78,7 +78,7 @@ export const useProjectsQuery = ({
   ownerId: Data.UserId.UserId;
 }) => {
   return useQuery([projectsQueryFilter, ownerId], () =>
-    dataAccess.project.findMany({ ownerId })
+    dataAccess.project.findManyOwnerId({ ownerId })
   );
 };
 
@@ -89,7 +89,7 @@ export const useSingleProjectQuery = ({
 }) => {
   return useQuery(
     [projectsQueryFilter, projectId],
-    () => dataAccess.project.findOne({ projectId }),
+    () => dataAccess.project.findManyById({ projectId }),
     { refetchOnWindowFocus: true }
   );
 };

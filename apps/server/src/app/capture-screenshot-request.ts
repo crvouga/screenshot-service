@@ -126,7 +126,10 @@ const startedFlow = function* ({
   webBrowser: WebBrowser.WebBrowser;
   request: CaptureScreenshotRequest;
 }) {
-  const findProjectResult = yield* call(dataAccess.project.findOne, request);
+  const findProjectResult = yield* call(
+    dataAccess.project.findManyById,
+    request
+  );
 
   if (findProjectResult.type === 'Err') {
     yield put(
@@ -135,7 +138,16 @@ const startedFlow = function* ({
     return;
   }
 
-  const project = findProjectResult.value;
+  const [project] = findProjectResult.value;
+
+  if (!project) {
+    yield put(
+      Action.Failed(clientId, request.requestId, [
+        { message: 'Could not find project' },
+      ])
+    );
+    return;
+  }
 
   const isOnWhitelist = project.whitelistedUrls.some(
     (url) => url === request.originUrl

@@ -68,7 +68,19 @@ const ProjectPageWithParams = ({
     );
   }
 
-  const project = result.value;
+  const [project] = result.value;
+
+  if (!project) {
+    return (
+      <>
+        <Header />
+
+        <ErrorPage
+          message={`Could not find project`}
+        />
+      </>
+    );
+  }
 
   return (
     <>

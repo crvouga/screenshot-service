@@ -41,7 +41,7 @@ const decodeRow = (
   );
 };
 
-export const findMany =
+export const findManyByOwnerId =
   (supabaseClient: SupabaseClient) =>
   async ({
     ownerId,
@@ -68,26 +68,31 @@ export const findMany =
     return Data.Result.Ok(Data.Result.toValues(decodings));
   };
 
-export const findOne =
+export const findManyById =
   (supabaseClient: SupabaseClient) =>
   async ({
     projectId,
   }: {
     projectId: Data.ProjectId.ProjectId;
-  }): Promise<Data.Result.Result<Problem[], Project>> => {
+  }): Promise<Data.Result.Result<Problem[], Project[]>> => {
     const response = await supabaseClient
       .from<definitions['projects']>('projects')
       .select('*')
-      .match({ id: projectId })
-      .single();
+      .match({ id: projectId });
 
     if (response.error) {
       return Data.Result.Err([{ message: response.error.message }]);
     }
 
-    const decoded = decodeRow(response.data);
+    const decodings = response.data.map(decodeRow);
 
-    return decoded;
+    const problems = Data.Result.toErrors(decodings).flat();
+
+    if (problems.length > 0) {
+      return Data.Result.Err(problems);
+    }
+
+    return Data.Result.Ok(Data.Result.toValues(decodings));
   };
 
 export const deleteForever =
@@ -136,7 +141,7 @@ export const insert =
     projectName: Data.ProjectName.ProjectName;
     whilelistedUrls: Data.Url.Url[];
   }): Promise<Data.Result.Result<Problem[], Project>> => {
-    const projectsResult = await findMany(supabaseClient)({ ownerId });
+    const projectsResult = await findManyByOwnerId(supabaseClient)({ ownerId });
 
     if (projectsResult.type === 'Err') {
       return projectsResult;
@@ -206,10 +211,10 @@ export const update =
 
 export const ProjectDataAccess = (supabaseClient: SupabaseClient) => {
   return {
+    findManyOwnerId: findManyByOwnerId(supabaseClient),
+    findManyById: findManyById(supabaseClient),
     update: update(supabaseClient),
-    findOne: findOne(supabaseClient),
     deleteForever: deleteForever(supabaseClient),
-    findMany: findMany(supabaseClient),
     insert: insert(supabaseClient),
   };
 };
