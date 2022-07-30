@@ -1,28 +1,28 @@
-import { LoadingButton } from '@mui/lab';
-import { Alert, Paper, Typography, Box, LinearProgress } from '@mui/material';
 import { Refresh } from '@mui/icons-material';
+import { LoadingButton } from '@mui/lab';
+import { Alert, Box, LinearProgress, Paper, Typography } from '@mui/material';
 import { Data } from '@screenshot-service/screenshot-service';
-import { getToday, configuration, CAPTURE_SCREENSHOT_RATE_LIMIT_ERROR_MESSAGE } from '@screenshot-service/shared';
+import { getToday, toRateLimitErrorMessage } from '@screenshot-service/shared';
 import { useQuery } from '@tanstack/react-query';
-import { dataAccess } from '../../../data-access';
+import { dataAccess, useConfigurationContext } from '../../../data-access';
 
 
 
 export const ProjectUsageLimit = ({ projectId }: { projectId: Data.ProjectId.ProjectId }) => {
-    const query = useQuery([projectId, 'request-count'], () => {
+    const { configuration } = useConfigurationContext()
+
+    const query = useQuery([projectId, 'usage'], () => {
         const dateRange = getToday()
         return dataAccess.captureScreenshotRequest.countCreatedBetween({ dateRange, projectId })
     })
 
-    const maxCount = configuration.MAX_DAILY_CAPTURE_SCREENSHOT_REQUESTS
+    const maxCount = configuration.maxDailyRequests
 
     const count = query.status === 'success' && query.data.type === 'Ok' ? Math.min(query.data.value, maxCount) : 0
 
     const percentage = (count / maxCount) * 100
 
-
     return (
-
         <Paper sx={{ p: 2, marginBottom: 4 }}>
             <Box sx={{ marginBottom: 2, display: 'flex', alignItems: 'center' }}>
                 <Typography variant="h6" sx={{ flex: 1 }}>
@@ -36,12 +36,12 @@ export const ProjectUsageLimit = ({ projectId }: { projectId: Data.ProjectId.Pro
                     Capture Screenshot Requests
                 </Typography>
                 <Typography color="text.secondary" >
-                    {count} / {configuration.MAX_DAILY_CAPTURE_SCREENSHOT_REQUESTS}
+                    {count} / {maxCount}
                 </Typography>
             </Box>
             <LinearProgress sx={{ height: 15 }} variant={'determinate'} value={percentage} />
             {count === maxCount && <Alert severity="warning" sx={{ marginTop: 2 }}>
-                {CAPTURE_SCREENSHOT_RATE_LIMIT_ERROR_MESSAGE}
+                {toRateLimitErrorMessage(configuration)}
             </Alert>}
 
             <Box sx={{ marginTop: 2, display: "flex" }}>

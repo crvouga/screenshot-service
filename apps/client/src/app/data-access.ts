@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { appEventEmitter } from './app-event-emitter';
 import { supabaseClient } from './supabase';
+import { Configuration } from '@screenshot-service/shared';
 
 //
 //
@@ -57,6 +58,26 @@ export const useUpdateProfileMutation = () => {
 export const useDeleteProfileMutation = () => {
   return useMutation(dataAccess.profile.deleteForever);
 };
+
+//
+//
+//
+// Configuration
+//
+//
+//
+
+export const useQueryConfiguration = () => {
+  return useQuery(['configuration'], () => dataAccess.configuration.findOne());
+};
+
+export const [ConfigurationContext, useConfigurationContext] = constate(
+  ({ configuration }: { configuration: Configuration }) => {
+    return {
+      configuration,
+    };
+  }
+);
 
 //
 //

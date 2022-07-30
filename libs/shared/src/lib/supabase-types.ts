@@ -111,6 +111,99 @@ export interface paths {
       };
     };
   };
+  "/configuration": {
+    get: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.configuration.id"];
+          max_project_count?: parameters["rowFilter.configuration.max_project_count"];
+          max_daily_requests?: parameters["rowFilter.configuration.max_daily_requests"];
+          /** Filtering Columns */
+          select?: parameters["select"];
+          /** Ordering */
+          order?: parameters["order"];
+          /** Limiting and Pagination */
+          offset?: parameters["offset"];
+          /** Limiting and Pagination */
+          limit?: parameters["limit"];
+        };
+        header: {
+          /** Limiting and Pagination */
+          Range?: parameters["range"];
+          /** Limiting and Pagination */
+          "Range-Unit"?: parameters["rangeUnit"];
+          /** Preference */
+          Prefer?: parameters["preferCount"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: {
+          schema: definitions["configuration"][];
+        };
+        /** Partial Content */
+        206: unknown;
+      };
+    };
+    post: {
+      parameters: {
+        body: {
+          /** configuration */
+          configuration?: definitions["configuration"];
+        };
+        query: {
+          /** Filtering Columns */
+          select?: parameters["select"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** Created */
+        201: unknown;
+      };
+    };
+    delete: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.configuration.id"];
+          max_project_count?: parameters["rowFilter.configuration.max_project_count"];
+          max_daily_requests?: parameters["rowFilter.configuration.max_daily_requests"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+    patch: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.configuration.id"];
+          max_project_count?: parameters["rowFilter.configuration.max_project_count"];
+          max_daily_requests?: parameters["rowFilter.configuration.max_daily_requests"];
+        };
+        body: {
+          /** configuration */
+          configuration?: definitions["configuration"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+  };
   "/profiles": {
     get: {
       parameters: {
@@ -344,6 +437,19 @@ export interface definitions {
     /** Format: ARRAY */
     whitelisted_urls: unknown[];
   };
+  configuration: {
+    /**
+     * Format: public.singleton
+     * @description Note:
+     * This is a Primary Key.<pk/>
+     * @enum {string}
+     */
+    id: "singleton";
+    /** Format: bigint */
+    max_project_count: number;
+    /** Format: bigint */
+    max_daily_requests: number;
+  };
   profiles: {
     /**
      * Format: uuid
@@ -459,6 +565,14 @@ export interface parameters {
   "rowFilter.projects.owner_id": string;
   /** Format: ARRAY */
   "rowFilter.projects.whitelisted_urls": string;
+  /** @description configuration */
+  "body.configuration": definitions["configuration"];
+  /** Format: public.singleton */
+  "rowFilter.configuration.id": string;
+  /** Format: bigint */
+  "rowFilter.configuration.max_project_count": string;
+  /** Format: bigint */
+  "rowFilter.configuration.max_daily_requests": string;
   /** @description profiles */
   "body.profiles": definitions["profiles"];
   /** Format: uuid */

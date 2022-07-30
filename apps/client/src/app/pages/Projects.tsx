@@ -8,18 +8,17 @@ import {
   Container,
   Typography
 } from '@mui/material';
-import { configuration } from '@screenshot-service/shared';
 import { Link } from 'react-router-dom';
 import { useAuthUser } from '../authentication';
+import { CreateProjectCallToAction } from '../components/CreateProjectCallToAction';
 import { Header } from '../components/Header';
-import { useProjectsQuery } from '../data-access';
+import { useConfigurationContext, useProjectsQuery } from '../data-access';
 import { routes } from '../routes';
 
 export const ProjectsPage = () => {
+  const { configuration } = useConfigurationContext()
   const authUser = useAuthUser();
   const query = useProjectsQuery({ ownerId: authUser.userId });
-
-
 
   return (
     <>
@@ -51,8 +50,8 @@ export const ProjectsPage = () => {
                   </Button>
                 </Link>
                 <Box sx={{ flex: 1 }} />
-                <Typography color="text.secondaru">
-                  {query.data.value.length} / {configuration.MAX_PROJECT_COUNT} projects
+                <Typography color="text.secondary">
+                  {query.data.value.length} / {configuration.maxProjectCount} projects
                 </Typography>
               </Box>
 
@@ -77,32 +76,5 @@ export const ProjectsPage = () => {
         </>
       )}
     </>
-  );
-};
-
-const CreateProjectCallToAction = () => {
-  return (
-    <Container maxWidth="sm">
-      <Card sx={{ width: '100%', my: 4 }}>
-        <Container maxWidth="xs" sx={{ py: 4, textAlign: 'center' }}>
-          {/* <CameraAlt sx={{ width: 72, height: 72 }} /> */}
-
-          <Typography variant="h4" align="center" sx={{ mb: 3 }}>
-            You don't have any projects.
-          </Typography>
-
-          <Link to={routes['/projects/create'].make()}>
-            <Button
-              fullWidth
-              startIcon={<Create />}
-              variant="contained"
-              size="large"
-            >
-              create a project
-            </Button>
-          </Link>
-        </Container>
-      </Card>
-    </Container>
   );
 };

@@ -1,11 +1,7 @@
-import { Create } from '@mui/icons-material';
 import {
   Alert,
   AlertTitle,
-  Box,
-  Button,
-  Card,
-  CircularProgress,
+  Box, CircularProgress,
   InputAdornment,
   ListItemText,
   MenuItem,
@@ -15,13 +11,10 @@ import {
 } from '@mui/material';
 import { Data } from '@screenshot-service/screenshot-service';
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { appEventEmitter } from '../../app-event-emitter';
 import { useAuthUser } from '../../authentication';
+import { CreateProjectCallToAction } from '../../components/CreateProjectCallToAction';
 import { Project, useProjectsQuery } from '../../data-access';
-import { routes } from '../../routes';
-
-
 
 type Props = {
   projectId: Data.ProjectId.ProjectId | null;
@@ -61,8 +54,9 @@ export const ProjectInput = ({
           const projects = query.data.value;
 
           if (projects.length === 0) {
-            return <CreateProjectCallToAction />;
+            return <CreateProjectCallToAction onClickLink={() => appEventEmitter.emit("ToggleCaptureScreenshotFormDrawer", 'closed')} />;
           }
+
           return (
             <Loaded
               projects={projects}
@@ -127,37 +121,7 @@ const Loaded = ({
   );
 };
 
-const CreateProjectCallToAction = () => {
-  return (
-    <Card sx={{ width: '100%', textAlign: 'center', p: 4 }}>
-      {/* <CameraAlt sx={{ width: 64, height: 64 }} /> */}
 
-      <Typography align="center" variant="h4" sx={{ mb: 1 }}>
-        You don't have any projects.
-      </Typography>
-
-      <Typography align="center" color="text.secondary" sx={{ mb: 2 }}>
-        You have to create a project before capturing any screenshots
-      </Typography>
-
-      <Link
-        to={routes['/projects/create'].make()}
-        onClick={() => {
-          appEventEmitter.emit('ToggleCaptureScreenshotFormDrawer', 'closed');
-        }}
-      >
-        <Button
-          fullWidth
-          startIcon={<Create />}
-          variant="contained"
-          size="large"
-        >
-          create a new project
-        </Button>
-      </Link>
-    </Card>
-  );
-};
 
 const Err = ({ message }: { message: string }) => {
   return (

@@ -2,6 +2,7 @@ import { Box } from '@mui/material';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthUserContext, useAuthState, useAuthUser } from './authentication';
 import { BrandedLoadingPage } from './components/Loading';
+import { ConfigurationContext, ProfileContext, useProfileQuery, useQueryConfiguration } from './data-access';
 import { AccountPage } from './pages/Account';
 import { AccountCreatePage } from './pages/AccountCreate';
 import { CaptureScreenshotFormDrawer } from './pages/CaptureScreenshot';
@@ -10,11 +11,10 @@ import { LogoutPage } from './pages/Logout';
 import {
   ProjectOverviewTab,
   ProjectPage,
-  ProjectUsageTab,
+  ProjectUsageTab
 } from './pages/Project';
 import { ProjectsCreatePage } from './pages/ProjectCreate';
 import { ProjectsPage } from './pages/Projects';
-import * as Profiles from './data-access';
 import { routes } from './routes';
 
 export const App = () => {
@@ -55,16 +55,48 @@ const LoadingAuth = () => {
           userId={authState.userId}
           defaultName={authState.defaultName}
         >
-          <LoadingProfile />
+          <LoadingConfiguration />
         </AuthUserContext>
       );
   }
 };
 
+const LoadingConfiguration = () => {
+  const query = useQueryConfiguration()
+
+  switch (query.status) {
+    case 'error':
+      return <BrandedLoadingPage />;
+
+    case 'loading':
+      return <BrandedLoadingPage />;
+
+    case 'success': {
+      const result = query.data;
+
+      switch (result.type) {
+        case 'Err':
+          return <Box>
+            {result.error.map(problem => problem.message).join(", ")}
+          </Box>
+
+        case 'Ok': {
+          const configuration = result.value
+
+          return (
+            <ConfigurationContext configuration={configuration}>
+              <LoadingProfile />
+            </ConfigurationContext>
+          )
+        }
+      }
+    }
+  }
+}
+
 const LoadingProfile = () => {
   const authUser = useAuthUser();
-
-  const query = Profiles.useProfileQuery(authUser);
+  const query = useProfileQuery(authUser);
 
   switch (query.status) {
     case 'error':
@@ -87,9 +119,9 @@ const LoadingProfile = () => {
 
           if (profile) {
             return (
-              <Profiles.ProfileContext profile={profile}>
+              <ProfileContext profile={profile}>
                 <Loaded />
-              </Profiles.ProfileContext>
+              </ProfileContext>
             )
           }
 
@@ -101,7 +133,6 @@ const LoadingProfile = () => {
             </Routes>
           );
         }
-
       }
     }
   }

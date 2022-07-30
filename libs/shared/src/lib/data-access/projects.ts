@@ -1,6 +1,6 @@
 import { Data } from '@screenshot-service/screenshot-service';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { configuration } from '../configuration';
+import * as Configuration from './configuration';
 import { definitions } from '../supabase-types';
 
 export type Project = {
@@ -149,10 +149,18 @@ export const insert =
 
     const projects = projectsResult.value;
 
-    if (projects.length >= configuration.MAX_PROJECT_COUNT) {
+    const configurationResult = await Configuration.findOne(supabaseClient)();
+
+    if (configurationResult.type === 'Err') {
+      return configurationResult;
+    }
+
+    const configuration = configurationResult.value;
+
+    if (projects.length >= configuration.maxProjectCount) {
       return Data.Result.Err([
         {
-          message: `Users are not allowed to have more than ${configuration.MAX_PROJECT_COUNT} projects.`,
+          message: `Users are not allowed to have more than ${configuration.maxProjectCount} projects.`,
         },
       ]);
     }

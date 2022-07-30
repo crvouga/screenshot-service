@@ -1,9 +1,7 @@
 import { Data } from '@screenshot-service/screenshot-service';
 import { SupabaseClient } from '@supabase/supabase-js';
-import {
-  CAPTURE_SCREENSHOT_RATE_LIMIT_ERROR_MESSAGE,
-  configuration,
-} from '../configuration';
+import { toRateLimitErrorMessage } from '../configuration';
+import * as Configuration from './configuration';
 import { DateRange, getToday } from '../date';
 import { definitions } from '../supabase-types';
 import { BUCKET_NAME, toFilename } from './screenshot-storage';
@@ -92,9 +90,17 @@ export const insertNew =
 
     const count = countResult.value;
 
-    if (count >= configuration.MAX_DAILY_CAPTURE_SCREENSHOT_REQUESTS) {
+    const configurationResult = await Configuration.findOne(supabaseClient)();
+
+    if (configurationResult.type === 'Err') {
+      return configurationResult;
+    }
+
+    const configuration = configurationResult.value;
+
+    if (count >= configuration.maxDailyRequests) {
       return Data.Result.Err([
-        { message: CAPTURE_SCREENSHOT_RATE_LIMIT_ERROR_MESSAGE },
+        { message: toRateLimitErrorMessage(configuration) },
       ]);
     }
 
