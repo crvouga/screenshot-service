@@ -2,4 +2,4 @@
 
 A JavaScript client for the screenshot service.
 
-Documentation will not be added for the foreseeable future.
+Sorry no documentation but check out this [example](https://github.com/crvouga/chrisvouga-dev) to figure out how to use it.
