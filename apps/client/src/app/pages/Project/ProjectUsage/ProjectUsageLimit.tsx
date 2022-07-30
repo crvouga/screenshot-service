@@ -33,7 +33,7 @@ export const ProjectUsageLimit = ({ projectId }: { projectId: Data.ProjectId.Pro
 
             <Box sx={{ marginBottom: 1, display: 'flex', alignItems: 'center' }}>
                 <Typography color="text.secondary" sx={{ flex: 1 }}>
-                    Capture Screenshot Requests
+                    api requests
                 </Typography>
                 <Typography color="text.secondary" >
                     {count} / {maxCount}

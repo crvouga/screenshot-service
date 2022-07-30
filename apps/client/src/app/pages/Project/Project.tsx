@@ -8,6 +8,7 @@ import { Header } from '../../components/Header';
 import { NotFoundPage } from '../../components/NotFound';
 import { Project, useSingleProjectQuery } from '../../data-access';
 import { ErrorPage } from '../Error';
+import { ProjectGetStarted } from './ProjectGetStarted';
 import { ProjectDeleteSection } from './ProjectOverview/ProjectDeleteSection';
 import { ProjectIdSection } from './ProjectOverview/ProjectIdSection';
 import { ProjectNameSection } from './ProjectOverview/ProjectNameSection';
@@ -94,6 +95,9 @@ const ProjectPageWithParams = ({
 
       <Box sx={{ paddingBottom: 8, }}>
         <Container maxWidth="md">
+
+          <ProjectGetStarted />
+
           <ProjectUsageLimit projectId={project.projectId} />
 
           <ProjectIdSection project={project} />
