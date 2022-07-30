@@ -5,6 +5,7 @@ import { definitions } from '../supabase-types';
 export type Configuration = {
   maxProjectCount: number;
   maxDailyRequests: number;
+  clientLibraryUrl: string;
 };
 
 export const findOne =
@@ -25,6 +26,7 @@ export const findOne =
     const configuration: Configuration = {
       maxDailyRequests: row.max_daily_requests,
       maxProjectCount: row.max_project_count,
+      clientLibraryUrl: row.client_library_url,
     };
 
     return Data.Result.Ok(configuration);

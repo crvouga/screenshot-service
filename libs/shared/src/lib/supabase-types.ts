@@ -118,6 +118,7 @@ export interface paths {
           id?: parameters["rowFilter.configuration.id"];
           max_project_count?: parameters["rowFilter.configuration.max_project_count"];
           max_daily_requests?: parameters["rowFilter.configuration.max_daily_requests"];
+          client_library_url?: parameters["rowFilter.configuration.client_library_url"];
           /** Filtering Columns */
           select?: parameters["select"];
           /** Ordering */
@@ -171,6 +172,7 @@ export interface paths {
           id?: parameters["rowFilter.configuration.id"];
           max_project_count?: parameters["rowFilter.configuration.max_project_count"];
           max_daily_requests?: parameters["rowFilter.configuration.max_daily_requests"];
+          client_library_url?: parameters["rowFilter.configuration.client_library_url"];
         };
         header: {
           /** Preference */
@@ -188,6 +190,7 @@ export interface paths {
           id?: parameters["rowFilter.configuration.id"];
           max_project_count?: parameters["rowFilter.configuration.max_project_count"];
           max_daily_requests?: parameters["rowFilter.configuration.max_daily_requests"];
+          client_library_url?: parameters["rowFilter.configuration.client_library_url"];
         };
         body: {
           /** configuration */
@@ -449,6 +452,11 @@ export interface definitions {
     max_project_count: number;
     /** Format: bigint */
     max_daily_requests: number;
+    /**
+     * Format: text
+     * @default https://www.npmjs.com/package/@crvouga/screenshot-service
+     */
+    client_library_url: string;
   };
   profiles: {
     /**
@@ -573,6 +581,8 @@ export interface parameters {
   "rowFilter.configuration.max_project_count": string;
   /** Format: bigint */
   "rowFilter.configuration.max_daily_requests": string;
+  /** Format: text */
+  "rowFilter.configuration.client_library_url": string;
   /** @description profiles */
   "body.profiles": definitions["profiles"];
   /** Format: uuid */
