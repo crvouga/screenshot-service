@@ -1,13 +1,14 @@
 import { LoadingButton } from '@mui/lab';
 import {
+  Alert,
   Box,
   Button,
   Card,
   Dialog,
-  DialogActions,
-  DialogTitle,
+  DialogActions, DialogContent, DialogTitle,
+  TextField,
   Typography,
-  useTheme,
+  useTheme
 } from '@mui/material';
 import { Data } from '@screenshot-service/screenshot-service';
 import { useSnackbar } from 'notistack';
@@ -16,10 +17,13 @@ import { useNavigate } from 'react-router-dom';
 import { useDeleteProjectMutation } from '../../../data-access';
 import { routes } from '../../../routes';
 
+
 export const ProjectDeleteSection = ({
   projectId,
+  projectName
 }: {
   projectId: Data.ProjectId.ProjectId;
+  projectName: Data.ProjectName.ProjectName
 }) => {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
@@ -29,8 +33,18 @@ export const ProjectDeleteSection = ({
   const navigate = useNavigate();
   const mutation = useDeleteProjectMutation();
   const snackbar = useSnackbar();
+  const [inputValue, setInputValue] = useState("")
+
+  const verifyPhrase = `delete ${projectName} forever`
+
+  const canDelete = inputValue === verifyPhrase
 
   const onDelete = async () => {
+
+    if (!canDelete) {
+      return
+    }
+
     const result = await mutation.mutateAsync({ projectId });
 
     switch (result.type) {
@@ -68,6 +82,22 @@ export const ProjectDeleteSection = ({
       </Box>
       <Dialog open={open} onClose={onCancel}>
         <DialogTitle>delete project forever?</DialogTitle>
+
+        <DialogContent>
+          <Alert severity="error" sx={{ marginBottom: 2 }}>
+            This action is not reversible. Please be certain.
+          </Alert>
+
+          <Alert severity="warning" sx={{ marginBottom: 2 }}>
+            Deleting will break websites using this project's id.
+          </Alert>
+
+          <Typography color="text.secondary" sx={{ fontWeight: 400 }}>
+            To verify, type "<Box component="span" sx={{ color: "text.primary", fontWeight: 900 }}>{verifyPhrase}</Box>" below:
+          </Typography>
+          <TextField fullWidth onChange={event => setInputValue(event.target.value)} />
+        </DialogContent>
+
         <DialogActions>
           <Button color="inherit" onClick={onCancel}>
             cancel
@@ -77,6 +107,7 @@ export const ProjectDeleteSection = ({
             onClick={onDelete}
             color="error"
             loading={mutation.status === 'loading'}
+            disabled={!canDelete}
           >
             delete forever
           </LoadingButton>

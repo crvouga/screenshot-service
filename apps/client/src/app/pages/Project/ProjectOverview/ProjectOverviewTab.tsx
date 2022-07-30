@@ -30,7 +30,7 @@ export const ProjectOverviewTab = () => {
 
           <ProjectNameSection project={project} />
 
-          <ProjectDeleteSection projectId={project.projectId} />
+          <ProjectDeleteSection projectName={project.projectName} projectId={project.projectId} />
         </Container>
       </Box>
     </Box>

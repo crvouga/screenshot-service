@@ -104,7 +104,7 @@ const ProjectPageWithParams = ({
 
           <ProjectRequestTable projectId={project.projectId} />
 
-          <ProjectDeleteSection projectId={project.projectId} />
+          <ProjectDeleteSection projectName={project.projectName} projectId={project.projectId} />
         </Container>
       </Box>
     </>
