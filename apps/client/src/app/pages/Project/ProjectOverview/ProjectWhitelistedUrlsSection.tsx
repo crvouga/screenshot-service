@@ -42,15 +42,18 @@ export const ProjectWhitelistedUrlsSection = ({
         marginBottom: 4,
       }}
     >
-      <Typography variant="h6" sx={{ mb: 2 }}>
+      <Typography variant="h6">
         whitelisted urls
+      </Typography>
+
+      <Typography color="text.secondary" sx={{ marginBottom: 2 }}>
+        for security reasons, add urls from where you will be making api requests from.
       </Typography>
 
       {whitelistedUrls.length === 0 && (
         <Alert severity="warning">
           <AlertTitle>no whitelisted urls</AlertTitle>
-          you're going to need to add a url to the white list to be able to
-          access the screenshot api
+          this project can not be used by anyone if there is no urls are on the whitelist
         </Alert>
       )}
 

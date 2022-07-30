@@ -76,7 +76,7 @@ export const ProjectRequestTable = ({ projectId }: { projectId: Data.ProjectId.P
   return <Paper sx={{ p: 2, marginBottom: 4 }}>
     <Toolbar disableGutters>
       <Typography variant="h6" sx={{ flex: 1 }}>
-        Requests
+        api requests
       </Typography>
       <Select
         id="order-select"
@@ -91,8 +91,8 @@ export const ProjectRequestTable = ({ projectId }: { projectId: Data.ProjectId.P
           }
         }}
       >
-        <MenuItem value={"OldestFirst"}>{"Oldest First"}</MenuItem>
-        <MenuItem value={"NewestFirst"}>{"Newest First"}</MenuItem>
+        <MenuItem value={"OldestFirst"}>{"oldest first"}</MenuItem>
+        <MenuItem value={"NewestFirst"}>{"newest first"}</MenuItem>
       </Select>
     </Toolbar>
 
