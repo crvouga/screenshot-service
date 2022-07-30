@@ -22,6 +22,8 @@ const Action = CaptureScreenshotRequest.Action;
 
 type ActionMap = InferActionMap<typeof Action>;
 
+const LOG_DELAY = 1000;
+
 //
 //
 //
@@ -211,7 +213,7 @@ const cacheFirstFlow = function* (
         'Failed get from cache. Trying network...'
       )
     );
-    yield delay(1500);
+    yield delay(LOG_DELAY);
 
     yield* networkFirstFlow(clientId, webBrowser, request);
 
@@ -230,7 +232,7 @@ const cacheFirstFlow = function* (
       )
     );
 
-    yield delay(1500);
+    yield delay(LOG_DELAY);
 
     yield* networkFirstFlow(clientId, webBrowser, request);
 
@@ -286,7 +288,9 @@ const networkFirstFlow = function* (
 ) {
   const requestId = request.requestId;
 
-  yield put(Action.Log(clientId, requestId, 'info', 'opening new page...'));
+  yield put(
+    Action.Log(clientId, requestId, 'info', 'opening new browser page...')
+  );
 
   const openPageResult = yield* call(WebBrowser.openNewPage, webBrowser);
 
@@ -297,18 +301,22 @@ const networkFirstFlow = function* (
 
   const page = openPageResult.value;
 
-  yield put(Action.Log(clientId, requestId, 'info', 'going to url...'));
+  yield put(Action.Log(clientId, requestId, 'info', 'loading website...'));
 
   const goToResult = yield* call(WebBrowser.goTo, page, request.targetUrl);
 
   if (goToResult.type === 'Err') {
     yield put(
       Action.Failed(clientId, request.requestId, [
-        { message: `going to url failed. ${goToResult.error.message}` },
+        { message: `going to page failed. ${goToResult.error.message}` },
       ])
     );
     return;
   }
+
+  yield put(Action.Log(clientId, requestId, 'info', 'website loaded'));
+
+  yield delay(LOG_DELAY);
 
   for (let remaining = request.delaySec; remaining > 0; remaining--) {
     yield put(
