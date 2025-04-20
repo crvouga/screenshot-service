@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "engines": {
-    "node": "16.x"
+    "node": "20.x"
   },
   "scripts": {
     "start": "nx serve",
@@ -27,6 +27,8 @@
     "@reduxjs/toolkit": "^1.8.2",
     "@supabase/supabase-js": "^1.35.3",
     "@tanstack/react-query": "^4.0.10",
+    "@trpc/client": "^11.1.0",
+    "@trpc/server": "^11.1.0",
     "constate": "^3.3.2",
     "core-js": "^3.6.5",
     "cors": "^2.8.5",
@@ -45,7 +47,8 @@
     "styled-components": "^5.3.5",
     "tslib": "^2.3.0",
     "typed-redux-saga": "^1.4.0",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "zod": "^3.24.3"
   },
   "devDependencies": {
     "@emotion/babel-plugin": "11.9.2",

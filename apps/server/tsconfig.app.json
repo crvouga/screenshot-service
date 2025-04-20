@@ -6,5 +6,9 @@
     "types": ["node", "express"]
   },
   "exclude": ["jest.config.ts", "**/*.spec.ts", "**/*.test.ts"],
-  "include": ["**/*.ts"]
+  "include": [
+    "**/*.ts",
+    "../../libs/server-trpc/src/lib/trpc-server.ts",
+    "../../libs/server-trpc/src/lib/app-router.ts"
+  ]
 }

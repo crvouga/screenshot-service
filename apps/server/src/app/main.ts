@@ -1,6 +1,7 @@
 import { AnyAction, configureStore, createAction } from '@reduxjs/toolkit';
 import { Socket } from '@screenshot-service/screenshot-service';
-
+import { appRouter } from '@screenshot-service/server-trpc';
+import { createHTTPHandler } from '@trpc/server/adapters/standalone';
 import http from 'http';
 import createSagaMiddleware, { eventChannel } from 'redux-saga';
 import { fork, put, takeEvery } from 'redux-saga/effects';
@@ -170,10 +171,17 @@ const makeSocketChan = (socketServer: SocketServer) =>
 //
 //
 
-const requestListener: http.RequestListener = (_, response) => {
-  response.end(
-    JSON.stringify({ message: 'Hello from screenshot service backend' })
-  );
+const requestListener: http.RequestListener = (req, res) => {
+  if (req.url === '/') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(
+      JSON.stringify({ message: 'Hello from screenshot service backend' })
+    );
+    return;
+  }
+
+  res.writeHead(404);
+  res.end();
 };
 
 export const main = async ({ port }: { port: number }) => {
@@ -187,7 +195,38 @@ export const main = async ({ port }: { port: number }) => {
 
   const webBrowser = await WebBrowser.create();
 
-  const httpServer = http.createServer(requestListener);
+  // Create HTTP server
+  const httpServer = http.createServer();
+
+  // Set up tRPC handler
+
+  const trpcHandler = createHTTPHandler({
+    router: appRouter,
+  });
+
+  // Handle requests
+  httpServer.on('request', (req, res) => {
+    // Handle tRPC requests
+    if (req.url?.startsWith('/trpc')) {
+      // Set CORS headers for tRPC
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Request-Method', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST');
+      res.setHeader('Access-Control-Allow-Headers', '*');
+
+      // Handle preflight requests
+      if (req.method === 'OPTIONS') {
+        res.writeHead(200);
+        res.end();
+        return;
+      }
+
+      return trpcHandler(req, res);
+    }
+
+    // Handle other requests
+    requestListener(req, res);
+  });
 
   const socketServer: SocketServer = new socket.Server(httpServer, {
     cors: {
@@ -200,6 +239,7 @@ export const main = async ({ port }: { port: number }) => {
 
   httpServer.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}/`);
+    console.log(`tRPC available at http://localhost:${port}/trpc`);
   });
 
   process.once('exit', () => {
