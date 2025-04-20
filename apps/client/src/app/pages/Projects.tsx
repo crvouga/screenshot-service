@@ -9,7 +9,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { useAuthUser } from '../authentication';
+import { useAuthUser } from '../authentication/use-auth-state';
 import { CreateProjectCallToAction } from '../components/CreateProjectCallToAction';
 import { Header } from '../components/Header';
 import { useConfigurationContext, useProjectsQuery } from '../data-access';

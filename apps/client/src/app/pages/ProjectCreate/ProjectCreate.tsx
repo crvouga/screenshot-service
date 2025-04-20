@@ -14,7 +14,7 @@ import { Data } from '@screenshot-service/screenshot-service';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthUser } from '../../authentication';
+import { useAuthUser } from '../../authentication/use-auth-state';
 import { useCreateProjectMutation } from '../../data-access';
 import { routes } from '../../routes';
 
@@ -71,9 +71,6 @@ export const ProjectsCreatePage = () => {
           sx={{ marginY: 2 }}
         />
 
-
-
-
         <LoadingButton
           startIcon={<Create />}
           fullWidth
@@ -89,7 +86,9 @@ export const ProjectsCreatePage = () => {
           <Box>
             {mutation.data?.type === 'Err' && (
               <Alert severity="error" sx={{ marginBottom: 2 }}>
-                {mutation.data.error.map(problem => problem.message).join(", ")}
+                {mutation.data.error
+                  .map((problem) => problem.message)
+                  .join(', ')}
               </Alert>
             )}
           </Box>

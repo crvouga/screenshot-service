@@ -1,8 +1,17 @@
 import { Box } from '@mui/material';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { AuthUserContext, useAuthState, useAuthUser } from './authentication';
+import {
+  AuthUserContext,
+  useAuthState,
+  useAuthUser,
+} from './authentication/use-auth-state';
 import { BrandedLoadingPage } from './components/Loading';
-import { ConfigurationContext, ProfileContext, useProfileQuery, useQueryConfiguration } from './data-access';
+import {
+  ConfigurationContext,
+  ProfileContext,
+  useProfileQuery,
+  useQueryConfiguration,
+} from './data-access';
 import { AccountPage } from './pages/Account';
 import { AccountCreatePage } from './pages/AccountCreate';
 import { CaptureScreenshotFormDrawer } from './pages/CaptureScreenshot';
@@ -11,7 +20,7 @@ import { LogoutPage } from './pages/Logout';
 import {
   ProjectOverviewTab,
   ProjectPage,
-  ProjectUsageTab
+  ProjectUsageTab,
 } from './pages/Project';
 import { ProjectsCreatePage } from './pages/ProjectCreate';
 import { ProjectsPage } from './pages/Projects';
@@ -62,7 +71,7 @@ const LoadingAuth = () => {
 };
 
 const LoadingConfiguration = () => {
-  const query = useQueryConfiguration()
+  const query = useQueryConfiguration();
 
   switch (query.status) {
     case 'error':
@@ -76,23 +85,25 @@ const LoadingConfiguration = () => {
 
       switch (result.type) {
         case 'Err':
-          return <Box>
-            {result.error.map(problem => problem.message).join(", ")}
-          </Box>
+          return (
+            <Box>
+              {result.error.map((problem) => problem.message).join(', ')}
+            </Box>
+          );
 
         case 'Ok': {
-          const configuration = result.value
+          const configuration = result.value;
 
           return (
             <ConfigurationContext configuration={configuration}>
               <LoadingProfile />
             </ConfigurationContext>
-          )
+          );
         }
       }
     }
   }
-}
+};
 
 const LoadingProfile = () => {
   const authUser = useAuthUser();
@@ -110,19 +121,21 @@ const LoadingProfile = () => {
 
       switch (result.type) {
         case 'Err':
-          return <Box>
-            {result.error.map(problem => problem.message).join(", ")}
-          </Box>
+          return (
+            <Box>
+              {result.error.map((problem) => problem.message).join(', ')}
+            </Box>
+          );
 
         case 'Ok': {
-          const profile = result.value
+          const profile = result.value;
 
           if (profile) {
             return (
               <ProfileContext profile={profile}>
                 <Loaded />
               </ProfileContext>
-            )
+            );
           }
 
           return (

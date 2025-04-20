@@ -1,18 +1,19 @@
 import {
   Alert,
   AlertTitle,
-  Box, CircularProgress,
+  Box,
+  CircularProgress,
   InputAdornment,
   ListItemText,
   MenuItem,
   Select,
   SelectProps,
-  Typography
+  Typography,
 } from '@mui/material';
 import { Data } from '@screenshot-service/screenshot-service';
 import { useEffect } from 'react';
 import { appEventEmitter } from '../../app-event-emitter';
-import { useAuthUser } from '../../authentication';
+import { useAuthUser } from '../../authentication/use-auth-state';
 import { CreateProjectCallToAction } from '../../components/CreateProjectCallToAction';
 import { Project, useProjectsQuery } from '../../data-access';
 
@@ -54,7 +55,16 @@ export const ProjectInput = ({
           const projects = query.data.value;
 
           if (projects.length === 0) {
-            return <CreateProjectCallToAction onClickLink={() => appEventEmitter.emit("ToggleCaptureScreenshotFormDrawer", 'closed')} />;
+            return (
+              <CreateProjectCallToAction
+                onClickLink={() =>
+                  appEventEmitter.emit(
+                    'ToggleCaptureScreenshotFormDrawer',
+                    'closed'
+                  )
+                }
+              />
+            );
           }
 
           return (
@@ -120,8 +130,6 @@ const Loaded = ({
     </Box>
   );
 };
-
-
 
 const Err = ({ message }: { message: string }) => {
   return (

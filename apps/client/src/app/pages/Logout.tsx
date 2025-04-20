@@ -1,6 +1,6 @@
 import { Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { supabaseClient } from '../supabase-client';
+import { authApi } from '../authentication/auth-api/impl';
 
 export const LogoutPage = () => {
   const navigate = useNavigate();
@@ -10,7 +10,7 @@ export const LogoutPage = () => {
   };
 
   const onLogout = () => {
-    supabaseClient.auth.signOut();
+    authApi.logout();
   };
 
   return (

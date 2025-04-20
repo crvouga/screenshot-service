@@ -3,21 +3,22 @@ import {
   Avatar,
   Button,
   Container,
-  TextField, Toolbar,
-  Typography
+  TextField,
+  Toolbar,
+  Typography,
 } from '@mui/material';
 import { Box } from '@mui/system';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 import { useEffect, useState } from 'react';
-import { useAuthUser } from '../authentication';
+import { useAuthUser } from '../authentication/use-auth-state';
 import { profileQueryFilter, useCreateProfileMutation } from '../data-access';
 import * as ProfileAvatar from '../profile-avatar';
 import { Link, routes } from '../routes';
 import {
   ThemeMode,
   ThemeModeToggleButtonGroup,
-  useThemeModeContext
+  useThemeModeContext,
 } from '../theme';
 
 export const AccountCreatePage = () => {

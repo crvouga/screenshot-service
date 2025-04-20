@@ -2,7 +2,7 @@ import { CameraAlt, Google } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import { Box, Container, Typography } from '@mui/material';
 import { useState } from 'react';
-import { supabaseClient } from '../supabase-client';
+import { authApi } from '../authentication/auth-api/impl';
 
 type IState = { type: 'Loading' } | { type: 'Idle' };
 
@@ -14,7 +14,7 @@ export const LoginPage = () => {
 
     const redirectTo = window.location.origin;
 
-    await supabaseClient.auth.signIn({ provider: 'google' }, { redirectTo });
+    await authApi.loginWithGoogle({ redirectTo });
   };
 
   return (

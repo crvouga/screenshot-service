@@ -2,7 +2,7 @@ import { LoadingButton } from '@mui/lab';
 import { Alert, Box, Collapse } from '@mui/material';
 import { Data } from '@screenshot-service/screenshot-service';
 import { useSnackbar } from 'notistack';
-import { useAuthUser } from '../../authentication';
+import { useAuthUser } from '../../authentication/use-auth-state';
 import { useProjectsQuery, useUpdateProjectMutation } from '../../data-access';
 
 export const NotOnWhitelistAlert = ({
@@ -17,8 +17,8 @@ export const NotOnWhitelistAlert = ({
     query.status !== 'success'
       ? []
       : query.data.type === 'Err'
-        ? []
-        : query.data.value;
+      ? []
+      : query.data.value;
 
   const currentProject = projects.find(
     (project) => project.projectId === projectId
