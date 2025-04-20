@@ -8,3 +8,7 @@ export const is = (value: unknown): value is UserId => Uuid.is(value);
 export const decode = makeDecode(is, () => ({
   message: 'failed to decode user id',
 }));
+
+export const generate = (): UserId => {
+  return Uuid.generate() as UserId;
+};
