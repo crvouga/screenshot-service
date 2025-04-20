@@ -1,11 +1,11 @@
 import { Data } from '@screenshot-service/screenshot-service';
 import * as Shared from '@screenshot-service/shared';
+import { Configuration } from '@screenshot-service/shared';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import constate from 'constate';
 import { useEffect } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { appEventEmitter } from './app-event-emitter';
-import { supabaseClient } from './supabase';
-import { Configuration } from '@screenshot-service/shared';
+import { supabaseClient } from './supabase-client';
 
 //
 //
@@ -15,7 +15,8 @@ import { Configuration } from '@screenshot-service/shared';
 //
 //
 
-export const dataAccess = Shared.DataAccess(supabaseClient);
+export const dataAccess: Shared.IDataAccess =
+  Shared.SupabaseDataAccess(supabaseClient);
 
 //
 //

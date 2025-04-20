@@ -6,7 +6,7 @@ import {
   CardActionArea,
   CircularProgress,
   Container,
-  Typography
+  Typography,
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useAuthUser } from '../authentication';
@@ -16,7 +16,7 @@ import { useConfigurationContext, useProjectsQuery } from '../data-access';
 import { routes } from '../routes';
 
 export const ProjectsPage = () => {
-  const { configuration } = useConfigurationContext()
+  const { configuration } = useConfigurationContext();
   const authUser = useAuthUser();
   const query = useProjectsQuery({ ownerId: authUser.userId });
 
@@ -43,15 +43,21 @@ export const ProjectsPage = () => {
 
           {query.data.value.length > 0 && (
             <Container sx={{ mt: 2 }} maxWidth="sm">
-              <Box sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
-                <Link style={{ display: "flex", alignItems: "center" }} to={routes['/projects/create'].make()}>
+              <Box
+                sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}
+              >
+                <Link
+                  style={{ display: 'flex', alignItems: 'center' }}
+                  to={routes['/projects/create'].make()}
+                >
                   <Button startIcon={<Create />} variant="contained">
                     Create New
                   </Button>
                 </Link>
                 <Box sx={{ flex: 1 }} />
                 <Typography color="text.secondary">
-                  {query.data.value.length} / {configuration.maxProjectCount} projects
+                  {query.data.value.length} / {configuration.maxProjectCount}{' '}
+                  projects
                 </Typography>
               </Box>
 

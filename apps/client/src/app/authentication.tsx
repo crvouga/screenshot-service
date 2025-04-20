@@ -2,7 +2,7 @@ import { Data } from '@screenshot-service/screenshot-service';
 import { Session } from '@supabase/supabase-js';
 import constate from 'constate';
 import { useEffect, useState } from 'react';
-import { supabaseClient } from './supabase';
+import { supabaseClient } from './supabase-client';
 
 type IAuthState =
   | { type: 'Loading' }

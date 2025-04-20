@@ -114,7 +114,7 @@ export const saga = function* ({
 const makeSocketChan = (socket: Socket.Instance) => {
   return eventChannel<AnyAction>((emit) => {
     socket.on('connect', () => {
-      emit(Action.Connected(socket.id));
+      emit(Action.Connected(socket.id ?? ''));
     });
 
     socket.on('disconnect', () => {

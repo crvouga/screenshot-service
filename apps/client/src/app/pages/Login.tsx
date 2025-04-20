@@ -2,7 +2,7 @@ import { CameraAlt, Google } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import { Box, Container, Typography } from '@mui/material';
 import { useState } from 'react';
-import { supabaseClient } from '../supabase';
+import { supabaseClient } from '../supabase-client';
 
 type IState = { type: 'Loading' } | { type: 'Idle' };
 

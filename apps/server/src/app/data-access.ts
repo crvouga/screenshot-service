@@ -1,28 +1,5 @@
-import { DataAccess } from '@screenshot-service/shared';
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
+import * as Shared from '@screenshot-service/shared';
+import { supabaseClient } from './supabase-client';
 
-dotenv.config();
-
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error('process.env.SUPABASE_SERVICE_ROLE_KEY is undefined');
-}
-
-if (!SUPABASE_URL) {
-  throw new Error('process.env.SUPABASE_URL is undefined');
-}
-
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-//
-//
-//
-// Data Access
-//
-//
-//
-
-export const dataAccess = DataAccess(supabaseClient);
+export const dataAccess: Shared.IDataAccess =
+  Shared.SupabaseDataAccess(supabaseClient);

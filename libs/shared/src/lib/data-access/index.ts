@@ -1,10 +1,7 @@
-export * from './data-access';
-export type { Profile } from './profiles';
-export type { Project } from './projects';
-export type { Configuration } from './configuration';
-export type {
-  CaptureScreenshotRequest,
-  FinalStatus,
-  Status,
-  InitialStatus,
-} from './capture-screenshot-request';
+export * from './capture-screenshot-request/interface';
+export * from './configuration/interface';
+export * from './data-access/impl-supabase';
+export * from './data-access/interface';
+export * from './profiles/interface';
+export * from './projects/interface';
+export * from './shared';

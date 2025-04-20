@@ -1,6 +1,6 @@
 import { Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { supabaseClient } from '../supabase';
+import { supabaseClient } from '../supabase-client';
 
 export const LogoutPage = () => {
   const navigate = useNavigate();
