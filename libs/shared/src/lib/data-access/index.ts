@@ -6,3 +6,4 @@ export * from './data-access/interface';
 export * from './profiles/interface';
 export * from './projects/interface';
 export * from './shared';
+export * from './screenshot-storage';

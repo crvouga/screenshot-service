@@ -1,12 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { appRouter } from '@screenshot-service/server-trpc';
+import {
+  appRouter,
+  captureScreenshotRequestRouterExpress,
+} from '@screenshot-service/server-trpc';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import cors from 'cors';
 import express from 'express';
+import bodyParser from 'body-parser';
 import createSagaMiddleware from 'redux-saga';
 import socketIo from 'socket.io';
 import { initialState, saga, SocketServer } from './app/app';
-import { dataAccess } from './app/data-access';
 import * as WebBrowser from './app/web-browser';
 import { getPort } from './port';
 
@@ -29,6 +32,10 @@ const main = async () => {
     console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
     next();
   });
+
+  // Add body parser middleware
+  app.use(bodyParser.json({ limit: '50mb' }));
+  app.use(bodyParser.urlencoded({ extended: true }));
 
   app.use(
     cors({
@@ -56,12 +63,14 @@ const main = async () => {
     '/trpc',
     createExpressMiddleware({
       router: appRouter,
-      createContext: () => ({ dataAccess }),
+      createContext: (input) => ({ req: input.req }),
       onError: ({ path, error }) => {
         console.error('tRPC error on path:', path, error);
       },
     })
   );
+
+  captureScreenshotRequestRouterExpress(app);
 
   app.get('/', (req, res) => {
     console.log('Received request to root endpoint');

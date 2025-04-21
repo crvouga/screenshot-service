@@ -1,9 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { z } from 'zod';
-import { publicProcedure, router } from './trpc-server';
 import { Data } from '@screenshot-service/screenshot-service';
+import { Express } from 'express';
+import { z } from 'zod';
 import { FileSystemMap } from './file-system-map';
+import { publicProcedure, router } from './trpc-server';
+import fs from 'fs';
+import path from 'path';
+import formidable from 'formidable';
 
 export type CaptureScreenshotRequest = {
   createdAt: string;
@@ -28,11 +30,10 @@ export type FinalStatus =
   | 'Succeeded_Network';
 
 // In-memory storage using hash maps
-const screenshotRequests = new FileSystemMap<string, CaptureScreenshotRequest>(
-  './data',
-  'screenshot-requests'
-);
-const screenshotBuffers = new Map<string, unknown>();
+export const screenshotRequests = new FileSystemMap<
+  string,
+  CaptureScreenshotRequest
+>('./data', 'screenshot-requests');
 
 // Zod schemas for validation
 const requestIdSchema = z.string().refine((val) => Data.RequestId.is(val), {
@@ -58,6 +59,106 @@ const urlSchema = z
 const strategySchema = z.string().refine((val) => Data.Strategy.is(val), {
   message: 'Invalid Strategy value',
 });
+
+export const toFilename = ({
+  imageType,
+  requestId,
+  projectId,
+}: {
+  imageType: Data.ImageType.ImageType;
+  requestId: Data.RequestId.RequestId;
+  projectId: Data.ProjectId.ProjectId;
+}) => {
+  return `${projectId}/${requestId}.${imageType}`;
+};
+
+export const BUCKET_NAME = `screenshots`;
+
+// Helper function to get screenshot file path
+const getScreenshotPath = (
+  projectId: string,
+  requestId: string,
+  imageType: string
+) => {
+  const dir = path.join('./data', BUCKET_NAME, projectId);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  return path.join(dir, `${requestId}.${imageType.toLowerCase()}`);
+};
+
+export const captureScreenshotRequestRouterExpress = (app: Express) => {
+  // Upload screenshot endpoint
+  app.post('/api/screenshots/upload', async (req, res) => {
+    try {
+      if (!req.is('multipart/form-data')) {
+        return res
+          .status(400)
+          .json({ error: 'Content-Type must be multipart/form-data' });
+      }
+
+      const form = formidable({});
+      const [fields, files] = await form.parse(req);
+
+      const requestId = fields.requestId?.[0];
+      const buffer = files.buffer?.[0];
+
+      if (!requestId || !buffer) {
+        return res.status(400).json({ error: 'Missing requestId or buffer' });
+      }
+
+      // Get the request to get projectId and imageType
+      const request = screenshotRequests.get(requestId);
+      if (!request) {
+        return res
+          .status(404)
+          .json({ error: `Request ${requestId} not found` });
+      }
+
+      // Save the screenshot to filesystem
+      const filePath = getScreenshotPath(
+        request.projectId,
+        request.requestId,
+        request.imageType
+      );
+      fs.writeFileSync(filePath, fs.readFileSync(buffer.filepath));
+
+      console.log(
+        `uploadScreenshot: Successfully stored screenshot for ${requestId} at ${filePath}`
+      );
+      return res.json({ success: true });
+    } catch (error) {
+      console.error('Error uploading screenshot:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Serve screenshot files from filesystem
+  app.get('/api/screenshots/:projectId/:filename', (req, res) => {
+    const { projectId, filename } = req.params;
+    const filePath = path.join('./data', BUCKET_NAME, projectId, filename);
+
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      console.log(`Screenshot not found: ${filePath}`);
+      return res.status(404).send('Screenshot not found');
+    }
+
+    // Determine content type based on file extension
+    const extension = path.extname(filename).toLowerCase();
+    let contentType = 'image/png'; // default
+    if (extension === '.jpg' || extension === '.jpeg') {
+      contentType = 'image/jpeg';
+    } else if (extension === '.webp') {
+      contentType = 'image/webp';
+    }
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+    fs.createReadStream(filePath).pipe(res);
+    return;
+  });
+};
 
 export const captureScreenshotRequestRouter = router({
   insertNew: publicProcedure
@@ -128,25 +229,6 @@ export const captureScreenshotRequestRouter = router({
       return;
     }),
 
-  uploadScreenshot: publicProcedure
-    .input(
-      z.object({
-        requestId: requestIdSchema,
-        buffer: z.unknown(),
-      })
-    )
-    .mutation(async ({ input }) => {
-      console.log(
-        `uploadScreenshot: Uploading screenshot for request ${input.requestId}`
-      );
-      // Store the screenshot buffer in our hash map
-      screenshotBuffers.set(input.requestId, input.buffer);
-      console.log(
-        `uploadScreenshot: Successfully stored screenshot for ${input.requestId}`
-      );
-      return { success: true };
-    }),
-
   findSucceededRequest: publicProcedure
     .input(
       z.object({
@@ -161,7 +243,7 @@ export const captureScreenshotRequestRouter = router({
         `findSucceededRequest: Searching for succeeded request with targetUrl ${input.targetUrl}`
       );
       // Find a succeeded request from our hash map
-      for (const [_, request] of screenshotRequests.entries()) {
+      for (const request of screenshotRequests.values()) {
         if (
           request.targetUrl === input.targetUrl &&
           request.delaySec === input.delaySec &&
@@ -224,16 +306,27 @@ export const captureScreenshotRequestRouter = router({
 
   getPublicUrl: publicProcedure
     .input(
-      z
-        .object({
-          requestId: requestIdSchema.optional(),
-          imageType: imageTypeSchema.optional(),
-          projectId: projectIdSchema.optional(),
-        })
-        .optional()
+      z.object({
+        requestId: requestIdSchema,
+        imageType: imageTypeSchema,
+        projectId: projectIdSchema,
+      })
     )
-    .query(async ({ input }) => {
-      return 'https://example.com/screenshots';
+    .query(async ({ input, ctx }) => {
+      const filename = toFilename({
+        projectId: Data.Result.unwrap(Data.ProjectId.decode(input.projectId)),
+        requestId: Data.Result.unwrap(Data.RequestId.decode(input.requestId)),
+        imageType: Data.Result.unwrap(Data.ImageType.decode(input.imageType)),
+      });
+
+      // Get the origin from the request headers
+      const origin = ctx.req?.headers.origin || ctx.req?.headers.host;
+      if (!origin) {
+        throw new Error('Could not determine request origin');
+      }
+
+      const baseUrl = `http://${origin}`;
+      return `${baseUrl}/api/screenshots/${filename}`;
     }),
 
   findMany: publicProcedure

@@ -53,17 +53,42 @@ export const TrpcClientCaptureScreenshotRequestDataAccess =
 
       uploadScreenshot: async ({ requestId }, buffer) => {
         try {
-          await trpcClient.captureScreenshotRequest.uploadScreenshot.mutate({
-            requestId,
-            buffer,
-          });
-          const got = await trpcClient.captureScreenshotRequest.findOne.query({
-            requestId,
-          });
-          if (!got) {
+          // Get the request first to ensure it exists
+          const request =
+            await trpcClient.captureScreenshotRequest.findOne.query({
+              requestId,
+            });
+          if (!request) {
             return Data.Result.Err([{ message: 'Request not found' }]);
           }
-          return Data.Result.Ok(got);
+
+          // Get the base URL from the server
+          const baseUrl = await trpcClient.getBaseUrl.query();
+          if (!baseUrl) {
+            return Data.Result.Err([
+              { message: 'Could not determine base URL' },
+            ]);
+          }
+
+          // Create FormData and append the buffer
+          const formData = new FormData();
+          formData.append('requestId', requestId);
+          formData.append('buffer', new Blob([buffer]));
+
+          // Upload the screenshot using the Express route
+          const response = await fetch(`${baseUrl}/api/screenshots/upload`, {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            return Data.Result.Err([
+              { message: error.error || 'Upload failed' },
+            ]);
+          }
+
+          return Data.Result.Ok(request);
         } catch (error) {
           return Data.Result.Err([
             {
