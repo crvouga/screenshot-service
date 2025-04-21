@@ -4,7 +4,7 @@ import {
 } from '@screenshot-service/screenshot-service';
 import { delay, takeEvery, fork, put, race, take } from 'redux-saga/effects';
 import { call } from 'typed-redux-saga';
-import { takeClientDisconnected } from './main';
+import { takeClientDisconnected } from './app';
 import { dataAccess } from './data-access';
 import { InferActionMap } from './utils';
 import * as WebBrowser from './web-browser';

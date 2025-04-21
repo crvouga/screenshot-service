@@ -1,12 +1,12 @@
 import { Data } from '@screenshot-service/screenshot-service';
-import { trpc } from '../../trpc-client';
+import { trpcClient } from '../../trpc-client';
 import { IProfileDataAccess } from './interface';
 
 export const TrpcClientProfileDataAccess = (): IProfileDataAccess => {
   return {
     findOne: async ({ userId }) => {
       try {
-        const profile = await trpc.profile.findOne.query({ userId });
+        const profile = await trpcClient.profile.findOne.query({ userId });
 
         if (!profile) {
           return Data.Result.Ok(null);
@@ -22,7 +22,7 @@ export const TrpcClientProfileDataAccess = (): IProfileDataAccess => {
 
     deleteForever: async ({ userId }) => {
       try {
-        await trpc.profile.deleteForever.mutate({ userId });
+        await trpcClient.profile.deleteForever.mutate({ userId });
         return Data.Result.Ok(Data.Unit);
       } catch (error) {
         return Data.Result.Err({
@@ -33,7 +33,7 @@ export const TrpcClientProfileDataAccess = (): IProfileDataAccess => {
 
     create: async ({ userId, name, avatarSeed, themeMode }) => {
       try {
-        const result = await trpc.profile.create.mutate({
+        const result = await trpcClient.profile.create.mutate({
           userId,
           name,
           avatarSeed,
@@ -50,7 +50,7 @@ export const TrpcClientProfileDataAccess = (): IProfileDataAccess => {
 
     update: async ({ userId, ...updates }) => {
       try {
-        await trpc.profile.update.mutate({
+        await trpcClient.profile.update.mutate({
           userId,
           name: updates.name,
           avatarSeed: updates.avatarSeed,

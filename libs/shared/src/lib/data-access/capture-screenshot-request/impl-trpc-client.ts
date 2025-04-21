@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Data } from '@screenshot-service/screenshot-service';
-import { trpc } from '../../trpc-client';
+import { trpcClient } from '../../trpc-client';
 import { ICaptureScreenshotRequestDataAccess } from './interface';
 
 export const TrpcClientCaptureScreenshotRequestDataAccess =
@@ -16,15 +16,16 @@ export const TrpcClientCaptureScreenshotRequestDataAccess =
         strategy,
       }) => {
         try {
-          const result = await trpc.captureScreenshotRequest.insertNew.mutate({
-            requestId,
-            targetUrl,
-            projectId,
-            imageType,
-            delaySec,
-            originUrl,
-            strategy,
-          });
+          const result =
+            await trpcClient.captureScreenshotRequest.insertNew.mutate({
+              requestId,
+              targetUrl,
+              projectId,
+              imageType,
+              delaySec,
+              originUrl,
+              strategy,
+            });
           return Data.Result.Ok(result);
         } catch (error) {
           return Data.Result.Err([
@@ -37,7 +38,7 @@ export const TrpcClientCaptureScreenshotRequestDataAccess =
 
       updateStatus: async ({ requestId, status }) => {
         try {
-          await trpc.captureScreenshotRequest.updateStatus.mutate({
+          await trpcClient.captureScreenshotRequest.updateStatus.mutate({
             requestId,
             status,
           });
@@ -52,7 +53,7 @@ export const TrpcClientCaptureScreenshotRequestDataAccess =
       uploadScreenshot: async ({ requestId }, buffer) => {
         try {
           const result =
-            await trpc.captureScreenshotRequest.uploadScreenshot.mutate({
+            await trpcClient.captureScreenshotRequest.uploadScreenshot.mutate({
               requestId,
               buffer,
             });
@@ -74,12 +75,14 @@ export const TrpcClientCaptureScreenshotRequestDataAccess =
       }) => {
         try {
           const result =
-            await trpc.captureScreenshotRequest.findSucceededRequest.query({
-              targetUrl,
-              delaySec,
-              projectId,
-              imageType,
-            });
+            await trpcClient.captureScreenshotRequest.findSucceededRequest.query(
+              {
+                targetUrl,
+                delaySec,
+                projectId,
+                imageType,
+              }
+            );
           return Data.Result.Ok(
             result
               ? Data.Maybe.Just(result as unknown as any)
@@ -105,7 +108,7 @@ export const TrpcClientCaptureScreenshotRequestDataAccess =
       }) => {
         try {
           const result =
-            await trpc.captureScreenshotRequest.findOneElseInsert.mutate({
+            await trpcClient.captureScreenshotRequest.findOneElseInsert.mutate({
               requestId,
               targetUrl,
               projectId,
@@ -127,7 +130,7 @@ export const TrpcClientCaptureScreenshotRequestDataAccess =
       getPublicUrl: async ({ requestId, imageType, projectId }) => {
         try {
           const publicUrl =
-            await trpc.captureScreenshotRequest.getPublicUrl.query({
+            await trpcClient.captureScreenshotRequest.getPublicUrl.query({
               requestId,
               imageType,
               projectId,
@@ -144,17 +147,18 @@ export const TrpcClientCaptureScreenshotRequestDataAccess =
 
       findMany: async ({ projectId, order, pageSize, page }) => {
         try {
-          const results = await trpc.captureScreenshotRequest.findMany.query({
-            projectId,
-            order: order
-              ? {
-                  column: 'createdAt',
-                  direction: order === 'OldestFirst' ? 'asc' : 'desc',
-                }
-              : undefined,
-            pageSize,
-            page,
-          });
+          const results =
+            await trpcClient.captureScreenshotRequest.findMany.query({
+              projectId,
+              order: order
+                ? {
+                    column: 'createdAt',
+                    direction: order === 'OldestFirst' ? 'asc' : 'desc',
+                  }
+                : undefined,
+              pageSize,
+              page,
+            });
           return Data.Result.Ok(results.data as unknown as any[]);
         } catch (error) {
           return Data.Result.Err([
@@ -168,10 +172,12 @@ export const TrpcClientCaptureScreenshotRequestDataAccess =
       countCreatedBetween: async ({ dateRange, projectId }) => {
         try {
           const count =
-            await trpc.captureScreenshotRequest.countCreatedBetween.query({
-              dateRange,
-              projectId,
-            });
+            await trpcClient.captureScreenshotRequest.countCreatedBetween.query(
+              {
+                dateRange,
+                projectId,
+              }
+            );
           return Data.Result.Ok(count);
         } catch (error) {
           return Data.Result.Err([
@@ -184,9 +190,10 @@ export const TrpcClientCaptureScreenshotRequestDataAccess =
 
       countAll: async ({ projectId }) => {
         try {
-          const count = await trpc.captureScreenshotRequest.countAll.query({
-            projectId,
-          });
+          const count =
+            await trpcClient.captureScreenshotRequest.countAll.query({
+              projectId,
+            });
           return Data.Result.Ok(count);
         } catch (error) {
           return Data.Result.Err([

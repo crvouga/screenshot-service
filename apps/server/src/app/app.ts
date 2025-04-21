@@ -1,9 +1,6 @@
-import { AnyAction, configureStore, createAction } from '@reduxjs/toolkit';
+import { AnyAction, createAction } from '@reduxjs/toolkit';
 import { Socket } from '@screenshot-service/screenshot-service';
-import { appRouter } from '@screenshot-service/server-trpc';
-import { createHTTPHandler } from '@trpc/server/adapters/standalone';
-import http from 'http';
-import createSagaMiddleware, { eventChannel } from 'redux-saga';
+import { eventChannel } from 'redux-saga';
 import { fork, put, takeEvery } from 'redux-saga/effects';
 import socket from 'socket.io';
 import { take } from 'typed-redux-saga';
@@ -13,7 +10,7 @@ import * as WebBrowser from './web-browser';
 
 type State = null;
 
-const initialState: State = null;
+export const initialState: State = null;
 
 //
 //
@@ -163,96 +160,7 @@ const makeSocketChan = (socketServer: SocketServer) =>
     };
   });
 
-//
-//
-//
-// Main
-//
-//
-//
-
-const requestListener: http.RequestListener = (req, res) => {
-  if (req.url === '/') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(
-      JSON.stringify({ message: 'Hello from screenshot service backend' })
-    );
-    return;
-  }
-
-  res.writeHead(404);
-  res.end();
-};
-
-export const main = async ({ port }: { port: number }) => {
-  const sagaMiddleware = createSagaMiddleware();
-
-  const store = configureStore({
-    preloadedState: initialState,
-    reducer: (state) => state,
-    middleware: [sagaMiddleware],
-  });
-
-  const webBrowser = await WebBrowser.create();
-
-  // Create HTTP server
-  const httpServer = http.createServer();
-
-  // Set up tRPC handler
-
-  const trpcHandler = createHTTPHandler({
-    router: appRouter,
-  });
-
-  // Handle requests
-  httpServer.on('request', (req, res) => {
-    // Handle tRPC requests
-    if (req.url?.startsWith('/trpc')) {
-      // Set CORS headers for tRPC
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Access-Control-Request-Method', '*');
-      res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST');
-      res.setHeader('Access-Control-Allow-Headers', '*');
-
-      // Handle preflight requests
-      if (req.method === 'OPTIONS') {
-        res.writeHead(200);
-        res.end();
-        return;
-      }
-
-      return trpcHandler(req, res);
-    }
-
-    // Handle other requests
-    requestListener(req, res);
-  });
-
-  const socketServer: SocketServer = new socket.Server(httpServer, {
-    cors: {
-      origin: '*',
-      methods: ['GET', 'POST'],
-    },
-  });
-
-  sagaMiddleware.run(saga, { webBrowser, socketServer });
-
-  httpServer.listen(port, () => {
-    console.log(`Server listening at http://localhost:${port}/`);
-    console.log(`tRPC available at http://localhost:${port}/trpc`);
-  });
-
-  process.once('exit', () => {
-    console.log('closing server and web browser');
-    webBrowser.close();
-    socketServer.close();
-    httpServer.close();
-  });
-
-  return store;
-};
-
-type SocketServer = socket.Server<
+export type SocketServer = socket.Server<
   Socket.ClientToServerEvents,
   Socket.ServerToClientEvents
 >;

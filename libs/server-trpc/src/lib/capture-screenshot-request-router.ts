@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { z } from 'zod';
 import { publicProcedure, router } from './trpc-server';
@@ -27,7 +28,7 @@ export type FinalStatus =
 
 // In-memory storage using hash maps
 const screenshotRequests = new Map<string, CaptureScreenshotRequest>();
-const screenshotBuffers = new Map<string, Buffer>();
+const screenshotBuffers = new Map<string, any>();
 
 export const captureScreenshotRequestRouter = router({
   insertNew: publicProcedure

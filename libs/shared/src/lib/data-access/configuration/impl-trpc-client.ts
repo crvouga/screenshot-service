@@ -1,5 +1,5 @@
 import { Data } from '@screenshot-service/screenshot-service';
-import { trpc } from '../../trpc-client';
+import { trpcClient } from '../../trpc-client';
 import { IConfigurationDataAccess } from './interface';
 
 export const TrpcClientConfigurationDataAccess =
@@ -7,7 +7,7 @@ export const TrpcClientConfigurationDataAccess =
     return {
       findOne: async () => {
         try {
-          const configuration = await trpc.configuration.findOne.query();
+          const configuration = await trpcClient.configuration.findOne.query();
           return Data.Result.Ok(configuration);
         } catch (error) {
           return Data.Result.Err([

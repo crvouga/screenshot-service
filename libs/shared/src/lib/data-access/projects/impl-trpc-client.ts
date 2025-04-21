@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Data } from '@screenshot-service/screenshot-service';
-import { trpc } from '../../trpc-client';
+import { trpcClient } from '../../trpc-client';
 import { IProjectDataAccess } from './interface';
 
 export const TrpcClientProjectDataAccess = (): IProjectDataAccess => {
   return {
     findManyOwnerId: async ({ ownerId }) => {
       try {
-        const projects = await trpc.project.findMany.query({ ownerId });
+        const projects = await trpcClient.project.findMany.query({ ownerId });
         return Data.Result.Ok(projects);
       } catch (error) {
         return Data.Result.Err([
@@ -20,7 +20,9 @@ export const TrpcClientProjectDataAccess = (): IProjectDataAccess => {
 
     findManyById: async ({ projectId }) => {
       try {
-        const projects = await trpc.project.findManyById.query({ projectId });
+        const projects = await trpcClient.project.findManyById.query({
+          projectId,
+        });
         return Data.Result.Ok(projects);
       } catch (error) {
         return Data.Result.Err([
@@ -33,7 +35,7 @@ export const TrpcClientProjectDataAccess = (): IProjectDataAccess => {
 
     deleteForever: async ({ projectId }) => {
       try {
-        const project = await trpc.project.delete.mutate({ projectId });
+        const project = await trpcClient.project.delete.mutate({ projectId });
         return Data.Result.Ok(project);
       } catch (error) {
         return Data.Result.Err([
@@ -46,7 +48,7 @@ export const TrpcClientProjectDataAccess = (): IProjectDataAccess => {
 
     insert: async ({ ownerId, projectName, whilelistedUrls }) => {
       try {
-        const project = await trpc.project.create.mutate({
+        const project = await trpcClient.project.create.mutate({
           ownerId,
           projectName,
           whitelistedUrls: whilelistedUrls,
@@ -63,7 +65,7 @@ export const TrpcClientProjectDataAccess = (): IProjectDataAccess => {
 
     update: async ({ projectId, projectName, whitelistedUrls }) => {
       try {
-        const project = await trpc.project.update.mutate({
+        const project = await trpcClient.project.update.mutate({
           projectId,
           projectName: projectName as unknown as Data.ProjectName.ProjectName,
           whitelistedUrls: whitelistedUrls as unknown as Data.Url.Url[],
