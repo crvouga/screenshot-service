@@ -1,15 +1,19 @@
 import { Data } from '@screenshot-service/screenshot-service';
-import { trpcClient } from '../../trpc-client';
-import { IProfileDataAccess } from './interface';
 import { z } from 'zod';
+import { TrpcClient } from '../../trpc-client';
 import { Problem } from '../shared';
+import { IProfileDataAccess } from './interface';
 
 // Zod schema for validating UserId
 const userIdSchema = z
   .string()
   .refine((val) => Data.UserId.is(val), { message: 'Invalid UserId format' });
 
-export const TrpcClientProfileDataAccess = (): IProfileDataAccess => {
+export const TrpcClientProfileDataAccess = ({
+  trpcClient,
+}: {
+  trpcClient: TrpcClient;
+}): IProfileDataAccess => {
   return {
     findOne: async ({ userId }) => {
       try {

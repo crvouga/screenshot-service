@@ -8,6 +8,15 @@
                 "avatarSeed": "123",
                 "themeMode": "system"
             }
+        },
+        "13298e83b363b3a6087ecb36368dea27": {
+            "key": "a08e1a41-cc8a-4016-b5e6-a28b9cf96f53",
+            "value": {
+                "userId": "a08e1a41-cc8a-4016-b5e6-a28b9cf96f53",
+                "name": "123",
+                "avatarSeed": "",
+                "themeMode": "system"
+            }
         }
     },
     "projects": {
@@ -19,6 +28,17 @@
                 "projectName": "My Cool Website",
                 "whitelistedUrls": [
                     "http://localhost:4200"
+                ]
+            }
+        },
+        "0f8453b7369b0d14795b63ede89729df": {
+            "key": "project-1745252691728",
+            "value": {
+                "projectId": "project-1745252691728",
+                "ownerId": "a08e1a41-cc8a-4016-b5e6-a28b9cf96f53",
+                "projectName": "My Cool Website",
+                "whitelistedUrls": [
+                    "http://localhost:8000"
                 ]
             }
         }
@@ -400,6 +420,34 @@
                 "strategy": "NetworkFirst",
                 "createdAt": "2025-04-21T15:52:37.374Z",
                 "status": "Loading"
+            }
+        },
+        "4201d45c6f0a9294ed962b101de3f2a3": {
+            "key": "1a110b1f-fb2d-4c54-a2ae-b088b3f06bcb",
+            "value": {
+                "requestId": "1a110b1f-fb2d-4c54-a2ae-b088b3f06bcb",
+                "projectId": "project-1745247894511",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://railway.com/project/0c74a800-026f-41c8-a091-5f52a00614e7?environmentId=5dc42936-e683-499a-8cec-ccd7bd602b28",
+                "originUrl": "http://localhost:4200",
+                "strategy": "NetworkFirst",
+                "createdAt": "2025-04-21T16:59:10.681Z",
+                "status": "Succeeded_Network"
+            }
+        },
+        "82835dd24019c4b2fbd995238e018426": {
+            "key": "905d8385-f718-456d-a744-a855c32f7003",
+            "value": {
+                "requestId": "905d8385-f718-456d-a744-a855c32f7003",
+                "projectId": "project-1745252691728",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://www.chrisvouga.dev/",
+                "originUrl": "http://localhost:8000",
+                "strategy": "NetworkFirst",
+                "createdAt": "2025-04-21T17:00:52.158Z",
+                "status": "Succeeded_Network"
             }
         }
     }

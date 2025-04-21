@@ -94,9 +94,9 @@ export const reducer = (
 export const saga = function* ({
   socketConfig,
 }: {
-  socketConfig?: Socket.Config;
+  socketConfig: Socket.Config;
 }) {
-  const socket = yield* call(Socket.make, socketConfig);
+  const socket = Socket.make(socketConfig);
   const socketChan = yield* call(makeSocketChan, socket);
 
   yield takeEvery(socketChan, function* (action) {
@@ -146,7 +146,7 @@ const makeSocketChan = (socket: Socket.Instance) => {
 export const makeStore = ({
   socketConfig,
 }: {
-  socketConfig?: Socket.Config;
+  socketConfig: Socket.Config;
 }) => {
   const sagaMiddleware = createSagaMiddleware();
 

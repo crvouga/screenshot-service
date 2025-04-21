@@ -4,9 +4,10 @@ import {
   captureScreenshotRequestRouterExpress,
 } from '@screenshot-service/server-trpc';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
+import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
-import bodyParser from 'body-parser';
+import path from 'path';
 import createSagaMiddleware from 'redux-saga';
 import socketIo from 'socket.io';
 import { initialState, saga, SocketServer } from './app/app';
@@ -72,9 +73,16 @@ const main = async () => {
 
   captureScreenshotRequestRouterExpress(app);
 
-  app.get('/', (req, res) => {
+  app.get('/api', (req, res) => {
     console.log('Received request to root endpoint');
     res.json({ message: 'Hello from screenshot service backend' });
+  });
+
+  // Serve static files from the client build directory
+  const clientBuildDir = path.join(__dirname, '../../../dist/apps/client');
+  app.use(express.static(clientBuildDir));
+  app.get(/(.*)/, (req, res) => {
+    res.sendFile(path.join(clientBuildDir, 'index.html'));
   });
 
   sagaMiddleware.run(saga, { webBrowser, socketServer });
@@ -84,6 +92,7 @@ const main = async () => {
     webBrowser.close();
     socketServer.close();
     httpServer.close();
+    console.log('Cleanup complete');
     process.exit(0);
   };
 

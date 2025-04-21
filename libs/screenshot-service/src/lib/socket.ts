@@ -33,17 +33,9 @@ export interface ServerToClientEvents {
 //
 //
 
-export const make = (config?: { serverBaseUrl: string }) => {
-  // todo put this in the env var
-  const PRODUCTION_SERVER_BASE_URL =
-    'https://crvouga-screenshot-service.herokuapp.com/';
-
-  const baseUrl = config?.serverBaseUrl
-    ? config.serverBaseUrl
-    : PRODUCTION_SERVER_BASE_URL;
-
+export const make = (config: { serverBaseUrl: string }) => {
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
-    socketIOClient(baseUrl);
+    socketIOClient(config.serverBaseUrl);
 
   return socket;
 };

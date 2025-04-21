@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Data } from '@screenshot-service/screenshot-service';
-import { trpcClient } from '../../trpc-client';
-import { IProjectDataAccess } from './interface';
 import { z } from 'zod';
+import { TrpcClient } from '../../trpc-client';
+import { IProjectDataAccess } from './interface';
 
 // Zod schemas for validation
 const projectIdSchema = z.string().refine((val) => Data.ProjectId.is(val), {
@@ -21,7 +21,11 @@ const urlSchema = z
   .string()
   .refine((val) => Data.Url.is(val), { message: 'Invalid URL format' });
 
-export const TrpcClientProjectDataAccess = (): IProjectDataAccess => {
+export const TrpcClientProjectDataAccess = ({
+  trpcClient,
+}: {
+  trpcClient: TrpcClient;
+}): IProjectDataAccess => {
   return {
     findManyOwnerId: async ({ ownerId }) => {
       try {

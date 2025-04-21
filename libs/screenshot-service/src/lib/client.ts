@@ -49,7 +49,7 @@ export type Unsubscribe = () => void;
 export const makeClient = ({
   socketConfig,
 }: {
-  socketConfig?: Socket.Config;
+  socketConfig: Socket.Config;
 }) => {
   const store = makeStore({ socketConfig });
 

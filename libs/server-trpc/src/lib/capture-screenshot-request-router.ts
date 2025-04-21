@@ -6,6 +6,7 @@ import { publicProcedure, router } from './trpc-server';
 import fs from 'fs';
 import path from 'path';
 import formidable from 'formidable';
+import { getBaseUrl } from './get-base-url';
 
 export type CaptureScreenshotRequest = {
   createdAt: string;
@@ -100,8 +101,8 @@ export const captureScreenshotRequestRouterExpress = (app: Express) => {
       const form = formidable({});
       const [fields, files] = await form.parse(req);
 
-      const requestId = fields.requestId?.[0];
-      const buffer = files.buffer?.[0];
+      const requestId = fields?.['requestId']?.[0];
+      const buffer = files?.['buffer']?.[0];
 
       if (!requestId || !buffer) {
         return res.status(400).json({ error: 'Missing requestId or buffer' });
@@ -134,9 +135,14 @@ export const captureScreenshotRequestRouterExpress = (app: Express) => {
   });
 
   // Serve screenshot files from filesystem
-  app.get('/api/screenshots/:projectId/:filename', (req, res) => {
-    const { projectId, filename } = req.params;
-    const filePath = path.join('./data', BUCKET_NAME, projectId, filename);
+  app.get('/api/screenshots/:projectId/:requestId.:imageType', (req, res) => {
+    const { projectId, requestId, imageType } = req.params;
+    const filePath = path.join(
+      './data',
+      BUCKET_NAME,
+      projectId,
+      `${requestId}.${imageType}`
+    );
 
     // Check if file exists
     if (!fs.existsSync(filePath)) {
@@ -145,7 +151,7 @@ export const captureScreenshotRequestRouterExpress = (app: Express) => {
     }
 
     // Determine content type based on file extension
-    const extension = path.extname(filename).toLowerCase();
+    const extension = `.${imageType.toLowerCase()}`;
     let contentType = 'image/png'; // default
     if (extension === '.jpg' || extension === '.jpeg') {
       contentType = 'image/jpeg';
@@ -319,13 +325,8 @@ export const captureScreenshotRequestRouter = router({
         imageType: Data.Result.unwrap(Data.ImageType.decode(input.imageType)),
       });
 
-      // Get the origin from the request headers
-      const origin = ctx.req?.headers.origin || ctx.req?.headers.host;
-      if (!origin) {
-        throw new Error('Could not determine request origin');
-      }
+      const baseUrl = getBaseUrl(ctx.req);
 
-      const baseUrl = `http://${origin}`;
       return `${baseUrl}/api/screenshots/${filename}`;
     }),
 
