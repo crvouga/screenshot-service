@@ -6,6 +6,7 @@
     "screenshot-service": "libs/screenshot-service",
     "server": "apps/server",
     "server-trpc": "libs/server-trpc",
-    "shared": "libs/shared"
+    "shared": "libs/shared",
+    "shared-core": "libs/shared-core"
   }
 }

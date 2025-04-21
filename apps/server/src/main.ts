@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import {
-  appRouter,
+  createAppRouter,
   captureScreenshotRequestRouterExpress,
 } from '@screenshot-service/server-trpc';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
@@ -13,6 +13,7 @@ import socketIo from 'socket.io';
 import { initialState, saga, SocketServer } from './app/app';
 import * as WebBrowser from './app/web-browser';
 import { getPort } from './port';
+import { environment } from './environments/environment';
 
 const main = async () => {
   console.log('Starting server...');
@@ -63,7 +64,11 @@ const main = async () => {
   app.use(
     '/trpc',
     createExpressMiddleware({
-      router: appRouter,
+      router: createAppRouter({
+        env: {
+          PROD: environment.production,
+        },
+      }),
       createContext: (input) => ({ req: input.req }),
       onError: ({ path, error }) => {
         console.error('tRPC error on path:', path, error);

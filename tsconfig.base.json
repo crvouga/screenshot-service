@@ -21,6 +21,7 @@
       ],
       "@screenshot-service/server-trpc": ["libs/server-trpc/src/index.ts"],
       "@screenshot-service/shared": ["libs/shared/src/index.ts"],
+      "@screenshot-service/shared-core": ["libs/shared-core/src/index.ts"],
       "@screenshot-service/shared-server": ["libs/shared-server/src/index.ts"]
     }
   },

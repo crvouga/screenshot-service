@@ -1,6 +1,6 @@
 import * as ScreenshotService from '@screenshot-service/screenshot-service';
 import { environment } from '../environments/environment';
-import { getServerBaseUrl } from '@screenshot-service/shared';
+import { getServerBaseUrl } from '@screenshot-service/shared-core';
 
 const config = {
   socketConfig: {
