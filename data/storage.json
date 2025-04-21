@@ -37,6 +37,62 @@
                 "createdAt": "2025-04-21T15:05:03.813Z",
                 "status": "Loading"
             }
+        },
+        "66311462739beb22ce4d92c9750500d8": {
+            "key": "8355366d-0eb2-4b8a-9a3f-b29c3e65a1b3",
+            "value": {
+                "requestId": "8355366d-0eb2-4b8a-9a3f-b29c3e65a1b3",
+                "projectId": "project-1745247894511",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://railway.com/project/0c74a800-026f-41c8-a091-5f52a00614e7?environmentId=5dc42936-e683-499a-8cec-ccd7bd602b28",
+                "originUrl": "http://localhost:4200",
+                "strategy": "NetworkFirst",
+                "createdAt": "2025-04-21T15:05:54.639Z",
+                "status": "Loading"
+            }
+        },
+        "f332625907e14e93c98b17be82e7b47b": {
+            "key": "1b3aceef-e972-452f-9bf8-25c15ccf36e2",
+            "value": {
+                "requestId": "1b3aceef-e972-452f-9bf8-25c15ccf36e2",
+                "projectId": "project-1745247894511",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://railway.com/project/0c74a800-026f-41c8-a091-5f52a00614e7?environmentId=5dc42936-e683-499a-8cec-ccd7bd602b28",
+                "originUrl": "http://localhost:4200",
+                "strategy": "NetworkFirst",
+                "createdAt": "2025-04-21T15:08:48.163Z",
+                "status": "Loading"
+            }
+        },
+        "092119e9afecb53ffecd772d2762f8e4": {
+            "key": "d7fa86fe-f27b-4696-9c64-2dcf9c347667",
+            "value": {
+                "requestId": "d7fa86fe-f27b-4696-9c64-2dcf9c347667",
+                "projectId": "project-1745247894511",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://railway.com/project/0c74a800-026f-41c8-a091-5f52a00614e7?environmentId=5dc42936-e683-499a-8cec-ccd7bd602b28",
+                "originUrl": "http://localhost:4200",
+                "strategy": "NetworkFirst",
+                "createdAt": "2025-04-21T15:10:01.454Z",
+                "status": "Loading"
+            }
+        },
+        "0307f222d69009df46ecdac74dfa4a76": {
+            "key": "1fa82d24-a70b-4921-939a-af9cb2a6ccf2",
+            "value": {
+                "requestId": "1fa82d24-a70b-4921-939a-af9cb2a6ccf2",
+                "projectId": "project-1745247894511",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://railway.com/project/0c74a800-026f-41c8-a091-5f52a00614e7?environmentId=5dc42936-e683-499a-8cec-ccd7bd602b28",
+                "originUrl": "http://localhost:4200",
+                "strategy": "NetworkFirst",
+                "createdAt": "2025-04-21T15:24:02.503Z",
+                "status": "Succeeded_Network"
+            }
         }
     }
 }

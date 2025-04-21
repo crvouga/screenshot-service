@@ -1,21 +1,25 @@
 import { Data } from '@screenshot-service/screenshot-service';
 import { trpcClient } from '../../trpc-client';
 import { IProfileDataAccess } from './interface';
+import { z } from 'zod';
+import { Problem } from '../shared';
+
+// Zod schema for validating UserId
+const userIdSchema = z
+  .string()
+  .refine((val) => Data.UserId.is(val), { message: 'Invalid UserId format' });
 
 export const TrpcClientProfileDataAccess = (): IProfileDataAccess => {
   return {
     findOne: async ({ userId }) => {
       try {
         const profile = await trpcClient.profile.findOne.query({ userId });
-
-        if (!profile) {
-          return Data.Result.Ok(null);
-        }
-
         return Data.Result.Ok(profile);
       } catch (error) {
         return Data.Result.Err([
-          { message: error instanceof Error ? error.message : 'Unknown error' },
+          {
+            message: error instanceof Error ? error.message : 'Unknown error',
+          },
         ]);
       }
     },
@@ -39,12 +43,15 @@ export const TrpcClientProfileDataAccess = (): IProfileDataAccess => {
           avatarSeed,
           themeMode,
         });
-
-        return Data.Result.Ok(result.userId as unknown as Data.UserId.UserId);
+        const validatedUserId = userIdSchema.parse(result.userId);
+        return Data.Result.Ok(
+          Data.Result.unwrap(Data.UserId.decode(validatedUserId))
+        );
       } catch (error) {
-        return Data.Result.Err({
+        const problem: Problem = {
           message: error instanceof Error ? error.message : 'Unknown error',
-        });
+        };
+        return Data.Result.Err(problem);
       }
     },
 
@@ -56,7 +63,6 @@ export const TrpcClientProfileDataAccess = (): IProfileDataAccess => {
           avatarSeed: updates.avatarSeed,
           themeMode: updates.themeMode,
         });
-
         return Data.Result.Ok(Data.Unit);
       } catch (error) {
         return Data.Result.Err({

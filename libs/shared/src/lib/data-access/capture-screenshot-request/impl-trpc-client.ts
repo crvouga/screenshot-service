@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Data } from '@screenshot-service/screenshot-service';
+import { z } from 'zod';
 import { trpcClient } from '../../trpc-client';
 import { ICaptureScreenshotRequestDataAccess } from './interface';
 
@@ -52,12 +53,17 @@ export const TrpcClientCaptureScreenshotRequestDataAccess =
 
       uploadScreenshot: async ({ requestId }, buffer) => {
         try {
-          const result =
-            await trpcClient.captureScreenshotRequest.uploadScreenshot.mutate({
-              requestId,
-              buffer,
-            });
-          return Data.Result.Ok(result as unknown as any);
+          await trpcClient.captureScreenshotRequest.uploadScreenshot.mutate({
+            requestId,
+            buffer,
+          });
+          const got = await trpcClient.captureScreenshotRequest.findOne.query({
+            requestId,
+          });
+          if (!got) {
+            return Data.Result.Err([{ message: 'Request not found' }]);
+          }
+          return Data.Result.Ok(got);
         } catch (error) {
           return Data.Result.Err([
             {
@@ -84,9 +90,7 @@ export const TrpcClientCaptureScreenshotRequestDataAccess =
               }
             );
           return Data.Result.Ok(
-            result
-              ? Data.Maybe.Just(result as unknown as any)
-              : Data.Maybe.Nothing
+            result ? Data.Maybe.Just(result) : Data.Maybe.Nothing
           );
         } catch (error) {
           return Data.Result.Err([
@@ -135,7 +139,16 @@ export const TrpcClientCaptureScreenshotRequestDataAccess =
               imageType,
               projectId,
             });
-          return Data.Result.Ok(publicUrl as unknown as Data.Url.Url);
+
+          // Validate that the returned value is a valid URL
+          const urlSchema = z.string().refine((val) => Data.Url.is(val), {
+            message: 'Invalid URL format',
+          });
+
+          const validatedUrl = urlSchema.parse(publicUrl);
+          return Data.Result.Ok(
+            Data.Result.unwrap(Data.Url.decode(validatedUrl))
+          );
         } catch (error) {
           return Data.Result.Err([
             {
@@ -159,7 +172,7 @@ export const TrpcClientCaptureScreenshotRequestDataAccess =
               pageSize,
               page,
             });
-          return Data.Result.Ok(results.data as unknown as any[]);
+          return Data.Result.Ok(results.data);
         } catch (error) {
           return Data.Result.Err([
             {

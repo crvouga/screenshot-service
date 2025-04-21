@@ -459,7 +459,8 @@ const networkFirstFlow = function* (
   console.log(`Screenshot uploaded successfully for request: ${requestId}`);
 
   console.log(
-    `Getting public URL for request: ${requestId}, screenshot: ${captureScreenshotRequest}`
+    `Getting public URL for request: ${requestId}, screenshot: `,
+    captureScreenshotRequest
   );
 
   const publicUrlResult = yield* call(

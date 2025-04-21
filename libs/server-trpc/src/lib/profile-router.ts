@@ -14,9 +14,20 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 
 const profilesMap = new FileSystemMap<string, Profile>('./data', 'profiles');
 
+// Zod schemas for validation
+const userIdSchema = z
+  .string()
+  .refine((val) => Data.UserId.is(val), { message: 'Invalid UserId format' });
+
+const themeModeSchema = z
+  .enum(['light', 'dark', 'system'])
+  .refine((val): val is ThemeMode => true, {
+    message: 'Invalid ThemeMode value',
+  });
+
 export const profileRouter = router({
   findOne: publicProcedure
-    .input(z.object({ userId: z.string() }))
+    .input(z.object({ userId: userIdSchema }))
     .query(async ({ input }) => {
       console.log(`findOne: Looking for profile with userId ${input.userId}`);
       const profile = profilesMap.get(input.userId);
@@ -29,7 +40,7 @@ export const profileRouter = router({
     }),
 
   deleteForever: publicProcedure
-    .input(z.object({ userId: z.string() }))
+    .input(z.object({ userId: userIdSchema }))
     .mutation(async ({ input }) => {
       console.log(`deleteForever: Deleting profile for userId ${input.userId}`);
       const existed = profilesMap.has(input.userId);
@@ -45,19 +56,19 @@ export const profileRouter = router({
   create: publicProcedure
     .input(
       z.object({
-        userId: z.string(),
+        userId: userIdSchema,
         name: z.string(),
         avatarSeed: z.string(),
-        themeMode: z.string(),
+        themeMode: themeModeSchema,
       })
     )
     .mutation(async ({ input }) => {
       console.log(`create: Creating new profile for userId ${input.userId}`);
       const profile: Profile = {
-        userId: input.userId as unknown as Data.UserId.UserId,
+        userId: Data.Result.unwrap(Data.UserId.decode(input.userId)),
         name: input.name,
         avatarSeed: input.avatarSeed,
-        themeMode: input.themeMode as unknown as ThemeMode,
+        themeMode: input.themeMode,
       };
 
       profilesMap.set(input.userId, profile);
@@ -70,10 +81,10 @@ export const profileRouter = router({
   update: publicProcedure
     .input(
       z.object({
-        userId: z.string(),
+        userId: userIdSchema,
         name: z.string().optional(),
         avatarSeed: z.string().optional(),
-        themeMode: z.string().optional(),
+        themeMode: themeModeSchema.optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -90,11 +101,11 @@ export const profileRouter = router({
         ...(input.name !== undefined && { name: input.name }),
         ...(input.avatarSeed !== undefined && { avatarSeed: input.avatarSeed }),
         ...(input.themeMode !== undefined && {
-          themeMode: input.themeMode as unknown as ThemeMode,
+          themeMode: input.themeMode,
         }),
       };
 
-      profilesMap.set(input.userId, updatedProfile as Profile);
+      profilesMap.set(input.userId, updatedProfile);
       console.log(
         `update: Successfully updated profile for userId ${input.userId}`
       );

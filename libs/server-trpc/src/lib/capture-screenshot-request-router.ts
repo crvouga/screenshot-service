@@ -34,30 +34,55 @@ const screenshotRequests = new FileSystemMap<string, CaptureScreenshotRequest>(
 );
 const screenshotBuffers = new Map<string, unknown>();
 
+// Zod schemas for validation
+const requestIdSchema = z.string().refine((val) => Data.RequestId.is(val), {
+  message: 'Invalid RequestId format',
+});
+
+const projectIdSchema = z.string().refine((val) => Data.ProjectId.is(val), {
+  message: 'Invalid ProjectId format',
+});
+
+const imageTypeSchema = z.string().refine((val) => Data.ImageType.is(val), {
+  message: 'Invalid ImageType format',
+});
+
+const delaySecSchema = z.number().refine((val) => Data.DelaySec.is(val), {
+  message: 'Invalid DelaySec value',
+});
+
+const urlSchema = z
+  .string()
+  .refine((val) => Data.Url.is(val), { message: 'Invalid URL format' });
+
+const strategySchema = z.string().refine((val) => Data.Strategy.is(val), {
+  message: 'Invalid Strategy value',
+});
+
 export const captureScreenshotRequestRouter = router({
   insertNew: publicProcedure
     .input(
       z.object({
-        requestId: z.string(),
-        targetUrl: z.string(),
-        projectId: z.string(),
-        imageType: z.string(),
-        delaySec: z.number(),
-        originUrl: z.string(),
-        strategy: z.string(),
+        requestId: requestIdSchema,
+        targetUrl: urlSchema,
+        projectId: projectIdSchema,
+        imageType: imageTypeSchema,
+        delaySec: delaySecSchema,
+        originUrl: urlSchema,
+        strategy: strategySchema,
       })
     )
     .mutation(async ({ input }) => {
       console.log(`insertNew: Creating new request with ID ${input.requestId}`);
       // Store the request in our hash map
       const request: CaptureScreenshotRequest = {
-        requestId: input.requestId as unknown as Data.RequestId.RequestId,
-        projectId: input.projectId as unknown as Data.ProjectId.ProjectId,
-        imageType: input.imageType as unknown as Data.ImageType.ImageType,
-        delaySec: input.delaySec as unknown as Data.DelaySec.DelaySec,
-        targetUrl: input.targetUrl as unknown as Data.Url.Url,
-        originUrl: input.originUrl as unknown as Data.Url.Url,
-        strategy: input.strategy as unknown as Data.Strategy.Strategy,
+        requestId: Data.Result.unwrap(Data.RequestId.decode(input.requestId)),
+        projectId: Data.Result.unwrap(Data.ProjectId.decode(input.projectId)),
+        imageType: Data.Result.unwrap(Data.ImageType.decode(input.imageType)),
+        delaySec: Data.Result.unwrap(Data.DelaySec.decode(input.delaySec)),
+        targetUrl: Data.Result.unwrap(Data.Url.decode(input.targetUrl)),
+        originUrl: Data.Result.unwrap(Data.Url.decode(input.originUrl)),
+        strategy: Data.Result.unwrap(Data.Strategy.decode(input.strategy)),
         createdAt: new Date().toISOString(),
         status: 'Loading' as InitialStatus,
       };
@@ -66,10 +91,16 @@ export const captureScreenshotRequestRouter = router({
       return request;
     }),
 
+  findOne: publicProcedure
+    .input(z.object({ requestId: requestIdSchema }))
+    .query(async ({ input }) => {
+      return screenshotRequests.get(input.requestId);
+    }),
+
   updateStatus: publicProcedure
     .input(
       z.object({
-        requestId: z.string(),
+        requestId: requestIdSchema,
         status: z.enum([
           'Loading',
           'Cancelled',
@@ -100,7 +131,7 @@ export const captureScreenshotRequestRouter = router({
   uploadScreenshot: publicProcedure
     .input(
       z.object({
-        requestId: z.string(),
+        requestId: requestIdSchema,
         buffer: z.unknown(),
       })
     )
@@ -119,10 +150,10 @@ export const captureScreenshotRequestRouter = router({
   findSucceededRequest: publicProcedure
     .input(
       z.object({
-        targetUrl: z.string(),
-        delaySec: z.number(),
-        projectId: z.string(),
-        imageType: z.string(),
+        targetUrl: urlSchema,
+        delaySec: delaySecSchema,
+        projectId: projectIdSchema,
+        imageType: imageTypeSchema,
       })
     )
     .query(async ({ input }) => {
@@ -151,13 +182,13 @@ export const captureScreenshotRequestRouter = router({
   findOneElseInsert: publicProcedure
     .input(
       z.object({
-        requestId: z.string(),
-        targetUrl: z.string(),
-        projectId: z.string(),
-        imageType: z.string(),
-        delaySec: z.number(),
-        originUrl: z.string(),
-        strategy: z.string(),
+        requestId: requestIdSchema,
+        targetUrl: urlSchema,
+        projectId: projectIdSchema,
+        imageType: imageTypeSchema,
+        delaySec: delaySecSchema,
+        originUrl: urlSchema,
+        strategy: strategySchema,
       })
     )
     .mutation(async ({ input }) => {
@@ -169,13 +200,13 @@ export const captureScreenshotRequestRouter = router({
           `findOneElseInsert: Request ${input.requestId} not found, creating new one`
         );
         const request: CaptureScreenshotRequest = {
-          requestId: input.requestId as unknown as Data.RequestId.RequestId,
-          projectId: input.projectId as unknown as Data.ProjectId.ProjectId,
-          imageType: input.imageType as unknown as Data.ImageType.ImageType,
-          delaySec: input.delaySec as unknown as Data.DelaySec.DelaySec,
-          targetUrl: input.targetUrl as unknown as Data.Url.Url,
-          originUrl: input.originUrl as unknown as Data.Url.Url,
-          strategy: input.strategy as unknown as Data.Strategy.Strategy,
+          requestId: Data.Result.unwrap(Data.RequestId.decode(input.requestId)),
+          projectId: Data.Result.unwrap(Data.ProjectId.decode(input.projectId)),
+          imageType: Data.Result.unwrap(Data.ImageType.decode(input.imageType)),
+          delaySec: Data.Result.unwrap(Data.DelaySec.decode(input.delaySec)),
+          targetUrl: Data.Result.unwrap(Data.Url.decode(input.targetUrl)),
+          originUrl: Data.Result.unwrap(Data.Url.decode(input.originUrl)),
+          strategy: Data.Result.unwrap(Data.Strategy.decode(input.strategy)),
           createdAt: new Date().toISOString(),
           status: 'Loading' as InitialStatus,
         };
@@ -195,11 +226,11 @@ export const captureScreenshotRequestRouter = router({
     .input(
       z
         .object({
-          requestId: z.string().nullish(),
-          imageType: z.string().nullish(),
-          projectId: z.string().nullish(),
+          requestId: requestIdSchema.optional(),
+          imageType: imageTypeSchema.optional(),
+          projectId: projectIdSchema.optional(),
         })
-        .nullish()
+        .optional()
     )
     .query(async ({ input }) => {
       return 'https://example.com/screenshots';
@@ -208,7 +239,7 @@ export const captureScreenshotRequestRouter = router({
   findMany: publicProcedure
     .input(
       z.object({
-        projectId: z.string(),
+        projectId: projectIdSchema,
         order: z
           .object({ column: z.string(), direction: z.string() })
           .optional(),
@@ -244,7 +275,7 @@ export const captureScreenshotRequestRouter = router({
     .input(
       z.object({
         dateRange: z.object({ start: z.string(), end: z.string() }),
-        projectId: z.string(),
+        projectId: projectIdSchema,
       })
     )
     .query(async ({ input }) => {
@@ -265,7 +296,7 @@ export const captureScreenshotRequestRouter = router({
   countAll: publicProcedure
     .input(
       z.object({
-        projectId: z.string(),
+        projectId: projectIdSchema,
       })
     )
     .query(async ({ input }) => {

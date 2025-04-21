@@ -2,6 +2,24 @@
 import { Data } from '@screenshot-service/screenshot-service';
 import { trpcClient } from '../../trpc-client';
 import { IProjectDataAccess } from './interface';
+import { z } from 'zod';
+
+// Zod schemas for validation
+const projectIdSchema = z.string().refine((val) => Data.ProjectId.is(val), {
+  message: 'Invalid ProjectId format',
+});
+
+const userIdSchema = z
+  .string()
+  .refine((val) => Data.UserId.is(val), { message: 'Invalid UserId format' });
+
+const projectNameSchema = z.string().refine((val) => Data.ProjectName.is(val), {
+  message: 'Invalid ProjectName format',
+});
+
+const urlSchema = z
+  .string()
+  .refine((val) => Data.Url.is(val), { message: 'Invalid URL format' });
 
 export const TrpcClientProjectDataAccess = (): IProjectDataAccess => {
   return {
@@ -48,10 +66,17 @@ export const TrpcClientProjectDataAccess = (): IProjectDataAccess => {
 
     insert: async ({ ownerId, projectName, whilelistedUrls }) => {
       try {
+        // Validate inputs with Zod
+        userIdSchema.parse(ownerId);
+        projectNameSchema.parse(projectName);
+        const validatedUrls = whilelistedUrls.map((url) =>
+          urlSchema.parse(url)
+        );
+
         const project = await trpcClient.project.create.mutate({
           ownerId,
           projectName,
-          whitelistedUrls: whilelistedUrls,
+          whitelistedUrls: validatedUrls,
         });
         return Data.Result.Ok(project);
       } catch (error) {
@@ -65,10 +90,24 @@ export const TrpcClientProjectDataAccess = (): IProjectDataAccess => {
 
     update: async ({ projectId, projectName, whitelistedUrls }) => {
       try {
+        // Validate inputs with Zod
+        projectIdSchema.parse(projectId);
+
+        // Only validate projectName if it's provided
+        if (projectName !== undefined && projectName !== null) {
+          projectNameSchema.parse(projectName);
+        }
+
+        // Only validate whitelistedUrls if it's provided
+        let validatedUrls;
+        if (whitelistedUrls !== undefined && whitelistedUrls !== null) {
+          validatedUrls = whitelistedUrls.map((url) => urlSchema.parse(url));
+        }
+
         const project = await trpcClient.project.update.mutate({
           projectId,
-          projectName: projectName as unknown as Data.ProjectName.ProjectName,
-          whitelistedUrls: whitelistedUrls as unknown as Data.Url.Url[],
+          projectName,
+          whitelistedUrls: validatedUrls,
         });
         return Data.Result.Ok(project);
       } catch (error) {

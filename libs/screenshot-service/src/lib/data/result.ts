@@ -112,3 +112,13 @@ export const mapOk = <TError, TValue, A>(
 
   return Ok(mapper(result.value));
 };
+
+export const unwrap = <TError, TValue>(
+  result: Result<TError, TValue>
+): TValue => {
+  if (isErr(result)) {
+    throw new Error(String(result.error));
+  }
+
+  return result.value;
+};
