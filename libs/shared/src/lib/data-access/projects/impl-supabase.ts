@@ -12,7 +12,7 @@ const decodeRow = (
   const ownerId = Data.UserId.decode(row.owner_id);
   const projectName = Data.ProjectName.decode(row.name);
   const whitelistedUrls = Data.Result.combineValues(
-    row.whitelisted_urls.map(Data.Url.decode)
+    row.whitelisted_urls?.map(Data.Url.decode)
   );
 
   if (
@@ -52,11 +52,11 @@ export const ProjectDataAccess = ({
         return Data.Result.Err([{ message: response.error.message }]);
       }
 
-      const decodings = response.data.map(decodeRow);
+      const decodings = response.data?.map(decodeRow);
 
       const problems = Data.Result.toErrors(decodings).flat();
 
-      if (problems.length > 0) {
+      if (problems?.length > 0) {
         return Data.Result.Err(problems);
       }
 
@@ -73,11 +73,11 @@ export const ProjectDataAccess = ({
         return Data.Result.Err([{ message: response.error.message }]);
       }
 
-      const decodings = response.data.map(decodeRow);
+      const decodings = response.data?.map(decodeRow);
 
       const problems = Data.Result.toErrors(decodings).flat();
 
-      if (problems.length > 0) {
+      if (problems?.length > 0) {
         return Data.Result.Err(problems);
       }
 
@@ -124,11 +124,11 @@ export const ProjectDataAccess = ({
           return Data.Result.Err([{ message: response.error.message }]);
         }
 
-        const decodings = response.data.map(decodeRow);
+        const decodings = response.data?.map(decodeRow);
 
         const problems = Data.Result.toErrors(decodings).flat();
 
-        if (problems.length > 0) {
+        if (problems?.length > 0) {
           return Data.Result.Err(problems);
         }
 
@@ -151,7 +151,7 @@ export const ProjectDataAccess = ({
 
       const configuration = configurationResult.value;
 
-      if (projects.length >= configuration.maxProjectCount) {
+      if (projects?.length >= configuration.maxProjectCount) {
         return Data.Result.Err([
           {
             message: `Users are not allowed to have more than ${configuration.maxProjectCount} projects.`,

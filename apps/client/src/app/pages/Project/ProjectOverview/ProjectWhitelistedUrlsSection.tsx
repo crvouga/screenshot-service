@@ -42,22 +42,22 @@ export const ProjectWhitelistedUrlsSection = ({
         marginBottom: 4,
       }}
     >
-      <Typography variant="h6">
-        whitelisted urls
-      </Typography>
+      <Typography variant="h6">whitelisted urls</Typography>
 
       <Typography color="text.secondary" sx={{ marginBottom: 2 }}>
-        for security reasons, add urls from where you will be making api requests from.
+        for security reasons, add urls from where you will be making api
+        requests from.
       </Typography>
 
-      {whitelistedUrls.length === 0 && (
+      {whitelistedUrls?.length === 0 && (
         <Alert severity="warning">
           <AlertTitle>no whitelisted urls</AlertTitle>
-          this project can not be used by anyone if there is no urls are on the whitelist
+          this project can not be used by anyone if there is no urls are on the
+          whitelist
         </Alert>
       )}
 
-      {whitelistedUrls.map((url) => (
+      {whitelistedUrls?.map((url) => (
         <WhitelistedUrlField
           key={url}
           projectId={project.projectId}
@@ -143,9 +143,9 @@ const AddToWhitelistInput = ({
         />
       </Box>
 
-      {problems.length > 0 && (
+      {problems?.length > 0 && (
         <Box sx={{ marginY: 2 }}>
-          {problems.map((problem) => (
+          {problems?.map((problem) => (
             <Alert severity="error" key={problem.message}>
               {problem.message}
             </Alert>
@@ -195,8 +195,8 @@ const WhitelistedUrlField = ({
     switch (result.type) {
       case 'Err':
         snackbar.enqueueSnackbar(
-          result.error.map((error) => error.message).join(', ') ??
-          'failed to remove url from whitelist',
+          result.error?.map((error) => error.message).join(', ') ??
+            'failed to remove url from whitelist',
           {
             variant: 'error',
           }

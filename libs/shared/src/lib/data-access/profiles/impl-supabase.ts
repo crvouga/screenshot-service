@@ -37,7 +37,7 @@ export const SupabaseProfileDataAccess = (
 
       const rows = response.data;
 
-      if (rows.length === 0) {
+      if (rows?.length === 0) {
         return Data.Result.Ok(null);
       }
 

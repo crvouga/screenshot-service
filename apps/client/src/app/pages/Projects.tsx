@@ -39,9 +39,9 @@ export const ProjectsPage = () => {
 
       {query.status === 'success' && query.data.type === 'Ok' && (
         <>
-          {query.data.value.length === 0 && <CreateProjectCallToAction />}
+          {query.data.value?.length === 0 && <CreateProjectCallToAction />}
 
-          {query.data.value.length > 0 && (
+          {query.data.value?.length > 0 && (
             <Container sx={{ mt: 2 }} maxWidth="sm">
               <Box
                 sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}
@@ -56,12 +56,12 @@ export const ProjectsPage = () => {
                 </Link>
                 <Box sx={{ flex: 1 }} />
                 <Typography color="text.secondary">
-                  {query.data.value.length} / {configuration.maxProjectCount}{' '}
+                  {query.data.value?.length} / {configuration.maxProjectCount}{' '}
                   projects
                 </Typography>
               </Box>
 
-              {query.data.value.map((project) => (
+              {query.data.value?.map((project) => (
                 <Box key={project.projectId} sx={{ mb: 2 }}>
                   <Link to={routes['/projects/:id'].make(project.projectId)}>
                     <CardActionArea>

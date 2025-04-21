@@ -87,7 +87,7 @@ const LoadingConfiguration = () => {
         case 'Err':
           return (
             <Box>
-              {result.error.map((problem) => problem.message).join(', ')}
+              {result.error?.map((problem) => problem.message).join(', ')}
             </Box>
           );
 
@@ -123,7 +123,7 @@ const LoadingProfile = () => {
         case 'Err':
           return (
             <Box>
-              {result.error.map((problem) => problem.message).join(', ')}
+              {result.error?.map((problem) => problem.message).join(', ')}
             </Box>
           );
 

@@ -41,7 +41,10 @@ export const saga = function* ({
   clientId: string;
   webBrowser: WebBrowser.WebBrowser;
 }) {
+  console.log(`Starting capture screenshot saga for client: ${clientId}`);
+
   yield takeEvery(Action.Cancelled, function* (action) {
+    console.log(`Request cancelled: ${action.payload.requestId}`);
     const newStatus: FinalStatus = 'Cancelled';
     yield* call(dataAccess.captureScreenshotRequest.updateStatus, {
       requestId: action.payload.requestId,
@@ -50,6 +53,10 @@ export const saga = function* ({
   });
 
   yield takeEvery(Action.Failed, function* (action) {
+    console.log(
+      `Request failed: ${action.payload.requestId}`,
+      action.payload.problems
+    );
     const newStatus: FinalStatus = 'Failed';
     yield* call(dataAccess.captureScreenshotRequest.updateStatus, {
       requestId: action.payload.requestId,
@@ -58,6 +65,9 @@ export const saga = function* ({
   });
 
   yield takeEvery(Action.Succeeded, function* (action) {
+    console.log(
+      `Request succeeded: ${action.payload.requestId} from ${action.payload.source}`
+    );
     const newStatus: FinalStatus =
       action.payload.source === 'Cache'
         ? 'Succeeded_Cached'
@@ -79,14 +89,17 @@ const startFlow = function* ({
   clientId: string;
   webBrowser: WebBrowser.WebBrowser;
 }) {
+  console.log(`Starting flow for client: ${clientId}`);
   while (true) {
     const action = yield* call(takeStart, { clientId });
     const request = action.payload;
     const requestId = request.requestId;
 
+    console.log(`New request received: ${requestId}`, request);
     yield put(Action.Log(clientId, requestId, 'info', 'starting...'));
 
     yield fork(function* () {
+      console.log(`Forking process for request: ${requestId}`);
       const [cancel, disconnected] = yield race([
         call(takeCancel, { requestId }),
         call(takeClientDisconnected, { clientId }),
@@ -94,6 +107,9 @@ const startFlow = function* ({
       ]);
 
       if (disconnected) {
+        console.log(
+          `Client disconnected: ${clientId} for request: ${requestId}`
+        );
         yield put(
           Action.Log(
             clientId,
@@ -107,6 +123,7 @@ const startFlow = function* ({
       }
 
       if (cancel) {
+        console.log(`Request cancelled by user: ${requestId}`);
         yield put(Action.Log(clientId, requestId, 'info', 'cancelling...'));
 
         yield delay(500);
@@ -128,12 +145,17 @@ const startedFlow = function* ({
   webBrowser: WebBrowser.WebBrowser;
   request: CaptureScreenshotRequest;
 }) {
+  console.log(`Started flow for request: ${request.requestId}`, request);
   const findProjectResult = yield* call(
     dataAccess.project.findManyById,
     request
   );
 
   if (findProjectResult.type === 'Err') {
+    console.error(
+      `Failed to find project for request: ${request.requestId}`,
+      findProjectResult.error
+    );
     yield put(
       Action.Failed(clientId, request.requestId, findProjectResult.error)
     );
@@ -143,6 +165,7 @@ const startedFlow = function* ({
   const [project] = findProjectResult.value;
 
   if (!project) {
+    console.error(`Project not found for request: ${request.requestId}`);
     yield put(
       Action.Failed(clientId, request.requestId, [
         { message: 'Could not find project' },
@@ -151,11 +174,18 @@ const startedFlow = function* ({
     return;
   }
 
+  console.log('project:', project);
+  console.log(
+    `Found project: ${project.projectName} for request: ${request.requestId}`
+  );
   const isOnWhitelist = project.whitelistedUrls.some(
     (url) => url === request.originUrl
   );
 
   if (!isOnWhitelist) {
+    console.error(
+      `Origin URL not whitelisted: ${request.originUrl} for project: ${project.projectName}`
+    );
     yield put(
       Action.Failed(clientId, request.requestId, [
         {
@@ -175,10 +205,17 @@ const startedFlow = function* ({
   );
 
   if (insertResult.type === 'Err') {
+    console.error(
+      `Failed to insert request: ${request.requestId}`,
+      insertResult.error
+    );
     yield put(Action.Failed(clientId, request.requestId, insertResult.error));
     return;
   }
 
+  console.log(
+    `Request inserted successfully: ${request.requestId}, using strategy: ${request.strategy}`
+  );
   switch (request.strategy) {
     case 'CacheFirst':
       yield* cacheFirstFlow(clientId, webBrowser, request);
@@ -195,6 +232,7 @@ const cacheFirstFlow = function* (
   webBrowser: WebBrowser.WebBrowser,
   request: CaptureScreenshotRequest
 ) {
+  console.log(`Starting cache-first flow for request: ${request.requestId}`);
   yield put(
     Action.Log(clientId, request.requestId, 'info', 'checking cache...')
   );
@@ -205,6 +243,10 @@ const cacheFirstFlow = function* (
   );
 
   if (findSucceededResult.type === 'Err') {
+    console.error(
+      `Failed to check cache for request: ${request.requestId}`,
+      findSucceededResult.error
+    );
     yield put(
       Action.Log(
         clientId,
@@ -223,6 +265,9 @@ const cacheFirstFlow = function* (
   const cached = findSucceededResult.value;
 
   if (cached.type === 'Nothing') {
+    console.log(
+      `No cache found for request: ${request.requestId}, falling back to network`
+    );
     yield put(
       Action.Log(
         clientId,
@@ -239,14 +284,25 @@ const cacheFirstFlow = function* (
     return;
   }
 
-  const earlierRequest = cached.value;
+  const captureScreenshotRequest = cached.value;
+  console.log(
+    `Found cached request: ${captureScreenshotRequest.requestId} for request: ${request.requestId}`
+  );
 
   const publicUrlResult = yield* call(
     dataAccess.captureScreenshotRequest.getPublicUrl,
-    earlierRequest
+    {
+      requestId: captureScreenshotRequest.requestId,
+      imageType: captureScreenshotRequest.imageType,
+      projectId: captureScreenshotRequest.projectId,
+    }
   );
 
   if (publicUrlResult.type === 'Err') {
+    console.error(
+      `Failed to get public URL for request: ${request.requestId}`,
+      publicUrlResult.error
+    );
     yield put(
       Action.Failed(clientId, request.requestId, publicUrlResult.error)
     );
@@ -254,6 +310,7 @@ const cacheFirstFlow = function* (
   }
 
   const publicUrl = publicUrlResult.value;
+  console.log(`Got public URL for cached request: ${publicUrl}`);
 
   yield put(
     Action.Log(clientId, request.requestId, 'info', 'found cached screenshot')
@@ -264,7 +321,7 @@ const cacheFirstFlow = function* (
       source: 'Cache',
       clientId,
       requestId: request.requestId,
-      imageType: earlierRequest.imageType,
+      imageType: captureScreenshotRequest.imageType,
       src: publicUrl,
     })
   );
@@ -287,6 +344,7 @@ const networkFirstFlow = function* (
   request: CaptureScreenshotRequest
 ) {
   const requestId = request.requestId;
+  console.log(`Starting network-first flow for request: ${requestId}`);
 
   yield put(
     Action.Log(clientId, requestId, 'info', 'opening new browser page...')
@@ -295,17 +353,26 @@ const networkFirstFlow = function* (
   const openPageResult = yield* call(WebBrowser.openNewPage, webBrowser);
 
   if (openPageResult.type === 'Err') {
+    console.error(
+      `Failed to open browser page for request: ${requestId}`,
+      openPageResult.error
+    );
     yield put(Action.Failed(clientId, requestId, [openPageResult.error]));
     return;
   }
 
   const page = openPageResult.value;
+  console.log(`Browser page opened for request: ${requestId}`);
 
   yield put(Action.Log(clientId, requestId, 'info', 'loading webpage...'));
 
   const goToResult = yield* call(WebBrowser.goTo, page, request.targetUrl);
 
   if (goToResult.type === 'Err') {
+    console.error(
+      `Failed to navigate to URL: ${request.targetUrl} for request: ${requestId}`,
+      goToResult.error
+    );
     yield put(
       Action.Failed(clientId, request.requestId, [
         { message: `going to page failed. ${goToResult.error.message}` },
@@ -314,11 +381,17 @@ const networkFirstFlow = function* (
     return;
   }
 
+  console.log(
+    `Successfully navigated to URL: ${request.targetUrl} for request: ${requestId}`
+  );
   yield put(Action.Log(clientId, requestId, 'info', 'website loaded'));
 
   yield delay(LOG_DELAY);
 
   for (let remaining = request.delaySec; remaining > 0; remaining--) {
+    console.log(
+      `Delaying for request: ${requestId}, ${remaining} seconds remaining`
+    );
     yield put(
       Action.Log(
         clientId,
@@ -331,6 +404,7 @@ const networkFirstFlow = function* (
     yield delay(1000);
   }
 
+  console.log(`Capturing screenshot for request: ${requestId}`);
   yield put(Action.Log(clientId, requestId, 'info', `capturing screenshot...`));
 
   const captureResult = yield* call(
@@ -340,11 +414,20 @@ const networkFirstFlow = function* (
   );
 
   if (captureResult.type === 'Err') {
+    console.error(
+      `Failed to capture screenshot for request: ${requestId}`,
+      captureResult.error
+    );
     yield put(Action.Failed(clientId, requestId, captureResult.error));
     return;
   }
 
+  console.log(
+    `Screenshot captured successfully for request: ${requestId}, uploading to cache`
+  );
   yield put(Action.Log(clientId, requestId, 'info', `caching screenshot...`));
+
+  console.log(`Uploading screenshot for request: ${requestId}`);
 
   const uploadResult = yield* call(
     dataAccess.captureScreenshotRequest.uploadScreenshot,
@@ -353,6 +436,10 @@ const networkFirstFlow = function* (
   );
 
   if (uploadResult.type === 'Err') {
+    console.error(
+      `Failed to upload screenshot for request: ${requestId}`,
+      uploadResult.error
+    );
     yield put(
       Action.Log(
         clientId,
@@ -365,19 +452,36 @@ const networkFirstFlow = function* (
     return;
   }
 
+  console.log(`Screenshot uploaded successfully for request: ${requestId}`);
+
   const captureScreenshotRequest = uploadResult.value;
+
+  console.log(`Screenshot uploaded successfully for request: ${requestId}`);
+
+  console.log(
+    `Getting public URL for request: ${requestId}, screenshot: ${captureScreenshotRequest}`
+  );
 
   const publicUrlResult = yield* call(
     dataAccess.captureScreenshotRequest.getPublicUrl,
-    captureScreenshotRequest
+    {
+      requestId: captureScreenshotRequest.requestId,
+      imageType: captureScreenshotRequest.imageType,
+      projectId: captureScreenshotRequest.projectId,
+    }
   );
 
   if (publicUrlResult.type === 'Err') {
+    console.error(
+      `Failed to get public URL for request: ${requestId}`,
+      publicUrlResult.error
+    );
     yield put(Action.Failed(clientId, requestId, publicUrlResult.error));
     return;
   }
 
   const publicUrl = publicUrlResult.value;
+  console.log(`Got public URL for request: ${requestId}: ${publicUrl}`);
 
   yield put(
     Action.Log(clientId, requestId, 'notice', `captured new screenshot`)
@@ -405,10 +509,15 @@ const networkFirstFlow = function* (
 //
 
 const takeStart = function* ({ clientId }: { clientId: string }) {
+  console.log(`Waiting for start action for client: ${clientId}`);
   while (true) {
     const action: ActionMap['Start'] = yield take(Action.Start);
 
     if (action.payload.clientId === clientId) {
+      console.log(
+        `Received start action for client: ${clientId}`,
+        action.payload
+      );
       return action;
     }
   }
@@ -419,10 +528,12 @@ const takeCancel = function* ({
 }: {
   requestId: Data.RequestId.RequestId;
 }) {
+  console.log(`Waiting for cancel action for request: ${requestId}`);
   while (true) {
     const action: ActionMap['Cancel'] = yield take(Action.Cancel);
 
     if (action.payload.requestId === requestId) {
+      console.log(`Received cancel action for request: ${requestId}`);
       return action;
     }
   }

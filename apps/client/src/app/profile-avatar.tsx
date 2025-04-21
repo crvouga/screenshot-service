@@ -20,7 +20,7 @@ const capitalize = (word: string) => {
 export const formatStyle = (style: Style) => {
   return style
     .split(/(?=[A-Z])/)
-    .map(capitalize)
+    ?.map(capitalize)
     .join(' ');
 };
 
@@ -74,8 +74,8 @@ export const parseUrl = (
       // Try to parse old URL format
       const url = new URL(avatarUrl ?? '');
       const pathParts = url.pathname.split('/');
-      const style = pathParts[pathParts.length - 3];
-      const seed = pathParts[pathParts.length - 2];
+      const style = pathParts[pathParts?.length - 3];
+      const seed = pathParts[pathParts?.length - 2];
 
       if (style && seed) {
         return {

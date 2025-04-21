@@ -46,7 +46,7 @@ export const ProjectInput = ({
           return (
             <Err
               message={query.data.error
-                .map((problem) => problem.message)
+                ?.map((problem) => problem.message)
                 .join('. ')}
             />
           );
@@ -54,7 +54,7 @@ export const ProjectInput = ({
         case 'Ok': {
           const projects = query.data.value;
 
-          if (projects.length === 0) {
+          if (projects?.length === 0) {
             return (
               <CreateProjectCallToAction
                 onClickLink={() =>
@@ -105,7 +105,7 @@ const Loaded = ({
         placeholder="select a project"
         {...SelectProps}
       >
-        {projects.map((project) => (
+        {projects?.map((project) => (
           <MenuItem
             value={project.projectId}
             key={project.projectId}

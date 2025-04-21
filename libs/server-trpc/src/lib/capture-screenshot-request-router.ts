@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { publicProcedure, router } from './trpc-server';
 import { Data } from '@screenshot-service/screenshot-service';
+import { FileSystemMap } from './file-system-map';
 
 export type CaptureScreenshotRequest = {
   createdAt: string;
@@ -27,8 +28,11 @@ export type FinalStatus =
   | 'Succeeded_Network';
 
 // In-memory storage using hash maps
-const screenshotRequests = new Map<string, CaptureScreenshotRequest>();
-const screenshotBuffers = new Map<string, any>();
+const screenshotRequests = new FileSystemMap<string, CaptureScreenshotRequest>(
+  './data',
+  'screenshot-requests'
+);
+const screenshotBuffers = new Map<string, unknown>();
 
 export const captureScreenshotRequestRouter = router({
   insertNew: publicProcedure
@@ -44,6 +48,7 @@ export const captureScreenshotRequestRouter = router({
       })
     )
     .mutation(async ({ input }) => {
+      console.log(`insertNew: Creating new request with ID ${input.requestId}`);
       // Store the request in our hash map
       const request: CaptureScreenshotRequest = {
         requestId: input.requestId as unknown as Data.RequestId.RequestId,
@@ -57,6 +62,7 @@ export const captureScreenshotRequestRouter = router({
         status: 'Loading' as InitialStatus,
       };
       screenshotRequests.set(input.requestId, request);
+      console.log(`insertNew: Successfully created request ${input.requestId}`);
       return request;
     }),
 
@@ -74,11 +80,19 @@ export const captureScreenshotRequestRouter = router({
       })
     )
     .mutation(async ({ input }) => {
+      console.log(
+        `updateStatus: Updating request ${input.requestId} to status ${input.status}`
+      );
       // Update status directly on the request object
       const request = screenshotRequests.get(input.requestId);
       if (request) {
         request.status = input.status as Status;
         screenshotRequests.set(input.requestId, request);
+        console.log(
+          `updateStatus: Successfully updated status for ${input.requestId}`
+        );
+      } else {
+        console.error(`updateStatus: Request ${input.requestId} not found`);
       }
       return;
     }),
@@ -87,12 +101,18 @@ export const captureScreenshotRequestRouter = router({
     .input(
       z.object({
         requestId: z.string(),
-        buffer: z.any(), // In a real implementation, you'd validate this is a Buffer
+        buffer: z.unknown(),
       })
     )
     .mutation(async ({ input }) => {
+      console.log(
+        `uploadScreenshot: Uploading screenshot for request ${input.requestId}`
+      );
       // Store the screenshot buffer in our hash map
       screenshotBuffers.set(input.requestId, input.buffer);
+      console.log(
+        `uploadScreenshot: Successfully stored screenshot for ${input.requestId}`
+      );
       return { success: true };
     }),
 
@@ -106,6 +126,9 @@ export const captureScreenshotRequestRouter = router({
       })
     )
     .query(async ({ input }) => {
+      console.log(
+        `findSucceededRequest: Searching for succeeded request with targetUrl ${input.targetUrl}`
+      );
       // Find a succeeded request from our hash map
       for (const [_, request] of screenshotRequests.entries()) {
         if (
@@ -115,9 +138,13 @@ export const captureScreenshotRequestRouter = router({
           request.imageType === input.imageType &&
           request.status === 'Succeeded_Cached'
         ) {
+          console.log(
+            `findSucceededRequest: Found matching request ${request.requestId}`
+          );
           return request;
         }
       }
+      console.log(`findSucceededRequest: No matching request found`);
       return null;
     }),
 
@@ -134,9 +161,13 @@ export const captureScreenshotRequestRouter = router({
       })
     )
     .mutation(async ({ input }) => {
+      console.log(`findOneElseInsert: Looking for request ${input.requestId}`);
       // Check if request exists, otherwise insert
       const existingRequest = screenshotRequests.get(input.requestId);
       if (!existingRequest) {
+        console.log(
+          `findOneElseInsert: Request ${input.requestId} not found, creating new one`
+        );
         const request: CaptureScreenshotRequest = {
           requestId: input.requestId as unknown as Data.RequestId.RequestId,
           projectId: input.projectId as unknown as Data.ProjectId.ProjectId,
@@ -149,22 +180,29 @@ export const captureScreenshotRequestRouter = router({
           status: 'Loading' as InitialStatus,
         };
         screenshotRequests.set(input.requestId, request);
+        console.log(
+          `findOneElseInsert: Successfully created request ${input.requestId}`
+        );
         return request;
       }
+      console.log(
+        `findOneElseInsert: Found existing request ${input.requestId}`
+      );
       return existingRequest;
     }),
 
   getPublicUrl: publicProcedure
     .input(
-      z.object({
-        requestId: z.string(),
-        imageType: z.string(),
-        projectId: z.string(),
-      })
+      z
+        .object({
+          requestId: z.string().nullish(),
+          imageType: z.string().nullish(),
+          projectId: z.string().nullish(),
+        })
+        .nullish()
     )
     .query(async ({ input }) => {
-      // Generate a URL based on the request ID
-      return `https://example.com/screenshots/${input.requestId}.${input.imageType}`;
+      return 'https://example.com/screenshots';
     }),
 
   findMany: publicProcedure
@@ -179,6 +217,9 @@ export const captureScreenshotRequestRouter = router({
       })
     )
     .query(async ({ input }) => {
+      console.log(
+        `findMany: Searching for requests with projectId ${input.projectId}`
+      );
       // Filter requests by project ID
       const projectRequests = Array.from(screenshotRequests.values()).filter(
         (request) => request.projectId === input.projectId
@@ -190,9 +231,12 @@ export const captureScreenshotRequestRouter = router({
       const start = (page - 1) * pageSize;
       const end = start + pageSize;
 
+      console.log(
+        `findMany: Found ${projectRequests?.length} requests, returning page ${page} with size ${pageSize}`
+      );
       return {
         data: projectRequests.slice(start, end),
-        total: projectRequests.length,
+        total: projectRequests?.length,
       };
     }),
 
@@ -204,13 +248,18 @@ export const captureScreenshotRequestRouter = router({
       })
     )
     .query(async ({ input }) => {
+      console.log(
+        `countCreatedBetween: Counting requests for project ${input.projectId} between ${input.dateRange.start} and ${input.dateRange.end}`
+      );
       // Calculate count dynamically from the requests
-      return Array.from(screenshotRequests.values()).filter(
+      const count = Array.from(screenshotRequests.values()).filter(
         (request) =>
           request.projectId === input.projectId &&
           request.createdAt >= input.dateRange.start &&
           request.createdAt <= input.dateRange.end
-      ).length;
+      )?.length;
+      console.log(`countCreatedBetween: Found ${count} requests`);
+      return count;
     }),
 
   countAll: publicProcedure
@@ -220,10 +269,17 @@ export const captureScreenshotRequestRouter = router({
       })
     )
     .query(async ({ input }) => {
+      console.log(
+        `countAll: Counting all requests for project ${input.projectId}`
+      );
       // Count all requests for the project
-      return Array.from(screenshotRequests.values()).filter(
+      const count = Array.from(screenshotRequests.values()).filter(
         (request) => request.projectId === input.projectId
-      ).length;
+      )?.length;
+      console.log(
+        `countAll: Found ${count} requests for project ${input.projectId}`
+      );
+      return count;
     }),
 });
 

@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-  "/": {
+  '/': {
     get: {
       responses: {
         /** OK */
@@ -12,37 +12,37 @@ export interface paths {
       };
     };
   };
-  "/projects": {
+  '/projects': {
     get: {
       parameters: {
         query: {
-          id?: parameters["rowFilter.projects.id"];
-          created_at?: parameters["rowFilter.projects.created_at"];
-          name?: parameters["rowFilter.projects.name"];
-          owner_id?: parameters["rowFilter.projects.owner_id"];
-          whitelisted_urls?: parameters["rowFilter.projects.whitelisted_urls"];
+          id?: parameters['rowFilter.projects.id'];
+          created_at?: parameters['rowFilter.projects.created_at'];
+          name?: parameters['rowFilter.projects.name'];
+          owner_id?: parameters['rowFilter.projects.owner_id'];
+          whitelisted_urls?: parameters['rowFilter.projects.whitelisted_urls'];
           /** Filtering Columns */
-          select?: parameters["select"];
+          select?: parameters['select'];
           /** Ordering */
-          order?: parameters["order"];
+          order?: parameters['order'];
           /** Limiting and Pagination */
-          offset?: parameters["offset"];
+          offset?: parameters['offset'];
           /** Limiting and Pagination */
-          limit?: parameters["limit"];
+          limit?: parameters['limit'];
         };
         header: {
           /** Limiting and Pagination */
-          Range?: parameters["range"];
+          Range?: parameters['range'];
           /** Limiting and Pagination */
-          "Range-Unit"?: parameters["rangeUnit"];
+          'Range-Unit'?: parameters['rangeUnit'];
           /** Preference */
-          Prefer?: parameters["preferCount"];
+          Prefer?: parameters['preferCount'];
         };
       };
       responses: {
         /** OK */
         200: {
-          schema: definitions["projects"][];
+          schema: definitions['projects'][];
         };
         /** Partial Content */
         206: unknown;
@@ -52,15 +52,15 @@ export interface paths {
       parameters: {
         body: {
           /** projects */
-          projects?: definitions["projects"];
+          projects?: definitions['projects'];
         };
         query: {
           /** Filtering Columns */
-          select?: parameters["select"];
+          select?: parameters['select'];
         };
         header: {
           /** Preference */
-          Prefer?: parameters["preferReturn"];
+          Prefer?: parameters['preferReturn'];
         };
       };
       responses: {
@@ -71,15 +71,15 @@ export interface paths {
     delete: {
       parameters: {
         query: {
-          id?: parameters["rowFilter.projects.id"];
-          created_at?: parameters["rowFilter.projects.created_at"];
-          name?: parameters["rowFilter.projects.name"];
-          owner_id?: parameters["rowFilter.projects.owner_id"];
-          whitelisted_urls?: parameters["rowFilter.projects.whitelisted_urls"];
+          id?: parameters['rowFilter.projects.id'];
+          created_at?: parameters['rowFilter.projects.created_at'];
+          name?: parameters['rowFilter.projects.name'];
+          owner_id?: parameters['rowFilter.projects.owner_id'];
+          whitelisted_urls?: parameters['rowFilter.projects.whitelisted_urls'];
         };
         header: {
           /** Preference */
-          Prefer?: parameters["preferReturn"];
+          Prefer?: parameters['preferReturn'];
         };
       };
       responses: {
@@ -90,19 +90,19 @@ export interface paths {
     patch: {
       parameters: {
         query: {
-          id?: parameters["rowFilter.projects.id"];
-          created_at?: parameters["rowFilter.projects.created_at"];
-          name?: parameters["rowFilter.projects.name"];
-          owner_id?: parameters["rowFilter.projects.owner_id"];
-          whitelisted_urls?: parameters["rowFilter.projects.whitelisted_urls"];
+          id?: parameters['rowFilter.projects.id'];
+          created_at?: parameters['rowFilter.projects.created_at'];
+          name?: parameters['rowFilter.projects.name'];
+          owner_id?: parameters['rowFilter.projects.owner_id'];
+          whitelisted_urls?: parameters['rowFilter.projects.whitelisted_urls'];
         };
         body: {
           /** projects */
-          projects?: definitions["projects"];
+          projects?: definitions['projects'];
         };
         header: {
           /** Preference */
-          Prefer?: parameters["preferReturn"];
+          Prefer?: parameters['preferReturn'];
         };
       };
       responses: {
@@ -111,36 +111,36 @@ export interface paths {
       };
     };
   };
-  "/configuration": {
+  '/configuration': {
     get: {
       parameters: {
         query: {
-          id?: parameters["rowFilter.configuration.id"];
-          max_project_count?: parameters["rowFilter.configuration.max_project_count"];
-          max_daily_requests?: parameters["rowFilter.configuration.max_daily_requests"];
-          client_library_url?: parameters["rowFilter.configuration.client_library_url"];
+          id?: parameters['rowFilter.configuration.id'];
+          max_project_count?: parameters['rowFilter.configuration.max_project_count'];
+          max_daily_requests?: parameters['rowFilter.configuration.max_daily_requests'];
+          client_library_url?: parameters['rowFilter.configuration.client_library_url'];
           /** Filtering Columns */
-          select?: parameters["select"];
+          select?: parameters['select'];
           /** Ordering */
-          order?: parameters["order"];
+          order?: parameters['order'];
           /** Limiting and Pagination */
-          offset?: parameters["offset"];
+          offset?: parameters['offset'];
           /** Limiting and Pagination */
-          limit?: parameters["limit"];
+          limit?: parameters['limit'];
         };
         header: {
           /** Limiting and Pagination */
-          Range?: parameters["range"];
+          Range?: parameters['range'];
           /** Limiting and Pagination */
-          "Range-Unit"?: parameters["rangeUnit"];
+          'Range-Unit'?: parameters['rangeUnit'];
           /** Preference */
-          Prefer?: parameters["preferCount"];
+          Prefer?: parameters['preferCount'];
         };
       };
       responses: {
         /** OK */
         200: {
-          schema: definitions["configuration"][];
+          schema: definitions['configuration'][];
         };
         /** Partial Content */
         206: unknown;
@@ -150,15 +150,15 @@ export interface paths {
       parameters: {
         body: {
           /** configuration */
-          configuration?: definitions["configuration"];
+          configuration?: definitions['configuration'];
         };
         query: {
           /** Filtering Columns */
-          select?: parameters["select"];
+          select?: parameters['select'];
         };
         header: {
           /** Preference */
-          Prefer?: parameters["preferReturn"];
+          Prefer?: parameters['preferReturn'];
         };
       };
       responses: {
@@ -169,14 +169,14 @@ export interface paths {
     delete: {
       parameters: {
         query: {
-          id?: parameters["rowFilter.configuration.id"];
-          max_project_count?: parameters["rowFilter.configuration.max_project_count"];
-          max_daily_requests?: parameters["rowFilter.configuration.max_daily_requests"];
-          client_library_url?: parameters["rowFilter.configuration.client_library_url"];
+          id?: parameters['rowFilter.configuration.id'];
+          max_project_count?: parameters['rowFilter.configuration.max_project_count'];
+          max_daily_requests?: parameters['rowFilter.configuration.max_daily_requests'];
+          client_library_url?: parameters['rowFilter.configuration.client_library_url'];
         };
         header: {
           /** Preference */
-          Prefer?: parameters["preferReturn"];
+          Prefer?: parameters['preferReturn'];
         };
       };
       responses: {
@@ -187,18 +187,18 @@ export interface paths {
     patch: {
       parameters: {
         query: {
-          id?: parameters["rowFilter.configuration.id"];
-          max_project_count?: parameters["rowFilter.configuration.max_project_count"];
-          max_daily_requests?: parameters["rowFilter.configuration.max_daily_requests"];
-          client_library_url?: parameters["rowFilter.configuration.client_library_url"];
+          id?: parameters['rowFilter.configuration.id'];
+          max_project_count?: parameters['rowFilter.configuration.max_project_count'];
+          max_daily_requests?: parameters['rowFilter.configuration.max_daily_requests'];
+          client_library_url?: parameters['rowFilter.configuration.client_library_url'];
         };
         body: {
           /** configuration */
-          configuration?: definitions["configuration"];
+          configuration?: definitions['configuration'];
         };
         header: {
           /** Preference */
-          Prefer?: parameters["preferReturn"];
+          Prefer?: parameters['preferReturn'];
         };
       };
       responses: {
@@ -207,37 +207,37 @@ export interface paths {
       };
     };
   };
-  "/profiles": {
+  '/profiles': {
     get: {
       parameters: {
         query: {
-          id?: parameters["rowFilter.profiles.id"];
-          created_at?: parameters["rowFilter.profiles.created_at"];
-          avatar_seed?: parameters["rowFilter.profiles.avatar_seed"];
-          name?: parameters["rowFilter.profiles.name"];
-          theme_mode?: parameters["rowFilter.profiles.theme_mode"];
+          id?: parameters['rowFilter.profiles.id'];
+          created_at?: parameters['rowFilter.profiles.created_at'];
+          avatar_seed?: parameters['rowFilter.profiles.avatar_seed'];
+          name?: parameters['rowFilter.profiles.name'];
+          theme_mode?: parameters['rowFilter.profiles.theme_mode'];
           /** Filtering Columns */
-          select?: parameters["select"];
+          select?: parameters['select'];
           /** Ordering */
-          order?: parameters["order"];
+          order?: parameters['order'];
           /** Limiting and Pagination */
-          offset?: parameters["offset"];
+          offset?: parameters['offset'];
           /** Limiting and Pagination */
-          limit?: parameters["limit"];
+          limit?: parameters['limit'];
         };
         header: {
           /** Limiting and Pagination */
-          Range?: parameters["range"];
+          Range?: parameters['range'];
           /** Limiting and Pagination */
-          "Range-Unit"?: parameters["rangeUnit"];
+          'Range-Unit'?: parameters['rangeUnit'];
           /** Preference */
-          Prefer?: parameters["preferCount"];
+          Prefer?: parameters['preferCount'];
         };
       };
       responses: {
         /** OK */
         200: {
-          schema: definitions["profiles"][];
+          schema: definitions['profiles'][];
         };
         /** Partial Content */
         206: unknown;
@@ -247,15 +247,15 @@ export interface paths {
       parameters: {
         body: {
           /** profiles */
-          profiles?: definitions["profiles"];
+          profiles?: definitions['profiles'];
         };
         query: {
           /** Filtering Columns */
-          select?: parameters["select"];
+          select?: parameters['select'];
         };
         header: {
           /** Preference */
-          Prefer?: parameters["preferReturn"];
+          Prefer?: parameters['preferReturn'];
         };
       };
       responses: {
@@ -266,15 +266,15 @@ export interface paths {
     delete: {
       parameters: {
         query: {
-          id?: parameters["rowFilter.profiles.id"];
-          created_at?: parameters["rowFilter.profiles.created_at"];
-          avatar_seed?: parameters["rowFilter.profiles.avatar_seed"];
-          name?: parameters["rowFilter.profiles.name"];
-          theme_mode?: parameters["rowFilter.profiles.theme_mode"];
+          id?: parameters['rowFilter.profiles.id'];
+          created_at?: parameters['rowFilter.profiles.created_at'];
+          avatar_seed?: parameters['rowFilter.profiles.avatar_seed'];
+          name?: parameters['rowFilter.profiles.name'];
+          theme_mode?: parameters['rowFilter.profiles.theme_mode'];
         };
         header: {
           /** Preference */
-          Prefer?: parameters["preferReturn"];
+          Prefer?: parameters['preferReturn'];
         };
       };
       responses: {
@@ -285,19 +285,19 @@ export interface paths {
     patch: {
       parameters: {
         query: {
-          id?: parameters["rowFilter.profiles.id"];
-          created_at?: parameters["rowFilter.profiles.created_at"];
-          avatar_seed?: parameters["rowFilter.profiles.avatar_seed"];
-          name?: parameters["rowFilter.profiles.name"];
-          theme_mode?: parameters["rowFilter.profiles.theme_mode"];
+          id?: parameters['rowFilter.profiles.id'];
+          created_at?: parameters['rowFilter.profiles.created_at'];
+          avatar_seed?: parameters['rowFilter.profiles.avatar_seed'];
+          name?: parameters['rowFilter.profiles.name'];
+          theme_mode?: parameters['rowFilter.profiles.theme_mode'];
         };
         body: {
           /** profiles */
-          profiles?: definitions["profiles"];
+          profiles?: definitions['profiles'];
         };
         header: {
           /** Preference */
-          Prefer?: parameters["preferReturn"];
+          Prefer?: parameters['preferReturn'];
         };
       };
       responses: {
@@ -306,41 +306,41 @@ export interface paths {
       };
     };
   };
-  "/capture_screenshot_requests": {
+  '/capture_screenshot_requests': {
     get: {
       parameters: {
         query: {
-          id?: parameters["rowFilter.capture_screenshot_requests.id"];
-          created_at?: parameters["rowFilter.capture_screenshot_requests.created_at"];
-          project_id?: parameters["rowFilter.capture_screenshot_requests.project_id"];
-          image_type?: parameters["rowFilter.capture_screenshot_requests.image_type"];
-          delay_sec?: parameters["rowFilter.capture_screenshot_requests.delay_sec"];
-          target_url?: parameters["rowFilter.capture_screenshot_requests.target_url"];
-          origin_url?: parameters["rowFilter.capture_screenshot_requests.origin_url"];
-          strategy?: parameters["rowFilter.capture_screenshot_requests.strategy"];
-          status?: parameters["rowFilter.capture_screenshot_requests.status"];
+          id?: parameters['rowFilter.capture_screenshot_requests.id'];
+          created_at?: parameters['rowFilter.capture_screenshot_requests.created_at'];
+          project_id?: parameters['rowFilter.capture_screenshot_requests.project_id'];
+          image_type?: parameters['rowFilter.capture_screenshot_requests.image_type'];
+          delay_sec?: parameters['rowFilter.capture_screenshot_requests.delay_sec'];
+          target_url?: parameters['rowFilter.capture_screenshot_requests.target_url'];
+          origin_url?: parameters['rowFilter.capture_screenshot_requests.origin_url'];
+          strategy?: parameters['rowFilter.capture_screenshot_requests.strategy'];
+          status?: parameters['rowFilter.capture_screenshot_requests.status'];
           /** Filtering Columns */
-          select?: parameters["select"];
+          select?: parameters['select'];
           /** Ordering */
-          order?: parameters["order"];
+          order?: parameters['order'];
           /** Limiting and Pagination */
-          offset?: parameters["offset"];
+          offset?: parameters['offset'];
           /** Limiting and Pagination */
-          limit?: parameters["limit"];
+          limit?: parameters['limit'];
         };
         header: {
           /** Limiting and Pagination */
-          Range?: parameters["range"];
+          Range?: parameters['range'];
           /** Limiting and Pagination */
-          "Range-Unit"?: parameters["rangeUnit"];
+          'Range-Unit'?: parameters['rangeUnit'];
           /** Preference */
-          Prefer?: parameters["preferCount"];
+          Prefer?: parameters['preferCount'];
         };
       };
       responses: {
         /** OK */
         200: {
-          schema: definitions["capture_screenshot_requests"][];
+          schema: definitions['capture_screenshot_requests'][];
         };
         /** Partial Content */
         206: unknown;
@@ -350,15 +350,15 @@ export interface paths {
       parameters: {
         body: {
           /** capture_screenshot_requests */
-          capture_screenshot_requests?: definitions["capture_screenshot_requests"];
+          capture_screenshot_requests?: definitions['capture_screenshot_requests'];
         };
         query: {
           /** Filtering Columns */
-          select?: parameters["select"];
+          select?: parameters['select'];
         };
         header: {
           /** Preference */
-          Prefer?: parameters["preferReturn"];
+          Prefer?: parameters['preferReturn'];
         };
       };
       responses: {
@@ -369,19 +369,19 @@ export interface paths {
     delete: {
       parameters: {
         query: {
-          id?: parameters["rowFilter.capture_screenshot_requests.id"];
-          created_at?: parameters["rowFilter.capture_screenshot_requests.created_at"];
-          project_id?: parameters["rowFilter.capture_screenshot_requests.project_id"];
-          image_type?: parameters["rowFilter.capture_screenshot_requests.image_type"];
-          delay_sec?: parameters["rowFilter.capture_screenshot_requests.delay_sec"];
-          target_url?: parameters["rowFilter.capture_screenshot_requests.target_url"];
-          origin_url?: parameters["rowFilter.capture_screenshot_requests.origin_url"];
-          strategy?: parameters["rowFilter.capture_screenshot_requests.strategy"];
-          status?: parameters["rowFilter.capture_screenshot_requests.status"];
+          id?: parameters['rowFilter.capture_screenshot_requests.id'];
+          created_at?: parameters['rowFilter.capture_screenshot_requests.created_at'];
+          project_id?: parameters['rowFilter.capture_screenshot_requests.project_id'];
+          image_type?: parameters['rowFilter.capture_screenshot_requests.image_type'];
+          delay_sec?: parameters['rowFilter.capture_screenshot_requests.delay_sec'];
+          target_url?: parameters['rowFilter.capture_screenshot_requests.target_url'];
+          origin_url?: parameters['rowFilter.capture_screenshot_requests.origin_url'];
+          strategy?: parameters['rowFilter.capture_screenshot_requests.strategy'];
+          status?: parameters['rowFilter.capture_screenshot_requests.status'];
         };
         header: {
           /** Preference */
-          Prefer?: parameters["preferReturn"];
+          Prefer?: parameters['preferReturn'];
         };
       };
       responses: {
@@ -392,23 +392,23 @@ export interface paths {
     patch: {
       parameters: {
         query: {
-          id?: parameters["rowFilter.capture_screenshot_requests.id"];
-          created_at?: parameters["rowFilter.capture_screenshot_requests.created_at"];
-          project_id?: parameters["rowFilter.capture_screenshot_requests.project_id"];
-          image_type?: parameters["rowFilter.capture_screenshot_requests.image_type"];
-          delay_sec?: parameters["rowFilter.capture_screenshot_requests.delay_sec"];
-          target_url?: parameters["rowFilter.capture_screenshot_requests.target_url"];
-          origin_url?: parameters["rowFilter.capture_screenshot_requests.origin_url"];
-          strategy?: parameters["rowFilter.capture_screenshot_requests.strategy"];
-          status?: parameters["rowFilter.capture_screenshot_requests.status"];
+          id?: parameters['rowFilter.capture_screenshot_requests.id'];
+          created_at?: parameters['rowFilter.capture_screenshot_requests.created_at'];
+          project_id?: parameters['rowFilter.capture_screenshot_requests.project_id'];
+          image_type?: parameters['rowFilter.capture_screenshot_requests.image_type'];
+          delay_sec?: parameters['rowFilter.capture_screenshot_requests.delay_sec'];
+          target_url?: parameters['rowFilter.capture_screenshot_requests.target_url'];
+          origin_url?: parameters['rowFilter.capture_screenshot_requests.origin_url'];
+          strategy?: parameters['rowFilter.capture_screenshot_requests.strategy'];
+          status?: parameters['rowFilter.capture_screenshot_requests.status'];
         };
         body: {
           /** capture_screenshot_requests */
-          capture_screenshot_requests?: definitions["capture_screenshot_requests"];
+          capture_screenshot_requests?: definitions['capture_screenshot_requests'];
         };
         header: {
           /** Preference */
-          Prefer?: parameters["preferReturn"];
+          Prefer?: parameters['preferReturn'];
         };
       };
       responses: {
@@ -447,7 +447,7 @@ export interface definitions {
      * This is a Primary Key.<pk/>
      * @enum {string}
      */
-    id: "singleton";
+    id: 'singleton';
     /** Format: bigint */
     max_project_count: number;
     /** Format: bigint */
@@ -478,7 +478,7 @@ export interface definitions {
      * Format: public.theme_mode
      * @enum {string}
      */
-    theme_mode: "light" | "dark" | "system";
+    theme_mode: 'light' | 'dark' | 'system';
   };
   capture_screenshot_requests: {
     /**
@@ -503,7 +503,7 @@ export interface definitions {
      * Format: public.capture_screenshot_request_image_type
      * @enum {string}
      */
-    image_type: "jpeg" | "png";
+    image_type: 'jpeg' | 'png';
     /** Format: bigint */
     delay_sec: number;
     /** Format: text */
@@ -514,17 +514,17 @@ export interface definitions {
      * Format: public.capture_screenshot_request_strategy
      * @enum {string}
      */
-    strategy: "NetworkFirst" | "CacheFirst";
+    strategy: 'NetworkFirst' | 'CacheFirst';
     /**
      * Format: public.capture_screenshot_request_status
      * @enum {string}
      */
     status:
-      | "Loading"
-      | "Cancelled"
-      | "Failed"
-      | "Succeeded_Cached"
-      | "Succeeded_Network";
+      | 'Loading'
+      | 'Cancelled'
+      | 'Failed'
+      | 'Succeeded_Cached'
+      | 'Succeeded_Network';
   };
 }
 
@@ -533,17 +533,17 @@ export interface parameters {
    * @description Preference
    * @enum {string}
    */
-  preferParams: "params=single-object";
+  preferParams: 'params=single-object';
   /**
    * @description Preference
    * @enum {string}
    */
-  preferReturn: "return=representation" | "return=minimal" | "return=none";
+  preferReturn: 'return=representation' | 'return=minimal' | 'return=none';
   /**
    * @description Preference
    * @enum {string}
    */
-  preferCount: "count=none";
+  preferCount: 'count=none';
   /** @description Filtering Columns */
   select: string;
   /** @description On Conflict */
@@ -562,59 +562,59 @@ export interface parameters {
   /** @description Limiting and Pagination */
   limit: string;
   /** @description projects */
-  "body.projects": definitions["projects"];
+  'body.projects': definitions['projects'];
   /** Format: uuid */
-  "rowFilter.projects.id": string;
+  'rowFilter.projects.id': string;
   /** Format: timestamp with time zone */
-  "rowFilter.projects.created_at": string;
+  'rowFilter.projects.created_at': string;
   /** Format: text */
-  "rowFilter.projects.name": string;
+  'rowFilter.projects.name': string;
   /** Format: uuid */
-  "rowFilter.projects.owner_id": string;
+  'rowFilter.projects.owner_id': string;
   /** Format: ARRAY */
-  "rowFilter.projects.whitelisted_urls": string;
+  'rowFilter.projects.whitelisted_urls': string;
   /** @description configuration */
-  "body.configuration": definitions["configuration"];
+  'body.configuration': definitions['configuration'];
   /** Format: public.singleton */
-  "rowFilter.configuration.id": string;
+  'rowFilter.configuration.id': string;
   /** Format: bigint */
-  "rowFilter.configuration.max_project_count": string;
+  'rowFilter.configuration.max_project_count': string;
   /** Format: bigint */
-  "rowFilter.configuration.max_daily_requests": string;
+  'rowFilter.configuration.max_daily_requests': string;
   /** Format: text */
-  "rowFilter.configuration.client_library_url": string;
+  'rowFilter.configuration.client_library_url': string;
   /** @description profiles */
-  "body.profiles": definitions["profiles"];
+  'body.profiles': definitions['profiles'];
   /** Format: uuid */
-  "rowFilter.profiles.id": string;
+  'rowFilter.profiles.id': string;
   /** Format: timestamp with time zone */
-  "rowFilter.profiles.created_at": string;
+  'rowFilter.profiles.created_at': string;
   /** Format: text */
-  "rowFilter.profiles.avatar_seed": string;
+  'rowFilter.profiles.avatar_seed': string;
   /** Format: text */
-  "rowFilter.profiles.name": string;
+  'rowFilter.profiles.name': string;
   /** Format: public.theme_mode */
-  "rowFilter.profiles.theme_mode": string;
+  'rowFilter.profiles.theme_mode': string;
   /** @description capture_screenshot_requests */
-  "body.capture_screenshot_requests": definitions["capture_screenshot_requests"];
+  'body.capture_screenshot_requests': definitions['capture_screenshot_requests'];
   /** Format: uuid */
-  "rowFilter.capture_screenshot_requests.id": string;
+  'rowFilter.capture_screenshot_requests.id': string;
   /** Format: timestamp with time zone */
-  "rowFilter.capture_screenshot_requests.created_at": string;
+  'rowFilter.capture_screenshot_requests.created_at': string;
   /** Format: uuid */
-  "rowFilter.capture_screenshot_requests.project_id": string;
+  'rowFilter.capture_screenshot_requests.project_id': string;
   /** Format: public.capture_screenshot_request_image_type */
-  "rowFilter.capture_screenshot_requests.image_type": string;
+  'rowFilter.capture_screenshot_requests.image_type': string;
   /** Format: bigint */
-  "rowFilter.capture_screenshot_requests.delay_sec": string;
+  'rowFilter.capture_screenshot_requests.delay_sec': string;
   /** Format: text */
-  "rowFilter.capture_screenshot_requests.target_url": string;
+  'rowFilter.capture_screenshot_requests.target_url': string;
   /** Format: text */
-  "rowFilter.capture_screenshot_requests.origin_url": string;
+  'rowFilter.capture_screenshot_requests.origin_url': string;
   /** Format: public.capture_screenshot_request_strategy */
-  "rowFilter.capture_screenshot_requests.strategy": string;
+  'rowFilter.capture_screenshot_requests.strategy': string;
   /** Format: public.capture_screenshot_request_status */
-  "rowFilter.capture_screenshot_requests.status": string;
+  'rowFilter.capture_screenshot_requests.status': string;
 }
 
 export interface operations {}

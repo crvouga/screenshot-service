@@ -87,7 +87,7 @@ export const ProjectsCreatePage = () => {
             {mutation.data?.type === 'Err' && (
               <Alert severity="error" sx={{ marginBottom: 2 }}>
                 {mutation.data.error
-                  .map((problem) => problem.message)
+                  ?.map((problem) => problem.message)
                   .join(', ')}
               </Alert>
             )}

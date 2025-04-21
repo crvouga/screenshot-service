@@ -5,7 +5,7 @@ export type ProjectName = string & { type: 'ProjectName' };
 const MAX_NAME_LENGTH = 100;
 
 export const is = (value: unknown): value is ProjectName => {
-  return typeof value === 'string' && value.length <= MAX_NAME_LENGTH;
+  return typeof value === 'string' && value?.length <= MAX_NAME_LENGTH;
 };
 
 export const decode = makeDecode(is, () => ({

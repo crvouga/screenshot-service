@@ -18,8 +18,6 @@ import {
 import * as React from 'react';
 import useLocalStorage from '../../../lib/use-local-storage';
 
-
-
 export const TargetUrlInput = ({
   targetUrl,
   setTargetUrl,
@@ -103,7 +101,7 @@ export const TargetUrlInput = ({
                   overflowX: 'hidden',
                 }}
               >
-                {history.map((item) => (
+                {history?.map((item) => (
                   <Box
                     key={item}
                     sx={{

@@ -72,7 +72,7 @@ export const SupabaseCaptureScreenshotRequestDataAccess = ({
         return Data.Result.Err([{ message: response.error.message }]);
       }
 
-      const count = response.count ?? response.data.length;
+      const count = response.count ?? response.data?.length;
 
       return Data.Result.Ok(count);
     })({
@@ -215,7 +215,7 @@ export const SupabaseCaptureScreenshotRequestDataAccess = ({
         return Data.Result.Ok(Data.Maybe.Nothing);
       }
 
-      return Data.Result.mapOk(Data.Maybe.Just, decodeRow(row));
+      return Data.Result?.mapOk(Data.Maybe.Just, decodeRow(row));
     },
 
     findOneElseInsert: async ({
@@ -256,7 +256,7 @@ export const SupabaseCaptureScreenshotRequestDataAccess = ({
           return Data.Result.Ok(Data.Maybe.Nothing);
         }
 
-        return Data.Result.mapOk(Data.Maybe.Just, decodeRow(row));
+        return Data.Result?.mapOk(Data.Maybe.Just, decodeRow(row));
       })({
         targetUrl,
         delaySec,
@@ -298,7 +298,7 @@ export const SupabaseCaptureScreenshotRequestDataAccess = ({
 
       const decoded = Data.Url.decode(response.publicURL);
 
-      return Data.Result.mapErr(Array.of, decoded);
+      return Data.Result?.mapErr(Array.of, decoded);
     },
 
     findMany: async ({ projectId, order, pageSize, page }) => {
@@ -317,11 +317,11 @@ export const SupabaseCaptureScreenshotRequestDataAccess = ({
         return Data.Result.Err([{ message: response.error.message }]);
       }
 
-      const results = response.data.map(decodeRow);
+      const results = response.data?.map(decodeRow);
 
       const errors = Data.Result.toErrors(results).flat();
 
-      if (errors.length > 0) {
+      if (errors?.length > 0) {
         return Data.Result.Err(errors);
       }
 
@@ -342,7 +342,7 @@ export const SupabaseCaptureScreenshotRequestDataAccess = ({
         return Data.Result.Err([{ message: response.error.message }]);
       }
 
-      const count = response.count ?? response.data.length;
+      const count = response.count ?? response.data?.length;
 
       return Data.Result.Ok(count);
     },
@@ -359,7 +359,7 @@ export const SupabaseCaptureScreenshotRequestDataAccess = ({
         return Data.Result.Err([{ message: response.error.message }]);
       }
 
-      const count = response.count ?? response.data.length;
+      const count = response.count ?? response.data?.length;
 
       return Data.Result.Ok(count);
     },

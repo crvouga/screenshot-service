@@ -5,6 +5,7 @@ import { TrpcClientProjectDataAccess } from '../projects/impl-trpc-client';
 import { IDataAccess } from './interface';
 
 export const TrpcClientDataAccess = (): IDataAccess => {
+  console.log('Creating TrpcClientDataAccess');
   return {
     profile: TrpcClientProfileDataAccess(),
     project: TrpcClientProjectDataAccess(),

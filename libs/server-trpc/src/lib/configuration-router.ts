@@ -9,7 +9,13 @@ const configurationData = {
 
 export const configurationRouter = router({
   findOne: publicProcedure.query(async () => {
-    return configurationData;
+    console.log('findOne: Retrieving configuration data');
+    const config = configurationData;
+    console.log(
+      'findOne: Configuration data retrieved',
+      JSON.stringify(config, null, 2)
+    );
+    return config;
   }),
 });
 

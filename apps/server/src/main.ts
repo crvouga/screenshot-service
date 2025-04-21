@@ -11,20 +11,25 @@ import * as WebBrowser from './app/web-browser';
 import { getPort } from './port';
 
 const main = async () => {
+  console.log('Starting server...');
   const port = getPort();
 
-  // Initialize Redux store and saga middleware
   const sagaMiddleware = createSagaMiddleware();
   const store = configureStore({
     preloadedState: initialState,
     reducer: (state) => state,
     middleware: [sagaMiddleware],
   });
+  store.subscribe(() => console.log('State:', store.getState()));
 
-  // Create Express app
   const app = express();
 
-  // Enable CORS for all routes
+  // Add request logging middleware
+  app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
+    next();
+  });
+
   app.use(
     cors({
       origin: '*',
@@ -33,16 +38,13 @@ const main = async () => {
     })
   );
 
-  // Create HTTP server
   const httpServer = app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}/`);
     console.log(`tRPC available at http://localhost:${port}/trpc`);
   });
 
-  // Initialize WebBrowser
   const webBrowser = await WebBrowser.create();
 
-  // Set up Socket.IO
   const socketServer: SocketServer = new socketIo.Server(httpServer, {
     cors: {
       origin: '*',
@@ -50,7 +52,6 @@ const main = async () => {
     },
   });
 
-  // Set up tRPC middleware
   app.use(
     '/trpc',
     createExpressMiddleware({
@@ -62,15 +63,13 @@ const main = async () => {
     })
   );
 
-  // Root route
   app.get('/', (req, res) => {
+    console.log('Received request to root endpoint');
     res.json({ message: 'Hello from screenshot service backend' });
   });
 
-  // Start saga middleware
   sagaMiddleware.run(saga, { webBrowser, socketServer });
 
-  // Handle process termination
   const cleanup = () => {
     console.log('Cleaning up...');
     webBrowser.close();
@@ -82,8 +81,6 @@ const main = async () => {
   process.on('SIGINT', cleanup);
   process.on('SIGTERM', cleanup);
   process.on('exit', cleanup);
-
-  return store;
 };
 
 main();

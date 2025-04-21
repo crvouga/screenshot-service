@@ -1,0 +1,42 @@
+{
+    "profiles": {
+        "1e88a3c193e86bfe8ea0591653259819": {
+            "key": "9bfbbfe6-4d74-425c-8142-e5d87da95eb2",
+            "value": {
+                "userId": "9bfbbfe6-4d74-425c-8142-e5d87da95eb2",
+                "name": "",
+                "avatarSeed": "123",
+                "themeMode": "system"
+            }
+        }
+    },
+    "projects": {
+        "bc3631ffbb51e185d081304e0383a7b2": {
+            "key": "project-1745247894511",
+            "value": {
+                "projectId": "project-1745247894511",
+                "ownerId": "9bfbbfe6-4d74-425c-8142-e5d87da95eb2",
+                "projectName": "My Cool Website",
+                "whitelistedUrls": [
+                    "http://localhost:4200"
+                ]
+            }
+        }
+    },
+    "screenshot-requests": {
+        "103325ebcad016c3b670dd88987bdcf6": {
+            "key": "d74dc594-4ebf-47a8-bbc2-1521e5bf3abb",
+            "value": {
+                "requestId": "d74dc594-4ebf-47a8-bbc2-1521e5bf3abb",
+                "projectId": "project-1745247894511",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://mail.google.com/mail/u/0/?tab=rm&ogbl#chat/space/AAAAkjf2USA",
+                "originUrl": "http://localhost:4200",
+                "strategy": "NetworkFirst",
+                "createdAt": "2025-04-21T15:05:03.813Z",
+                "status": "Loading"
+            }
+        }
+    }
+}

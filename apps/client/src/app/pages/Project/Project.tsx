@@ -1,9 +1,6 @@
 import { Box, CircularProgress, Container, Typography } from '@mui/material';
 import { Data } from '@screenshot-service/screenshot-service';
-import {
-  useOutletContext,
-  useParams
-} from 'react-router-dom';
+import { useOutletContext, useParams } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { NotFoundPage } from '../../components/NotFound';
 import { Project, useSingleProjectQuery } from '../../data-access';
@@ -62,7 +59,7 @@ const ProjectPageWithParams = ({
 
         <ErrorPage
           message={`Something went wrong when loading project. ${result.error
-            .map((error) => error.message)
+            ?.map((error) => error.message)
             .join(', ')}`}
         />
       </>
@@ -76,9 +73,7 @@ const ProjectPageWithParams = ({
       <>
         <Header />
 
-        <ErrorPage
-          message={`Could not find project`}
-        />
+        <ErrorPage message={`Could not find project`} />
       </>
     );
   }
@@ -93,9 +88,8 @@ const ProjectPageWithParams = ({
         </Typography>
       </Box>
 
-      <Box sx={{ paddingBottom: 8, }}>
+      <Box sx={{ paddingBottom: 8 }}>
         <Container maxWidth="md">
-
           <ProjectGetStarted />
 
           <ProjectUsageLimit projectId={project.projectId} />
@@ -108,13 +102,12 @@ const ProjectPageWithParams = ({
 
           <ProjectRequestTable projectId={project.projectId} />
 
-          <ProjectDeleteSection projectName={project.projectName} projectId={project.projectId} />
+          <ProjectDeleteSection
+            projectName={project.projectName}
+            projectId={project.projectId}
+          />
         </Container>
       </Box>
     </>
   );
 };
-
-
-
-

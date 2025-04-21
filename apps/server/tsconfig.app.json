@@ -9,6 +9,7 @@
   "include": [
     "**/*.ts",
     "../../libs/server-trpc/src/lib/trpc-server.ts",
-    "../../libs/server-trpc/src/lib/app-router.ts"
+    "../../libs/server-trpc/src/lib/app-router.ts",
+    "../../libs/server-trpc/src/lib/file-system-map.ts"
   ]
 }

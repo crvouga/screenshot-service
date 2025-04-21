@@ -19,11 +19,11 @@ import {
   Skeleton,
   ToggleButton,
   ToggleButtonGroup,
-  Typography
+  Typography,
 } from '@mui/material';
 import {
   CaptureScreenshotRequest,
-  Data
+  Data,
 } from '@screenshot-service/screenshot-service';
 import { useEffect, useState } from 'react';
 import { screenshotService } from '../../screenshot-service';
@@ -99,15 +99,12 @@ export const CaptureScreenshotForm = () => {
   const requestState =
     requestId && state.type === 'Connected'
       ? CaptureScreenshotRequest.toRequest(
-        requestId,
-        state.captureScreenshotRequest
-      )
+          requestId,
+          state.captureScreenshotRequest
+        )
       : CaptureScreenshotRequest.initialRequestState;
 
-  const problems =
-    requestState.type === 'Failed'
-      ? requestState.problems
-      : [];
+  const problems = requestState.type === 'Failed' ? requestState.problems : [];
 
   return (
     <>
@@ -122,10 +119,10 @@ export const CaptureScreenshotForm = () => {
           setForm(mergeErrors({ projectId: [] }));
         }}
         SelectProps={{
-          error: form.errors.projectId.length > 0,
+          error: form.errors.projectId?.length > 0,
         }}
         helperText={form.errors.projectId
-          .map((error) => error.message)
+          ?.map((error) => error.message)
           .join(', ')}
       />
 
@@ -139,9 +136,9 @@ export const CaptureScreenshotForm = () => {
           setForm(mergeValues({ targetUrl }));
           setForm(mergeErrors({ targetUrl: [] }));
         }}
-        error={form.errors.targetUrl.length > 0}
+        error={form.errors.targetUrl?.length > 0}
         helperText={form.errors.targetUrl
-          .map((error) => error.message)
+          ?.map((error) => error.message)
           .join(', ')}
       />
 
@@ -179,9 +176,9 @@ export const CaptureScreenshotForm = () => {
           setForm(mergeValues({ delaySec }));
         }}
       >
-        {Data.DelaySec.delaySecs.map((delaySec) => (
+        {Data.DelaySec.delaySecs?.map((delaySec) => (
           <MenuItem value={delaySec} key={delaySec}>
-            <ListItemText primary={pluralize(delaySec, "second", "seconds")} />
+            <ListItemText primary={pluralize(delaySec, 'second', 'seconds')} />
           </MenuItem>
         ))}
       </Select>
@@ -215,11 +212,20 @@ export const CaptureScreenshotForm = () => {
       )}
 
       <Collapse in={state.type === 'Connecting'}>
-        <Alert sx={{ marginBottom: 2, alignItems: "center" }} severity='warning' action={<CircularProgress disableShrink sx={{ marginRight: 1 }} size="1.2rem" />} >
+        <Alert
+          sx={{ marginBottom: 2, alignItems: 'center' }}
+          severity="warning"
+          action={
+            <CircularProgress
+              disableShrink
+              sx={{ marginRight: 1 }}
+              size="1.2rem"
+            />
+          }
+        >
           Connecting to server...
         </Alert>
       </Collapse>
-
 
       <LoadingButton
         startIcon={<PhotoCameraIcon />}
@@ -250,9 +256,9 @@ export const CaptureScreenshotForm = () => {
         cancel
       </LoadingButton>
 
-      {problems.length > 0 && (
+      {problems?.length > 0 && (
         <Box sx={{ marginY: 2 }}>
-          {problems.map((problems) => (
+          {problems?.map((problems) => (
             <Alert
               key={problems.message}
               severity="error"
@@ -273,7 +279,7 @@ export const CaptureScreenshotForm = () => {
 
       <Box sx={{ mb: 4 }}>
         <Typography>
-          {requestState.logs[requestState.logs.length - 1]?.message ?? '...'}
+          {requestState.logs[requestState.logs?.length - 1]?.message ?? '...'}
         </Typography>
       </Box>
 
@@ -293,9 +299,9 @@ export const CaptureScreenshotForm = () => {
         disabled={requestState.type !== 'Succeeded'}
         {...(requestState.type === 'Succeeded'
           ? {
-            href: requestState.src,
-            download: requestState.src,
-          }
+              href: requestState.src,
+              download: requestState.src,
+            }
           : {})}
       >
         Download Screenshot
@@ -304,12 +310,16 @@ export const CaptureScreenshotForm = () => {
   );
 };
 
-const pluralize = (quantity: number, singular: string, plural: string): string => {
+const pluralize = (
+  quantity: number,
+  singular: string,
+  plural: string
+): string => {
   if (quantity === 1) {
-    return `1 ${singular}`
+    return `1 ${singular}`;
   }
-  return `${quantity} ${plural}`
-}
+  return `${quantity} ${plural}`;
+};
 
 const Screenshot = ({
   alt,
@@ -428,27 +438,27 @@ const initialFormState: FormState = {
 
 const mergeValues =
   (valuesNew: Partial<FormState['values']>) =>
-    (formState: FormState = initialFormState): FormState => {
-      return {
-        ...formState,
-        values: {
-          ...formState.values,
-          ...valuesNew,
-        },
-      };
+  (formState: FormState = initialFormState): FormState => {
+    return {
+      ...formState,
+      values: {
+        ...formState.values,
+        ...valuesNew,
+      },
     };
+  };
 
 const mergeErrors =
   (errorsNew: Partial<FormState['errors']>) =>
-    (formState: FormState = initialFormState): FormState => {
-      return {
-        ...formState,
-        errors: {
-          ...formState.errors,
-          ...errorsNew,
-        },
-      };
+  (formState: FormState = initialFormState): FormState => {
+    return {
+      ...formState,
+      errors: {
+        ...formState.errors,
+        ...errorsNew,
+      },
     };
+  };
 
 const validateForm = (
   form: FormState

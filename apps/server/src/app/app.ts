@@ -64,6 +64,7 @@ export const saga = function* ({
   webBrowser: WebBrowser.WebBrowser;
   socketServer: SocketServer;
 }) {
+  console.log('Starting main saga');
   yield takeEvery('*', function* (action) {
     console.log(JSON.stringify(action, null, 2));
     yield;
@@ -71,6 +72,7 @@ export const saga = function* ({
 
   yield fork(socketFlow, { socketServer });
   yield fork(clientFlow, { webBrowser, socketServer });
+  console.log('Main saga initialized');
 };
 
 const clientFlow = function* ({
@@ -80,16 +82,20 @@ const clientFlow = function* ({
   webBrowser: WebBrowser.WebBrowser;
   socketServer: SocketServer;
 }) {
+  console.log('Starting client flow');
   yield takeEvery(Action.ClientConnected, function* (action) {
     const clientId = action.payload.clientId;
+    console.log(`Client connected: ${clientId}`);
 
     yield fork(CaptureScreenshot.saga, { clientId, webBrowser });
+    console.log(`Started CaptureScreenshot saga for client: ${clientId}`);
 
     yield takeEvery('*', function* (action) {
       if (
         Socket.isServerToClientAction(action) &&
         action.payload.clientId === clientId
       ) {
+        console.log(`Emitting ServerToClient action to client: ${clientId}`);
         socketServer.to(clientId).emit('ServerToClient', action);
         yield;
       }
@@ -102,12 +108,14 @@ export const takeClientDisconnected = function* ({
 }: {
   clientId: string;
 }) {
+  console.log(`Waiting for client disconnect: ${clientId}`);
   while (true) {
     const action: ActionMap['ClientDisconnected'] = yield take(
       Action.ClientDisconnected
     );
 
     if (action.payload.clientId === clientId) {
+      console.log(`Client disconnected: ${clientId}`);
       return action;
     }
   }
@@ -126,37 +134,48 @@ const socketFlow = function* ({
 }: {
   socketServer: SocketServer;
 }) {
+  console.log('Starting socket flow');
   const socketChan = makeSocketChan(socketServer);
+  console.log('Socket channel created');
 
   yield takeEvery(socketChan, function* (action) {
+    console.log(`Received action from socket channel: ${action.type}`);
     yield put(action);
   });
 };
 
 const makeSocketChan = (socketServer: SocketServer) =>
   eventChannel<AnyAction>((emit) => {
+    console.log('Setting up socket event channel');
     socketServer.on('connection', (socket) => {
+      console.log(`New socket connection: ${socket.id}`);
       emit(Action.ClientConnected(socket.id));
 
       socket.on('disconnecting', () => {
+        console.log(`Socket disconnecting: ${socket.id}`);
         emit(Action.ClientDisconnecting(socket.id));
       });
 
       socket.on('disconnect', () => {
+        console.log(`Socket disconnected: ${socket.id}`);
         emit(Action.ClientDisconnected(socket.id));
       });
 
       socket.on('error', (error) => {
+        console.error(`Socket error for ${socket.id}:`, error);
         emit(Action.SocketError(error));
       });
 
       socket.on('ClientToServer', (action) => {
+        console.log(
+          `Received ClientToServer action from ${socket.id}: ${action.type}`
+        );
         return emit(action);
       });
     });
 
     return () => {
-      //
+      console.log('Socket channel closed');
     };
   });
 

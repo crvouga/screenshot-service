@@ -5,10 +5,12 @@ import {
   Button,
   Card,
   Dialog,
-  DialogActions, DialogContent, DialogTitle,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   TextField,
   Typography,
-  useTheme
+  useTheme,
 } from '@mui/material';
 import { Data } from '@screenshot-service/screenshot-service';
 import { useSnackbar } from 'notistack';
@@ -17,13 +19,12 @@ import { useNavigate } from 'react-router-dom';
 import { useDeleteProjectMutation } from '../../../data-access';
 import { routes } from '../../../routes';
 
-
 export const ProjectDeleteSection = ({
   projectId,
-  projectName
+  projectName,
 }: {
   projectId: Data.ProjectId.ProjectId;
-  projectName: Data.ProjectName.ProjectName
+  projectName: Data.ProjectName.ProjectName;
 }) => {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
@@ -33,16 +34,15 @@ export const ProjectDeleteSection = ({
   const navigate = useNavigate();
   const mutation = useDeleteProjectMutation();
   const snackbar = useSnackbar();
-  const [inputValue, setInputValue] = useState("")
+  const [inputValue, setInputValue] = useState('');
 
-  const verifyPhrase = `delete ${projectName} forever`
+  const verifyPhrase = `delete ${projectName} forever`;
 
-  const canDelete = inputValue === verifyPhrase
+  const canDelete = inputValue === verifyPhrase;
 
   const onDelete = async () => {
-
     if (!canDelete) {
-      return
+      return;
     }
 
     const result = await mutation.mutateAsync({ projectId });
@@ -50,8 +50,8 @@ export const ProjectDeleteSection = ({
     switch (result.type) {
       case 'Err':
         snackbar.enqueueSnackbar(
-          result.error.map((error) => error.message).join(', ') ??
-          'failed to delete project',
+          result.error?.map((error) => error.message).join(', ') ??
+            'failed to delete project',
           {
             variant: 'error',
           }
@@ -93,9 +93,19 @@ export const ProjectDeleteSection = ({
           </Alert>
 
           <Typography color="text.secondary" sx={{ fontWeight: 400 }}>
-            To verify, type "<Box component="span" sx={{ color: "text.primary", fontWeight: 900 }}>{verifyPhrase}</Box>" below:
+            To verify, type "
+            <Box
+              component="span"
+              sx={{ color: 'text.primary', fontWeight: 900 }}
+            >
+              {verifyPhrase}
+            </Box>
+            " below:
           </Typography>
-          <TextField fullWidth onChange={event => setInputValue(event.target.value)} />
+          <TextField
+            fullWidth
+            onChange={(event) => setInputValue(event.target.value)}
+          />
         </DialogContent>
 
         <DialogActions>
