@@ -69,8 +69,8 @@ export const projectRouter = router({
     .input(
       z.object({
         projectId: z.string(),
-        projectName: z.string(),
-        whitelistedUrls: z.array(z.string()),
+        projectName: z.string().nullish(),
+        whitelistedUrls: z.array(z.string()).nullish(),
       })
     )
     .mutation(async ({ input }) => {
@@ -78,14 +78,23 @@ export const projectRouter = router({
         (project) => project.projectId === input.projectId
       );
       if (index !== -1) {
-        projectsData[index] = {
-          ...projectsData[index],
-          projectName:
-            input.projectName as unknown as Data.ProjectName.ProjectName,
-          whitelistedUrls: input.whitelistedUrls.map(
+        const updatedProject = { ...projectsData[index] };
+
+        if (input.projectName !== null && input.projectName !== undefined) {
+          updatedProject.projectName =
+            input.projectName as unknown as Data.ProjectName.ProjectName;
+        }
+
+        if (
+          input.whitelistedUrls !== null &&
+          input.whitelistedUrls !== undefined
+        ) {
+          updatedProject.whitelistedUrls = input.whitelistedUrls.map(
             (url) => url as unknown as Data.Url.Url
-          ),
-        };
+          );
+        }
+
+        projectsData[index] = updatedProject;
         return projectsData[index];
       }
       throw new Error('Project not found');

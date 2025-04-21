@@ -4,7 +4,7 @@ import { publicProcedure, router } from './trpc-server';
 const configurationData = {
   maxDailyRequests: 100,
   maxProjectCount: 5,
-  clientLibraryUrl: 'https://cdn.example.com/screenshot-service.js',
+  clientLibraryUrl: 'https://www.npmjs.com/package/@crvouga/screenshot-service',
 };
 
 export const configurationRouter = router({

@@ -21,6 +21,8 @@
     "access": "public"
   },
   "dependencies": {
+    "@dicebear/collection": "^9.2.2",
+    "@dicebear/core": "^9.2.2",
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
     "@mui/icons-material": "^5.6.2",
@@ -36,6 +38,7 @@
     "cors": "^2.8.5",
     "dayjs": "^1.11.4",
     "dotenv": "^16.0.1",
+    "express": "^5.1.0",
     "notistack": "^2.0.4",
     "puppeteer": "^14.0.0",
     "react": "18.1.0",

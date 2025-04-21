@@ -1,54 +1,13 @@
 /**
- *
- *
- *
  * Profile Avatars
- *
- *
- *
  */
+import { createAvatar } from '@dicebear/core';
+import * as identicon from '@dicebear/identicon';
 
-export type Style =
-  // | 'adventurer'
-  // | 'adventurer-neutral'
-  // | 'avataaars'
-  // | 'bottts'
-  // | 'big-ears'
-  // | 'big-ears-neutral'
-  // | 'big-smile'
-  // | 'croodles'
-  'croodles-neutral';
-// | 'gridy'
-// 'identicon';
-// | 'initials'
-// 'jdenticon';
-// | 'micah'
-// | 'miniavs'
-// | 'open-peeps'
-// | 'personas'
-// | 'pixel-art'
-// | 'pixel-art-neutral';
+export type Style = 'identicon';
 
 export const STYLES: { [style in Style]: Style } = {
-  // adventurer: 'adventurer',
-  // 'adventurer-neutral': 'adventurer-neutral',
-  // avataaars: 'avataaars',
-  // 'big-ears': 'big-ears',
-  // bottts: 'bottts',
-  // 'big-ears-neutral': 'big-ears-neutral',
-  // 'big-smile': 'big-smile',
-  // croodles: 'croodles',
-  'croodles-neutral': 'croodles-neutral',
-  // gridy: 'gridy',
-  // identicon: 'identicon',
-  // initials: 'initials',
-  // jdenticon: 'jdenticon',
-  // micah: 'micah',
-  // miniavs: 'miniavs',
-  // 'open-peeps': 'open-peeps',
-  // personas: 'personas',
-  // 'pixel-art': 'pixel-art',
-  // 'pixel-art-neutral': 'pixel-art-neutral',
+  identicon: 'identicon',
 };
 
 export const ALL_STYLES = Object.keys(STYLES) as Style[];
@@ -59,7 +18,10 @@ const capitalize = (word: string) => {
 };
 
 export const formatStyle = (style: Style) => {
-  return style.split('-').map(capitalize).join(' ');
+  return style
+    .split(/(?=[A-Z])/)
+    .map(capitalize)
+    .join(' ');
 };
 
 export const toStyle = (style: string): Style => {
@@ -67,7 +29,7 @@ export const toStyle = (style: string): Style => {
     return style as Style;
   }
 
-  return STYLES['croodles-neutral'];
+  return STYLES['identicon'];
 };
 
 export type Seed = string & { type: 'Seed' };
@@ -76,17 +38,29 @@ export const toSeed = (seedString: string) => {
   return seedString.replace(' ', '').replace(';', '').replace('.', '') as Seed;
 };
 
-const BASE_URL = `https://avatars.dicebear.com/api`;
-const FILE_TYPE = 'png';
+// Map style names to their respective packages
+const styleToPackage = {
+  identicon: identicon,
+};
 
-export const toUrl = ({ seed }: { seed: Seed }) => {
-  const url = new URL(
-    `${BASE_URL}/${STYLES['croodles-neutral']}/${seed}.${FILE_TYPE}`
-  );
+export const toUrl = ({
+  seed,
+  style = 'identicon',
+}: {
+  seed: Seed;
+  style?: Style;
+}) => {
+  const stylePackage = styleToPackage[style];
 
-  url.searchParams.append('backgroundColor', 'white');
+  const avatar = createAvatar(stylePackage, {
+    seed: seed,
+    backgroundColor: ['ffffff'],
+    backgroundType: ['solid'],
+    radius: 50,
+    size: 200,
+  });
 
-  return url.toString();
+  return `data:image/svg+xml;utf8,${encodeURIComponent(avatar.toString())}`;
 };
 
 export const parseUrl = (
@@ -96,25 +70,29 @@ export const parseUrl = (
   style: Style;
 } => {
   try {
-    const [style, seed] =
-      new URL(avatarUrl ?? '')?.pathname
-        ?.split('.')?.[0]
-        ?.split('/')
-        ?.slice(-2) ?? [];
+    if (!avatarUrl || !avatarUrl.startsWith('data:image/svg+xml')) {
+      // Try to parse old URL format
+      const url = new URL(avatarUrl ?? '');
+      const pathParts = url.pathname.split('/');
+      const style = pathParts[pathParts.length - 3];
+      const seed = pathParts[pathParts.length - 2];
 
-    if (style && seed) {
-      return {
-        style: toStyle(style),
-        seed: toSeed(seed),
-      };
+      if (style && seed) {
+        return {
+          style: toStyle(style),
+          seed: toSeed(seed),
+        };
+      }
     }
+
+    // Default values if we can't parse
     return {
-      style: STYLES['croodles-neutral'],
+      style: STYLES['identicon'],
       seed: toSeed(''),
     };
   } catch (error) {
     return {
-      style: STYLES['croodles-neutral'],
+      style: STYLES['identicon'],
       seed: toSeed(''),
     };
   }
