@@ -17,6 +17,15 @@
                 "avatarSeed": "",
                 "themeMode": "system"
             }
+        },
+        "6ad5dbc172a7250ca2c6d53f2814f389": {
+            "key": "2bbf9836-558f-4a4f-a297-9e5c3544dbeb",
+            "value": {
+                "userId": "2bbf9836-558f-4a4f-a297-9e5c3544dbeb",
+                "name": "",
+                "avatarSeed": "123",
+                "themeMode": "system"
+            }
         }
     },
     "projects": {
@@ -39,6 +48,17 @@
                 "projectName": "My Cool Website",
                 "whitelistedUrls": [
                     "http://localhost:8000"
+                ]
+            }
+        },
+        "6bc67b80e15f282339c7c5ea39df9cfe": {
+            "key": "project-1745259848941",
+            "value": {
+                "projectId": "project-1745259848941",
+                "ownerId": "2bbf9836-558f-4a4f-a297-9e5c3544dbeb",
+                "projectName": "My Cool Website",
+                "whitelistedUrls": [
+                    "http://localhost:4200"
                 ]
             }
         }
@@ -448,6 +468,34 @@
                 "strategy": "NetworkFirst",
                 "createdAt": "2025-04-21T17:00:52.158Z",
                 "status": "Succeeded_Network"
+            }
+        },
+        "82b829e237e003958b4998567db9cab9": {
+            "key": "aaaa2126-5d30-48cd-967f-ae2ec25cce31",
+            "value": {
+                "requestId": "aaaa2126-5d30-48cd-967f-ae2ec25cce31",
+                "projectId": "project-1745259848941",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://account.squarespace.com/domains/managed/chrisvouga.dev/dns/dns-settings",
+                "originUrl": "http://localhost:4200",
+                "strategy": "NetworkFirst",
+                "createdAt": "2025-04-21T18:24:21.081Z",
+                "status": "Succeeded_Network"
+            }
+        },
+        "d8d07f481dbc880085da0e012c31a755": {
+            "key": "f4a07400-c918-4dc9-9981-f21cb62aa038",
+            "value": {
+                "requestId": "f4a07400-c918-4dc9-9981-f21cb62aa038",
+                "projectId": "project-1745259848941",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://account.squarespace.com/domains/managed/chrisvouga.dev/dns/dns-settings",
+                "originUrl": "http://localhost:4200",
+                "strategy": "CacheFirst",
+                "createdAt": "2025-04-21T18:24:44.306Z",
+                "status": "Loading"
             }
         }
     }
