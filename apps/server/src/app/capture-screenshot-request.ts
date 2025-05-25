@@ -2,13 +2,12 @@ import {
   CaptureScreenshotRequest,
   Data,
 } from '@screenshot-service/screenshot-service';
-import { delay, takeEvery, fork, put, race, take } from 'redux-saga/effects';
+import { FinalStatus, IDataAccess } from '@screenshot-service/shared';
+import { delay, fork, put, race, take, takeEvery } from 'redux-saga/effects';
 import { call } from 'typed-redux-saga';
 import { takeClientDisconnected } from './app';
-import { dataAccess } from './data-access';
 import { InferActionMap } from './utils';
 import * as WebBrowser from './web-browser';
-import { FinalStatus } from '@screenshot-service/shared';
 
 //
 //
@@ -37,9 +36,11 @@ type CaptureScreenshotRequest = ActionMap['Start']['payload'];
 export const saga = function* ({
   clientId,
   webBrowser,
+  dataAccess,
 }: {
   clientId: string;
   webBrowser: WebBrowser.WebBrowser;
+  dataAccess: IDataAccess;
 }) {
   console.log(`Starting capture screenshot saga for client: ${clientId}`);
 
@@ -79,15 +80,17 @@ export const saga = function* ({
     });
   });
 
-  yield fork(startFlow, { clientId, webBrowser });
+  yield fork(startFlow, { clientId, webBrowser, dataAccess });
 };
 
 const startFlow = function* ({
   clientId,
   webBrowser,
+  dataAccess,
 }: {
   clientId: string;
   webBrowser: WebBrowser.WebBrowser;
+  dataAccess: IDataAccess;
 }) {
   console.log(`Starting flow for client: ${clientId}`);
   while (true) {
@@ -103,7 +106,7 @@ const startFlow = function* ({
       const [cancel, disconnected] = yield race([
         call(takeCancel, { requestId }),
         call(takeClientDisconnected, { clientId }),
-        call(startedFlow, { clientId, webBrowser, request }),
+        call(startedFlow, { clientId, webBrowser, request, dataAccess }),
       ]);
 
       if (disconnected) {
@@ -140,10 +143,12 @@ const startedFlow = function* ({
   clientId,
   webBrowser,
   request,
+  dataAccess,
 }: {
   clientId: string;
   webBrowser: WebBrowser.WebBrowser;
   request: CaptureScreenshotRequest;
+  dataAccess: IDataAccess;
 }) {
   console.log(`Started flow for request: ${request.requestId}`, request);
   const findProjectResult = yield* call(
@@ -218,20 +223,26 @@ const startedFlow = function* ({
   );
   switch (request.strategy) {
     case 'CacheFirst':
-      yield* cacheFirstFlow(clientId, webBrowser, request);
+      yield* cacheFirstFlow({ clientId, webBrowser, request, dataAccess });
       return;
 
     case 'NetworkFirst':
-      yield* networkFirstFlow(clientId, webBrowser, request);
+      yield* networkFirstFlow({ clientId, webBrowser, request, dataAccess });
       return;
   }
 };
 
-const cacheFirstFlow = function* (
-  clientId: string,
-  webBrowser: WebBrowser.WebBrowser,
-  request: CaptureScreenshotRequest
-) {
+const cacheFirstFlow = function* ({
+  clientId,
+  webBrowser,
+  request,
+  dataAccess,
+}: {
+  clientId: string;
+  webBrowser: WebBrowser.WebBrowser;
+  request: CaptureScreenshotRequest;
+  dataAccess: IDataAccess;
+}) {
   console.log(`Starting cache-first flow for request: ${request.requestId}`);
   yield put(
     Action.Log(clientId, request.requestId, 'info', 'checking cache...')
@@ -257,7 +268,7 @@ const cacheFirstFlow = function* (
     );
     yield delay(LOG_DELAY);
 
-    yield* networkFirstFlow(clientId, webBrowser, request);
+    yield* networkFirstFlow({ clientId, webBrowser, request, dataAccess });
 
     return;
   }
@@ -279,7 +290,7 @@ const cacheFirstFlow = function* (
 
     yield delay(LOG_DELAY);
 
-    yield* networkFirstFlow(clientId, webBrowser, request);
+    yield* networkFirstFlow({ clientId, webBrowser, request, dataAccess });
 
     return;
   }
@@ -338,11 +349,17 @@ const cacheFirstFlow = function* (
 //
 //
 
-const networkFirstFlow = function* (
-  clientId: string,
-  webBrowser: WebBrowser.WebBrowser,
-  request: CaptureScreenshotRequest
-) {
+const networkFirstFlow = function* ({
+  clientId,
+  webBrowser,
+  request,
+  dataAccess,
+}: {
+  clientId: string;
+  webBrowser: WebBrowser.WebBrowser;
+  request: CaptureScreenshotRequest;
+  dataAccess: IDataAccess;
+}) {
   const requestId = request.requestId;
   console.log(`Starting network-first flow for request: ${requestId}`);
 

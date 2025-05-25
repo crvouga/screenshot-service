@@ -26,6 +26,15 @@
                 "avatarSeed": "123",
                 "themeMode": "system"
             }
+        },
+        "44d9953f80f3b9dd9e540e491f9147ad": {
+            "key": "a0c92dfa-ad7b-40a5-8d12-c0c64d9a787a",
+            "value": {
+                "userId": "a0c92dfa-ad7b-40a5-8d12-c0c64d9a787a",
+                "name": "",
+                "avatarSeed": "",
+                "themeMode": "system"
+            }
         }
     },
     "projects": {
@@ -56,6 +65,17 @@
             "value": {
                 "projectId": "project-1745259848941",
                 "ownerId": "2bbf9836-558f-4a4f-a297-9e5c3544dbeb",
+                "projectName": "My Cool Website",
+                "whitelistedUrls": [
+                    "http://localhost:4200"
+                ]
+            }
+        },
+        "ec02a79ed2d957842d1ffee8391ec5dd": {
+            "key": "project-1748206276284",
+            "value": {
+                "projectId": "project-1748206276284",
+                "ownerId": "a0c92dfa-ad7b-40a5-8d12-c0c64d9a787a",
                 "projectName": "My Cool Website",
                 "whitelistedUrls": [
                     "http://localhost:4200"
@@ -496,6 +516,146 @@
                 "strategy": "CacheFirst",
                 "createdAt": "2025-04-21T18:24:44.306Z",
                 "status": "Loading"
+            }
+        },
+        "48ad6d5f5c30f774d0d190f213398566": {
+            "key": "330d6549-f40f-4cd2-a371-c1648c1a1fd8",
+            "value": {
+                "requestId": "330d6549-f40f-4cd2-a371-c1648c1a1fd8",
+                "projectId": "project-1748206276284",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://asudev.jira.com/jira/software/c/projects/CRSETRI/boards/6654?assignee=63bda9400a1b5442166a68c7",
+                "originUrl": "http://localhost:4200",
+                "strategy": "NetworkFirst",
+                "createdAt": "2025-05-25T20:51:29.774Z",
+                "status": "Failed"
+            }
+        },
+        "7e26fdb7a73b4f946adc63a1acb4ad2f": {
+            "key": "3a1632d2-3ac7-4333-bcda-76b3b1aecddf",
+            "value": {
+                "requestId": "3a1632d2-3ac7-4333-bcda-76b3b1aecddf",
+                "projectId": "project-1748206276284",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://asudev.jira.com/jira/software/c/projects/CRSETRI/boards/6654?assignee=63bda9400a1b5442166a68c7",
+                "originUrl": "http://localhost:4200",
+                "strategy": "NetworkFirst",
+                "createdAt": "2025-05-25T20:51:41.092Z",
+                "status": "Cancelled"
+            }
+        },
+        "c8583d5494d3d6b71f350cf79a8e0138": {
+            "key": "24dae098-1a7e-4d67-bbbf-d992a0d86897",
+            "value": {
+                "requestId": "24dae098-1a7e-4d67-bbbf-d992a0d86897",
+                "projectId": "project-1748206276284",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://www.chrisvouga.dev/",
+                "originUrl": "http://localhost:4200",
+                "strategy": "NetworkFirst",
+                "createdAt": "2025-05-25T20:52:06.334Z",
+                "status": "Loading"
+            }
+        },
+        "9a18e598453d33c4a6f1bdd01a28a267": {
+            "key": "d0ce7043-dd2f-4704-9db7-9aa4c0503b5e",
+            "value": {
+                "requestId": "d0ce7043-dd2f-4704-9db7-9aa4c0503b5e",
+                "projectId": "project-1748206276284",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://www.chrisvouga.dev/",
+                "originUrl": "http://localhost:4200",
+                "strategy": "NetworkFirst",
+                "createdAt": "2025-05-25T20:52:59.648Z",
+                "status": "Succeeded_Network"
+            }
+        },
+        "cbb4cd42fc40d148b84f6e1caf0a8e44": {
+            "key": "6b09c58e-0958-42dc-8151-dade4dcc2d75",
+            "value": {
+                "requestId": "6b09c58e-0958-42dc-8151-dade4dcc2d75",
+                "projectId": "project-1748206276284",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://gamezilla.app",
+                "originUrl": "http://localhost:4200",
+                "strategy": "NetworkFirst",
+                "createdAt": "2025-05-25T21:09:33.936Z",
+                "status": "Cancelled"
+            }
+        },
+        "318fb48c2a285958188678a306ed9ae8": {
+            "key": "df354db8-cbc6-4590-b46c-f29e277c2323",
+            "value": {
+                "requestId": "df354db8-cbc6-4590-b46c-f29e277c2323",
+                "projectId": "project-1748206276284",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://gamezilla.app",
+                "originUrl": "http://localhost:4200",
+                "strategy": "NetworkFirst",
+                "createdAt": "2025-05-25T21:09:54.612Z",
+                "status": "Cancelled"
+            }
+        },
+        "5de4c752b2a1b6cd4274a0c3e1d61cc0": {
+            "key": "ea2df3ad-d727-49fe-8c9b-7e6a1309d479",
+            "value": {
+                "requestId": "ea2df3ad-d727-49fe-8c9b-7e6a1309d479",
+                "projectId": "project-1748206276284",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://www.chrisvouga.dev/",
+                "originUrl": "http://localhost:4200",
+                "strategy": "NetworkFirst",
+                "createdAt": "2025-05-25T21:10:14.738Z",
+                "status": "Loading"
+            }
+        },
+        "44b3d866086e4165bada889fa3a5578b": {
+            "key": "2efb4cf8-8e21-4211-961b-8900f07decb9",
+            "value": {
+                "requestId": "2efb4cf8-8e21-4211-961b-8900f07decb9",
+                "projectId": "project-1748206276284",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://gamezilla.app",
+                "originUrl": "http://localhost:4200",
+                "strategy": "NetworkFirst",
+                "createdAt": "2025-05-25T21:10:32.835Z",
+                "status": "Cancelled"
+            }
+        },
+        "b635c382e08f010f5a7632fb132f6f60": {
+            "key": "9a5cedad-395a-4bd2-8483-3d17db5e6cd4",
+            "value": {
+                "requestId": "9a5cedad-395a-4bd2-8483-3d17db5e6cd4",
+                "projectId": "project-1748206276284",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://www.gamezilla.app",
+                "originUrl": "http://localhost:4200",
+                "strategy": "NetworkFirst",
+                "createdAt": "2025-05-25T21:11:31.794Z",
+                "status": "Loading"
+            }
+        },
+        "87c2b5c3aa6f5d39e9e4321a8736e49b": {
+            "key": "e81c5f45-5135-4116-8a3a-2a27f9f8383e",
+            "value": {
+                "requestId": "e81c5f45-5135-4116-8a3a-2a27f9f8383e",
+                "projectId": "project-1748206276284",
+                "imageType": "jpeg",
+                "delaySec": 3,
+                "targetUrl": "https://www.gamezilla.app",
+                "originUrl": "http://localhost:4200",
+                "strategy": "NetworkFirst",
+                "createdAt": "2025-05-25T21:12:03.164Z",
+                "status": "Cancelled"
             }
         }
     }

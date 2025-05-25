@@ -1,8 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
 import {
-  createAppRouter,
   captureScreenshotRequestRouterExpress,
+  createAppRouter,
 } from '@screenshot-service/server-trpc';
+import * as Shared from '@screenshot-service/shared';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -11,9 +12,13 @@ import path from 'path';
 import createSagaMiddleware from 'redux-saga';
 import socketIo from 'socket.io';
 import { initialState, saga, SocketServer } from './app/app';
+import { supabaseClient } from './app/supabase-client';
 import * as WebBrowser from './app/web-browser';
-import { getPort } from './port';
 import { environment } from './environments/environment';
+import { getPort } from './port';
+import { getServerBaseUrl } from '@screenshot-service/shared-core';
+
+const USE_SUPABASE_CLIENT = false;
 
 const main = async () => {
   console.log('Starting server...');
@@ -61,14 +66,27 @@ const main = async () => {
     },
   });
 
+  const trpcRouter = createAppRouter({
+    env: {
+      PROD: environment.production,
+    },
+  });
+
+  const trpcCaller = Shared.createTrpcClientNetwork({
+    serverBaseUrl: getServerBaseUrl({
+      isProd: environment.production,
+      isServerSide: true,
+    }),
+  });
+
+  const dataAccess: Shared.IDataAccess = USE_SUPABASE_CLIENT
+    ? Shared.SupabaseDataAccess(supabaseClient)
+    : Shared.TrpcClientDataAccess({ trpcClient: trpcCaller });
+
   app.use(
     '/trpc',
     createExpressMiddleware({
-      router: createAppRouter({
-        env: {
-          PROD: environment.production,
-        },
-      }),
+      router: trpcRouter,
       createContext: (input) => ({ req: input.req }),
       onError: ({ path, error }) => {
         console.error('tRPC error on path:', path, error);
@@ -90,7 +108,7 @@ const main = async () => {
     res.sendFile(path.join(clientBuildDir, 'index.html'));
   });
 
-  sagaMiddleware.run(saga, { webBrowser, socketServer });
+  sagaMiddleware.run(saga, { webBrowser, socketServer, dataAccess });
 
   const cleanup = () => {
     console.log('Cleaning up...');

@@ -7,6 +7,7 @@ import { take } from 'typed-redux-saga';
 import * as CaptureScreenshot from './capture-screenshot-request';
 import { InferActionMap, InferActionUnion } from './utils';
 import * as WebBrowser from './web-browser';
+import { IDataAccess } from '@screenshot-service/shared';
 
 type State = null;
 
@@ -60,9 +61,11 @@ export const isAction = (action: AnyAction): action is Action => {
 export const saga = function* ({
   webBrowser,
   socketServer,
+  dataAccess,
 }: {
   webBrowser: WebBrowser.WebBrowser;
   socketServer: SocketServer;
+  dataAccess: IDataAccess;
 }) {
   console.log('Starting main saga');
   yield takeEvery('*', function* (action) {
@@ -71,23 +74,29 @@ export const saga = function* ({
   });
 
   yield fork(socketFlow, { socketServer });
-  yield fork(clientFlow, { webBrowser, socketServer });
+  yield fork(clientFlow, { webBrowser, socketServer, dataAccess });
   console.log('Main saga initialized');
 };
 
 const clientFlow = function* ({
   webBrowser,
   socketServer,
+  dataAccess,
 }: {
   webBrowser: WebBrowser.WebBrowser;
   socketServer: SocketServer;
+  dataAccess: IDataAccess;
 }) {
   console.log('Starting client flow');
   yield takeEvery(Action.ClientConnected, function* (action) {
     const clientId = action.payload.clientId;
     console.log(`Client connected: ${clientId}`);
 
-    yield fork(CaptureScreenshot.saga, { clientId, webBrowser });
+    yield fork(CaptureScreenshot.saga, {
+      clientId,
+      webBrowser,
+      dataAccess,
+    });
     console.log(`Started CaptureScreenshot saga for client: ${clientId}`);
 
     yield takeEvery('*', function* (action) {

@@ -1,4 +1,4 @@
-import { TrpcClient } from '../../trpc-client';
+import { TrpcClient, TrpcClientCaller } from '../../trpc-client';
 import { TrpcClientCaptureScreenshotRequestDataAccess } from '../capture-screenshot-request/impl-trpc-client';
 import { TrpcClientConfigurationDataAccess } from '../configuration/impl-trpc-client';
 import { TrpcClientProfileDataAccess } from '../profiles/impl-trpc-client';

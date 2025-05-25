@@ -14,7 +14,10 @@ export const createAppRouter = ({ env }: { env: { PROD: boolean } }) => {
     }),
     project: projectRouter,
     getBaseUrl: publicProcedure.query(() => {
-      return getServerBaseUrl({ prod: env.PROD });
+      return getServerBaseUrl({
+        isServerSide: true,
+        isProd: env.PROD,
+      });
     }),
   });
 };

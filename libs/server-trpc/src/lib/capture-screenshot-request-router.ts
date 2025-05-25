@@ -343,7 +343,8 @@ export const createCaptureScreenshotRequestRouter = ({
         });
 
         const baseUrl = getServerBaseUrl({
-          prod: env.PROD,
+          isServerSide: true,
+          isProd: env.PROD,
         });
 
         return `${baseUrl}/api/screenshots/${filename}`;

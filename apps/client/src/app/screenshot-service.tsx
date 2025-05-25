@@ -4,7 +4,10 @@ import { getServerBaseUrl } from '@screenshot-service/shared-core';
 
 const config = {
   socketConfig: {
-    serverBaseUrl: getServerBaseUrl({ prod: environment.production }),
+    serverBaseUrl: getServerBaseUrl({
+      isServerSide: false,
+      isProd: environment.production,
+    }),
   },
 };
 
