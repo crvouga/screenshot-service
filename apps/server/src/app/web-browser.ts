@@ -97,8 +97,13 @@ export const captureScreenshot = async (
 
 export const create = async () => {
   console.info('Launching puppeteer browser');
+
+  // Use system Chromium if available (e.g., in Docker), otherwise use bundled Chromium
+  const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || undefined;
+
   const browser = await puppeteer.launch({
     //why?: https://www.bannerbear.com/blog/ways-to-speed-up-puppeteer-screenshots/
+    executablePath,
     args: [
       '--autoplay-policy=user-gesture-required',
       '--disable-background-networking',
