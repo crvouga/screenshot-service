@@ -1,61 +1,30 @@
-# Use Node.js 20 as base image
-FROM node:20-slim
+# ============================================================================
+# Build stage - contains all build dependencies
+# ============================================================================
+FROM node:20-slim AS builder
 
-# Install system dependencies required for Puppeteer/Chrome and native module compilation
+# Install system dependencies required for building and native module compilation
 RUN apt-get update && apt-get install -y \
     wget \
     ca-certificates \
-    fonts-liberation \
     git \
     python3 \
     make \
     g++ \
-    chromium \
-    chromium-sandbox \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libc6 \
-    libcairo2 \
-    libcups2 \
-    libdbus-1-3 \
-    libexpat1 \
-    libfontconfig1 \
-    libgbm1 \
-    libgcc1 \
-    libglib2.0-0 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libstdc++6 \
-    libx11-6 \
-    libx11-xcb1 \
-    libxcb1 \
-    libxcomposite1 \
-    libxcursor1 \
-    libxdamage1 \
-    libxext6 \
-    libxfixes3 \
-    libxi6 \
-    libxrandr2 \
-    libxrender1 \
-    libxss1 \
-    libxtst6 \
-    lsb-release \
-    xdg-utils \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files first for better layer caching
 COPY package.json bun.lock* ./
 
 # Install dependencies (skip Puppeteer Chromium download, we'll use system Chromium)
 ENV PUPPETEER_SKIP_DOWNLOAD=true
-RUN npm install -g bun && \
+# Use BuildKit cache mount for npm/bun cache (faster subsequent builds)
+RUN --mount=type=cache,target=/root/.npm \
+    --mount=type=cache,target=/root/.bun/install/cache \
+    npm install -g bun && \
     bun install --frozen-lockfile && \
     npm install bufferutil utf-8-validate --no-save --legacy-peer-deps
 
@@ -104,6 +73,61 @@ EOF
 # Build the application (both client and server)
 # Disable Nx daemon to avoid native module issues in Docker
 RUN NX_DAEMON=false npx nx run-many --target=build --projects=client,server --configuration=production
+
+# ============================================================================
+# Runtime stage - minimal image with only runtime dependencies
+# ============================================================================
+FROM node:20-slim AS runtime
+
+# Install only runtime dependencies required for Puppeteer/Chrome
+RUN apt-get update && apt-get install -y \
+    wget \
+    ca-certificates \
+    fonts-liberation \
+    chromium \
+    chromium-sandbox \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libc6 \
+    libcairo2 \
+    libcups2 \
+    libdbus-1-3 \
+    libexpat1 \
+    libfontconfig1 \
+    libgbm1 \
+    libgcc1 \
+    libglib2.0-0 \
+    libgtk-3-0 \
+    libnspr4 \
+    libnss3 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libstdc++6 \
+    libx11-6 \
+    libx11-xcb1 \
+    libxcb1 \
+    libxcomposite1 \
+    libxcursor1 \
+    libxdamage1 \
+    libxext6 \
+    libxfixes3 \
+    libxi6 \
+    libxrandr2 \
+    libxrender1 \
+    libxss1 \
+    libxtst6 \
+    lsb-release \
+    xdg-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy only the built application from builder stage
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
 
 # Set environment variables
 ENV NODE_ENV=production
