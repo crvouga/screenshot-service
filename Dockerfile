@@ -1,12 +1,15 @@
 # Use Node.js 20 as base image
 FROM node:20-slim
 
-# Install system dependencies required for Puppeteer/Chrome
+# Install system dependencies required for Puppeteer/Chrome and native module compilation
 RUN apt-get update && apt-get install -y \
     wget \
     ca-certificates \
     fonts-liberation \
     git \
+    python3 \
+    make \
+    g++ \
     chromium \
     chromium-sandbox \
     libasound2 \
@@ -53,7 +56,8 @@ COPY package.json bun.lock* ./
 # Install dependencies (skip Puppeteer Chromium download, we'll use system Chromium)
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 RUN npm install -g bun && \
-    bun install --frozen-lockfile
+    bun install --frozen-lockfile && \
+    npm install bufferutil utf-8-validate --no-save --legacy-peer-deps
 
 # Copy Nx configuration and workspace files
 COPY nx.json tsconfig.base.json workspace.json ./
@@ -98,7 +102,8 @@ RUN mkdir -p ./apps/client-e2e && \
 EOF
 
 # Build the application (both client and server)
-RUN npx nx run-many --target=build --projects=client,server --configuration=production
+# Disable Nx daemon to avoid native module issues in Docker
+RUN NX_DAEMON=false npx nx run-many --target=build --projects=client,server --configuration=production
 
 # Set environment variables
 ENV NODE_ENV=production
