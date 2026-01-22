@@ -16,7 +16,10 @@
     "kill": "npx kill-port 4200 && npx kill-port 3333 && npx kill-port 5000 && npx kill-port 8000",
     "supabase:types": "npx openapi-typescript https://rcqvjrnexkyfcimdrnri.supabase.co/rest/v1/?apikey=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjcXZqcm5leGt5ZmNpbWRybnJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NTIyMjIxMzQsImV4cCI6MTk2Nzc5ODEzNH0.kuSVPHPQ1BC8PKWhyisHhTMUwDhKxy9MPt_Bh_u8VvI --output libs/shared/src/lib/supabase-types.ts",
     "publish-client-library": "npx nx build screenshot-service && npm publish dist/libs/screenshot-service",
-    "docker:preview": "docker build -t crvouga/screenshot-service:preview . && docker run --rm -p 8080:80 crvouga/screenshot-service:preview"
+    "docker:preview": "docker build -t crvouga/screenshot-service:preview . && docker run --rm -p 8080:80 crvouga/screenshot-service:preview",
+    "docker:build:arm64": "docker build --platform linux/arm64 -t crvouga/screenshot-service:latest .",
+    "docker:build:amd64": "docker build --platform linux/amd64 -t crvouga/screenshot-service:latest .",
+    "docker:build:multi": "docker buildx build --platform linux/amd64,linux/arm64 -t crvouga/screenshot-service:latest --push ."
   },
   "private": false,
   "publishConfig": {
