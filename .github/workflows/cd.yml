@@ -16,6 +16,8 @@ env:
   REGISTRY: docker.io
   IMAGE_NAME: crvouga/screenshot-service
 
+permissions: write-all
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
