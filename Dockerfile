@@ -22,10 +22,12 @@ COPY package.json bun.lock* ./
 # Install dependencies (skip Puppeteer Chromium download, we'll use system Chromium)
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 # Use BuildKit cache mount for npm/bun cache (faster subsequent builds)
+# Bun builds native modules with node-gyp from PATH, falling back to node-gyp@latest,
+# which needs a newer Node than this image has. Pin both so arm64 source builds work.
 # Cache mount IDs prefixed with 'buildcache' for Google Cloud Build compatibility
 RUN --mount=type=cache,id=buildcache/npm-cache,target=/root/.npm \
     --mount=type=cache,id=buildcache/bun-cache,target=/root/.bun/install/cache \
-    npm install -g bun && \
+    npm install -g bun@1.4.5 node-gyp@11.5.0 && \
     bun install --frozen-lockfile && \
     npm install bufferutil utf-8-validate --no-save --legacy-peer-deps
 
